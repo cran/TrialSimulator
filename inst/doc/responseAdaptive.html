@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Designs with Response-Adaptive Randomization</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>$(document).ready(function(){
+    if (typeof $('[data-toggle="tooltip"]').tooltip === 'function') {
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+    if ($('[data-toggle="popover"]').popover === 'function') {
+        $('[data-toggle="popover"]').popover();
+    }
+});
+</script>
+<style type="text/css">
+.lightable-minimal {
+border-collapse: separate;
+border-spacing: 16px 1px;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-minimal td {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal th {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal thead tr:last-child th {
+border-bottom: 2px solid #00000050;
+empty-cells: hide;
+}
+.lightable-minimal tbody tr:first-child td {
+padding-top: 0.5em;
+}
+.lightable-minimal.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-minimal.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic {
+border-top: 0.16em solid #111111;
+border-bottom: 0.16em solid #111111;
+width: 100%;
+margin-bottom: 10px;
+margin: 10px 5px;
+}
+.lightable-classic tfoot tr td {
+border: 0;
+}
+.lightable-classic tfoot tr:first-child td {
+border-top: 0.14em solid #111111;
+}
+.lightable-classic caption {
+color: #222222;
+}
+.lightable-classic td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic thead tr:last-child th {
+border-bottom: 0.10em solid #111111;
+}
+.lightable-classic.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic-2 {
+border-top: 3px double #111111;
+border-bottom: 3px double #111111;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-classic-2 tfoot tr td {
+border: 0;
+}
+.lightable-classic-2 tfoot tr:first-child td {
+border-top: 3px double #111111;
+}
+.lightable-classic-2 caption {
+color: #222222;
+}
+.lightable-classic-2 td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic-2 th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic-2 tbody tr:last-child td {
+border-bottom: 3px double #111111;
+}
+.lightable-classic-2 thead tr:last-child th {
+border-bottom: 1px solid #111111;
+}
+.lightable-classic-2.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic-2.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #EEE;
+border-collapse: collapse;
+margin-bottom: 10px;
+}
+.lightable-material tfoot tr td {
+border: 0;
+}
+.lightable-material tfoot tr:first-child td {
+border-top: 1px solid #EEE;
+}
+.lightable-material th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+}
+.lightable-material td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+border-top: 1px solid #eeeeee;
+}
+.lightable-material.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #ddd;
+}
+.lightable-material-dark {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #FFFFFF12;
+border-collapse: collapse;
+margin-bottom: 10px;
+background-color: #363640;
+}
+.lightable-material-dark tfoot tr td {
+border: 0;
+}
+.lightable-material-dark tfoot tr:first-child td {
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF60;
+}
+.lightable-material-dark td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF;
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark.lightable-hover tbody tr:hover {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody tr:nth-child(even) {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material-dark.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #FFFFFF12;
+}
+.lightable-paper {
+width: 100%;
+margin-bottom: 10px;
+color: #444;
+}
+.lightable-paper tfoot tr td {
+border: 0;
+}
+.lightable-paper tfoot tr:first-child td {
+border-top: 1px solid #00000020;
+}
+.lightable-paper thead tr:last-child th {
+color: #666;
+vertical-align: bottom;
+border-bottom: 1px solid #00000020;
+line-height: 1.15em;
+padding: 10px 5px;
+}
+.lightable-paper td {
+vertical-align: middle;
+border-bottom: 1px solid #00000010;
+line-height: 1.15em;
+padding: 7px 5px;
+}
+.lightable-paper.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-paper.lightable-striped tbody tr:nth-child(even) {
+background-color: #00000008;
+}
+.lightable-paper.lightable-striped tbody td {
+border: 0;
+}
+</style>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Designs with Response-Adaptive
+Randomization</h1>
+
+
+
+<p>Response-adaptive randomization (RAR) can be a powerful strategy in
+Phase II dose-finding trials. It allows sponsors to dynamically update
+the randomization scheme at one or more interim analyses based on
+accumulating data. By shifting allocation toward more promising
+treatment arms, RAR can enhance the ethical and statistical efficiency
+of the trial.</p>
+<p>This vignette demonstrates how to simulate a trial with
+response-adaptive design using the <code>TrialSimulator</code> package.
+For further background, refer to <a href="https://www.mediana.us/MedianaDesigner/ADRand.pdf">this</a>
+document from the <code>MedianaDesigner</code> package. Dr. Alex
+Dmitrienko also provides a series of excellent online lectures on this
+topic:</p>
+<ul>
+<li><p><a href="https://www.youtube.com/watch?v=-ADsHASLimM&amp;list=PL_qOo99xv_nRJU8MEBO_VzBjH8duFy01n&amp;index=3&amp;ab_channel=MedianaOnline">Part
+1</a></p></li>
+<li><p><a href="https://www.youtube.com/watch?v=2agD_9qP1cU&amp;t=1447s&amp;ab_channel=MedianaOnline">Part
+2</a>.</p></li>
+</ul>
+<p>However, the original <code>MedianaDesigner::ADRand()</code> function
+is no longer functional, even for examples provided on <a href="https://medianasoft.github.io/CaseStudyF1">this</a> page.
+Therefore, this vignette focuses on implementing a similar
+response-adaptive design using <code>TrialSimulator</code>. The core
+algorithm for updating the randomization ratio is re-implemented based
+on the logic of the <code>DoseFinding</code> package and may differ
+slightly from that used in Dr. Dmitrienko’s materials.</p>
+<div id="simulation-settings" class="section level2">
+<h2>Simulation Settings</h2>
+<ul>
+<li><p>We assume an <code>Emax</code> model for the endpoint
+<code>fev1</code> (forced expiratory volume in 1 second) measured after
+4 months of treatment. The maximum effect (0.1) is achieved at dose
+100.</p></li>
+<li><p>The trial includes one placebo arm and five active arms with
+doses: 20, 25, 30, and 35.</p>
+<ul>
+<li>Patients are initially randomized equally across all five arms.</li>
+</ul></li>
+<li><p>A total of 200 patients are recruited over 36 months, with 50% of
+enrollment expected by 24 months.</p></li>
+<li><p>Two interim analyses are planned after 50 and 120 patients have
+non-missing <code>fev1</code> readouts, i.e. pipeline patients are
+excluded.</p></li>
+<li><p>The final analysis is performed when data from all 200 patients
+are available.</p></li>
+<li><p>At each interim:</p>
+<ul>
+<li><p>Candidate dose-response models <code>Emax</code>,
+<code>sigEmax</code>, and <code>quadratic</code> are fitted.</p></li>
+<li><p>Bootstrap estimates from <code>DoseFinding::maFitMod()</code> are
+used to calculate, for each dose <span class="math inline">\(d \in \{20,
+25, 30, 35\}\)</span>, the probability <span class="math inline">\(p_d\)</span> that the estimated treatment effect
+exceeds 0.08.</p></li>
+<li><p>The randomization ratio for each active dose is set proportional
+to <span class="math inline">\(p_d\)</span></p></li>
+<li><p>The placebo ratio remains fixed at 20%.</p></li>
+</ul></li>
+<li><p>At the final analysis, a multiple contrast test is conducted
+using data from all 200 patients.</p></li>
+</ul>
+</div>
+<div id="define-data-generator-of-fev1" class="section level2">
+<h2>Define Data Generator of <code>fev1</code></h2>
+<p>The following function generates <code>fev1</code> outcomes using the
+assumed <code>Emax</code> model. It is later assigned as the generator
+function when defining endpoints.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>rng <span class="ot">&lt;-</span> <span class="cf">function</span>(n, dose){</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  model <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">Mods</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="at">emax =</span> <span class="fu">c</span>(<span class="fl">2.6</span>, <span class="fl">12.5</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="at">placEff =</span> <span class="fl">1.25</span>, <span class="at">maxEff =</span> <span class="fl">0.1</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    <span class="at">doses =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">100</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    <span class="at">fev1 =</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="fu">getResp</span>(model, <span class="at">doses =</span> dose), <span class="at">sd =</span> .<span class="dv">05</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  )</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="define-fev1-endpoints-for-each-arm" class="section level2">
+<h2>Define <code>fev1</code> Endpoints for Each Arm</h2>
+<p>Each treatment arm is associated with an endpoint definition,
+specifying the dose and data generator.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>fev1 <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;fev1&#39;</span>, <span class="at">type =</span> <span class="st">&#39;non-tte&#39;</span>, <span class="at">readout =</span> <span class="fu">c</span>(<span class="at">fev1 =</span> <span class="dv">4</span>),</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                 <span class="at">generator =</span> rng, <span class="at">dose =</span> <span class="dv">0</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>pbo <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;0.0&#39;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>pbo<span class="sc">$</span><span class="fu">add_endpoints</span>(fev1)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>fev1 <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;fev1&#39;</span>, <span class="at">type =</span> <span class="st">&#39;non-tte&#39;</span>, <span class="at">readout =</span> <span class="fu">c</span>(<span class="at">fev1 =</span> <span class="dv">4</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>                 <span class="at">generator =</span> rng, <span class="at">dose =</span> <span class="fl">20.0</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>dose1 <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;20.0&#39;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>dose1<span class="sc">$</span><span class="fu">add_endpoints</span>(fev1)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>fev1 <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;fev1&#39;</span>, <span class="at">type =</span> <span class="st">&#39;non-tte&#39;</span>, <span class="at">readout =</span> <span class="fu">c</span>(<span class="at">fev1 =</span> <span class="dv">4</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>                 <span class="at">generator =</span> rng, <span class="at">dose =</span> <span class="fl">25.0</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>dose2 <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;25.0&#39;</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>dose2<span class="sc">$</span><span class="fu">add_endpoints</span>(fev1)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>fev1 <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;fev1&#39;</span>, <span class="at">type =</span> <span class="st">&#39;non-tte&#39;</span>, <span class="at">readout =</span> <span class="fu">c</span>(<span class="at">fev1 =</span> <span class="dv">4</span>),</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>                 <span class="at">generator =</span> rng, <span class="at">dose =</span> <span class="fl">30.0</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>dose3 <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;30.0&#39;</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>dose3<span class="sc">$</span><span class="fu">add_endpoints</span>(fev1)</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>fev1 <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;fev1&#39;</span>, <span class="at">type =</span> <span class="st">&#39;non-tte&#39;</span>, <span class="at">readout =</span> <span class="fu">c</span>(<span class="at">fev1 =</span> <span class="dv">4</span>),</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>                 <span class="at">generator =</span> rng, <span class="at">dose =</span> <span class="fl">35.0</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>dose4 <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;35.0&#39;</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>dose4<span class="sc">$</span><span class="fu">add_endpoints</span>(fev1)</span></code></pre></div>
+</div>
+<div id="define-a-trial" class="section level2">
+<h2>Define a Trial</h2>
+<p>Here we define the trial object with 200 patients and an accrual
+period of 36 months. The total trial duration is extended to 40 months
+to account for a 4-month follow-up after last enrollment.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>accrual_rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">end_time =</span> <span class="fu">c</span>(<span class="dv">24</span>, <span class="cn">Inf</span>),</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                           <span class="at">piecewise_rate =</span> <span class="fu">c</span>(<span class="dv">100</span><span class="sc">/</span><span class="dv">24</span>, <span class="dv">100</span><span class="sc">/</span><span class="dv">12</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;Trial-3415&#39;</span>, <span class="at">n_patients =</span> <span class="dv">200</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1727811904</span>, <span class="at">duration =</span> <span class="dv">40</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">enroller =</span> StaggeredRecruiter, <span class="at">accrual_rate =</span> accrual_rate</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">5</span>), pbo, dose1, dose2, dose3, dose4)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; Arm(s) &lt;0.0, 20.0, 25.0, 30.0, 35.0&gt; are added to the trial.</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; Randomization is done for 200 potential patients.</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Data of 200 potential patients are generated for the trial with 5 arm(s) &lt;0.0, 20.0, 25.0, 30.0, 35.0&gt;.</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>trial</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Trial Name:  Trial-3415  </span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Description:  Trial-3415  </span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Arms:  5  </span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Registered Arms:  0.0, 20.0, 25.0, 30.0, 35.0  </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Sample Ratio:  1, 1, 1, 1, 1  </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Patients:  200  </span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Planned Duration:  40  </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Random Seed:  1727811904</span></span></code></pre></div>
+</div>
+<div id="define-milestones-and-associated-actions" class="section level2">
+<h2>Define Milestones and Associated Actions</h2>
+<p>Three milestones are defined: two interim analyses and one final
+analysis. The same action is used for both interims, while a separate
+one is used for the final.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>stage1 <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;stage 1&#39;</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                    <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="st">&#39;fev1&#39;</span>, <span class="at">n =</span> <span class="dv">50</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                    <span class="at">action =</span> stage_action)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>stage2 <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;stage 2&#39;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                    <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="st">&#39;fev1&#39;</span>, <span class="at">n =</span> <span class="dv">120</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>                    <span class="at">action =</span> stage_action)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;final&#39;</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>                   <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="st">&#39;fev1&#39;</span>, <span class="at">n =</span> <span class="dv">200</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>                   <span class="at">action =</span> final_action)</span></code></pre></div>
+<p>The <code>stage_action()</code> function is called at each interim
+milestone to lock current data and update sample ratios based on
+model-based probabilities. It utilities a helper function
+<code>compute_sample_ratio()</code> which can be found in the Appendix
+below.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>stage_action <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  new_sample_ratio <span class="ot">&lt;-</span> <span class="fu">compute_sample_ratio</span>(locked_data)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">update_sample_ratio</span>(<span class="at">arm_names =</span> <span class="fu">c</span>(<span class="st">&#39;0.0&#39;</span>, <span class="st">&#39;20.0&#39;</span>, <span class="st">&#39;25.0&#39;</span>, <span class="st">&#39;30.0&#39;</span>, <span class="st">&#39;35.0&#39;</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                            <span class="at">sample_ratios =</span> new_sample_ratio)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  </span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="fu">message</span>(milestone_name, <span class="st">&#39;: &#39;</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="fu">table</span>(locked_data<span class="sc">$</span>arm), new_sample_ratio) <span class="sc">%&gt;%</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">&#39;dose&#39;</span>, <span class="st">&#39;total_n&#39;</span>, <span class="st">&#39;new_ratio&#39;</span>)) <span class="sc">%&gt;%</span> <span class="fu">print</span>()</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>}</span></code></pre></div>
+<p>At the final milestone, the function <code>final_action()</code>
+performs the multiple contrast test and stores the result. It calls a
+helper function <code>multiple_contrast_test()</code>, which can be
+found in the Appendix below.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>final_action <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  </span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&#39;final: &#39;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="fu">table</span>(locked_data<span class="sc">$</span>arm)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>    <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">&#39;dose&#39;</span>, <span class="st">&#39;total_n&#39;</span>)) <span class="sc">%&gt;%</span> <span class="fu">print</span>()</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> <span class="fu">multiple_contrast_test</span>(locked_data),</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>             <span class="at">name =</span> <span class="st">&#39;MC_test&#39;</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="execute-a-trial" class="section level2">
+<h2>Execute a Trial</h2>
+<p>After registering all milestones with a listener object, we simulate
+the trial using <code>controller$run()</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>listener <span class="ot">&lt;-</span> <span class="fu">listener</span>()</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>listener<span class="sc">$</span><span class="fu">add_milestones</span>(stage1, stage2, final)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; A milestone &lt;stage 1&gt; is registered.</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; A milestone &lt;stage 2&gt; is registered.</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; A milestone &lt;final&gt; is registered.</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>controller <span class="ot">&lt;-</span> <span class="fu">controller</span>(trial, listener)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">plot_event =</span> <span class="cn">TRUE</span>, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; stage 1:</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;   dose total_n new_ratio</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; 1  0.0      13 0.2000000</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; 2 20.0      13 0.1056760</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; 3 25.0      13 0.1469556</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; 4 30.0      14 0.2253870</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; 5 35.0      13 0.3219814</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; stage 2:</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt;   dose total_n  new_ratio</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; 1  0.0      31 0.20000000</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; 2 20.0      25 0.03908046</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; 3 25.0      26 0.10344828</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; 4 30.0      28 0.21839080</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt; 5 35.0      43 0.43908046</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; final:</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;   dose total_n</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; 1  0.0      40</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; 2 20.0      26</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; 3 25.0      32</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; 4 30.0      39</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; 5 35.0      63</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>output <span class="ot">&lt;-</span> controller<span class="sc">$</span><span class="fu">get_output</span>()</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>output <span class="sc">%&gt;%</span> </span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">escape =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="st">&quot;striped&quot;</span>, </span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a>                <span class="at">position =</span> <span class="st">&quot;left&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">&quot;100%&quot;</span>)</span></code></pre></div>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; ">
+<table class="table table-striped" style="width: auto !important; ">
+<thead>
+<tr>
+<th style="text-align:left;">
+trial
+</th>
+<th style="text-align:right;">
+seed
+</th>
+<th style="text-align:right;">
+milestone_time_&lt;stage 1&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;stage 1&gt;_&lt;patient_id&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;stage 1&gt;_&lt;fev1&gt;
+</th>
+<th style="text-align:left;">
+n_events_&lt;stage 1&gt;_&lt;arms&gt;
+</th>
+<th style="text-align:right;">
+milestone_time_&lt;stage 2&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;stage 2&gt;_&lt;patient_id&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;stage 2&gt;_&lt;fev1&gt;
+</th>
+<th style="text-align:left;">
+n_events_&lt;stage 2&gt;_&lt;arms&gt;
+</th>
+<th style="text-align:right;">
+milestone_time_&lt;final&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;final&gt;_&lt;patient_id&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;final&gt;_&lt;fev1&gt;
+</th>
+<th style="text-align:left;">
+n_events_&lt;final&gt;_&lt;arms&gt;
+</th>
+<th style="text-align:left;">
+MC_test
+</th>
+<th style="text-align:left;">
+error_message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Trial-3415
+</td>
+<td style="text-align:right;">
+1727811904
+</td>
+<td style="text-align:right;">
+15.76
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:left;">
+c(13, 10….
+</td>
+<td style="text-align:right;">
+30.28
+</td>
+<td style="text-align:right;">
+153
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:left;">
+c(31, 24….
+</td>
+<td style="text-align:right;">
+39.88
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:left;">
+c(40, 40….
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In the output, the columns
+<code>n_event_&lt;milestone&gt;_&lt;arms&gt;</code> contain detailed
+information on observed events or sample sizes per arm at each
+milestone. It is evident that we have pipeline patients at both
+interims.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>output[, <span class="st">&#39;n_events_&lt;stage 1&gt;_&lt;arms&gt;&#39;</span>]</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;   X0.0 X20.0 X25.0 X30.0 X35.0   endpoint</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; 1   13    13    13    14    13 patient_id</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 2   10    10    10    10    10       fev1</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>output[, <span class="st">&#39;n_events_&lt;stage 2&gt;_&lt;arms&gt;&#39;</span>]</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt;   X0.0 X20.0 X25.0 X30.0 X35.0   endpoint</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; 1   31    25    26    28    43 patient_id</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 2   24    20    23    23    30       fev1</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>output[, <span class="st">&#39;n_events_&lt;final&gt;_&lt;arms&gt;&#39;</span>]</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;   X0.0 X20.0 X25.0 X30.0 X35.0   endpoint</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; 1   40    26    32    39    63 patient_id</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; 2   40    26    32    39    63       fev1</span></span></code></pre></div>
+</div>
+<div id="appendix-codes-of-helper-functions" class="section level2">
+<h2>Appendix: Codes of Helper Functions</h2>
+<p>For completeness, the full code of the helper functions
+<code>compute_sample_ratio()</code> and
+<code>multiple_contrast_test()</code> is included below, which determine
+the new sample ratio and performs the multiple contrast test.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>compute_sample_ratio <span class="ot">&lt;-</span> <span class="cf">function</span>(data){</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  data<span class="sc">$</span>dose <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(data<span class="sc">$</span>arm)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(fev1 <span class="sc">~</span> <span class="fu">factor</span>(dose) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> data)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  dose <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">sort</span>(data<span class="sc">$</span>dose))</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  mu_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  S_hat <span class="ot">&lt;-</span> <span class="fu">vcov</span>(fit)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="fu">suppressMessages</span>(</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>    ma_fit <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">maFitMod</span>(dose, mu_hat, <span class="at">S =</span> S_hat,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>                                    <span class="at">models =</span> <span class="fu">c</span>(<span class="st">&quot;emax&quot;</span>, <span class="st">&quot;sigEmax&quot;</span>, <span class="st">&quot;quadratic&quot;</span>))</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  )</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(ma_fit, <span class="at">doseSeq =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">35</span>), <span class="at">summaryFct =</span> <span class="cn">NULL</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  prob <span class="ot">&lt;-</span> <span class="fu">apply</span>(pred[, <span class="sc">-</span><span class="dv">1</span>] <span class="sc">-</span> pred[, <span class="dv">1</span>], <span class="dv">2</span>, <span class="cf">function</span>(x){<span class="fu">mean</span>(x <span class="sc">&gt;</span> .<span class="dv">08</span>)})</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  sample_ratio <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">2</span>, (<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">2</span>) <span class="sc">*</span> prob <span class="sc">/</span> <span class="fu">sum</span>(prob)) <span class="sc">%&gt;%</span> <span class="fu">unname</span>()</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  sample_ratio</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>}</span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>multiple_contrast_test <span class="ot">&lt;-</span> <span class="cf">function</span>(data){</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>  </span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>  candidate_models <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">Mods</span>(</span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a>    <span class="at">emax =</span> <span class="fu">c</span>(<span class="fl">2.6</span>, <span class="fl">12.5</span>), <span class="at">sigEmax =</span> <span class="fu">c</span>(<span class="fl">30.5</span>, <span class="fl">3.5</span>), <span class="at">quadratic =</span> <span class="sc">-</span><span class="fl">0.00776</span>,</span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>    <span class="at">placEff =</span> <span class="fl">1.25</span>, <span class="at">maxEff =</span> <span class="fl">0.15</span>, <span class="at">doses =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">35</span>))</span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a>  data<span class="sc">$</span>dose <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(data<span class="sc">$</span>arm)</span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a>  test <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">MCTtest</span>(<span class="at">dose =</span> dose, <span class="at">resp =</span> fev1,</span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a>                               <span class="at">models =</span> candidate_models, <span class="at">data =</span> data)</span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a>  </span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a>  <span class="do">## at least one dose shows significant non-flatten pattern</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a>  <span class="fu">any</span>(<span class="fu">attr</span>(test<span class="sc">$</span>tStat, <span class="st">&#39;pVal&#39;</span>) <span class="sc">&lt;</span> .<span class="dv">05</span>)</span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

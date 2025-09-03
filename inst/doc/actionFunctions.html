@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Specify Actions to Execute at Trial Milestones</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Specify Actions to Execute at Trial
+Milestones</h1>
+
+
+
+<p>In <code>TrialSimulator</code>, we can define custom action functions
+that will be executed automatically whenever a trial milestone is
+reached. This mechanism provides a flexible way to simulate adaptive and
+dynamic trial behaviors, such as:</p>
+<ul>
+<li><p>Conducting interim analyses</p></li>
+<li><p>Early stopping for efficacy or futility</p></li>
+<li><p>Dropping or selecting treatment arms</p></li>
+<li><p>Adjusting enrollment rules adaptively</p></li>
+<li><p>Logging or tracking intermediate results</p></li>
+<li><p>Locking and exporting trial data snapshot at specific
+points</p></li>
+</ul>
+<p>This vignette demonstrates how to define such actions, associate them
+with milestones, and make use of them to enrich trial simulations.</p>
+<div id="define-trial-milestones" class="section level2">
+<h2>Define Trial Milestones</h2>
+<p>A milestone represents a pre-specified time point or condition during
+the trial at which a snapshot of accumulated data becomes available for
+custom analysis. Each milestone consists of three key elements:</p>
+<ul>
+<li><p><code>name</code>: the label of the milestone. A data snapshot at
+the triggering time can be retrieved by calling
+<code>trial$get_locked_data(milestone_name)</code>.</p></li>
+<li><p><code>when</code>: the logical conditions that trigger the
+milestone. Refer to the vignette <a href="conditionSystem.html">Condition System for Triggering Milestones
+in a Trial</a> for more information.</p></li>
+<li><p><code>action</code>: a function to be executed once the milestone
+is reached. Within this function, we can analyze data snapshot, make
+decisions, and store analysis results for later summary.</p></li>
+</ul>
+<p>For example, consider an interim analysis that is triggered once the
+trial has been running for at least 20 months and at least 450 events
+have occurred for the endpoint <code>PFS</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>interim <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;interim analysis&#39;</span>, </span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                     <span class="at">action =</span> doNothing, </span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>                     <span class="at">when =</span> <span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">20</span>) <span class="sc">&amp;</span> </span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>                       <span class="fu">eventNumber</span>(<span class="st">&#39;PFS&#39;</span>, <span class="at">n =</span> <span class="dv">450</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>                     )</span></code></pre></div>
+<p>Note that in this example, <code>action</code> is set to the default
+<code>doNothing</code> function. In such cases,
+<code>TrialSimulator</code> will not perform additional computations but
+will still record the triggering time of the milestone. This can be
+useful when the sole interest is in timing of interim analysis given
+recruitment and dropout assumptions.</p>
+<p>Importantly, whenever a milestone is reached,
+<code>TrialSimulator</code> <strong>automatically</strong> records a set
+of standard outputs, even when <code>doNothing</code> is used. These are
+summarized in the following table:</p>
+<table style="width:99%;">
+<caption>Automatically Saved Results At Triggered Milestones</caption>
+<colgroup>
+<col width="39%" />
+<col width="7%" />
+<col width="33%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type of Results</th>
+<th>Format</th>
+<th>Column Naming Convention</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Time of triggering a milestone</td>
+<td>scalar</td>
+<td><p><code>milestone_time_&lt;...&gt;</code></p>
+<p>where <code>...</code> is milestone name</p></td>
+<td><code>milestone_name_&lt;interim&gt;</code></td>
+</tr>
+<tr class="even">
+<td>Number of observed events for a time-to-event endpoint</td>
+<td>scalar</td>
+<td><p><code>n_events_&lt;...1&gt;_&lt;...2&gt;</code></p>
+<p>where <code>...1</code> is milestone name and <code>...2</code> is
+endpoint name</p></td>
+<td><code>n_events_&lt;interim&gt;_&lt;PFS&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>Number of observed non-missing readouts for a non-TTE endpoint</td>
+<td>scalar</td>
+<td><p><code>n_events_&lt;...1&gt;_&lt;...2&gt;</code></p>
+<p>where <code>...1</code> is milestone name and <code>...2</code> is
+endpoint name</p></td>
+<td><code>n_events_&lt;final&gt;_&lt;ORR&gt;</code></td>
+</tr>
+<tr class="even">
+<td>Number of enrolled patients</td>
+<td>scalar</td>
+<td><p><code>n_events_&lt;...&gt;_&lt;patient_id&gt;</code></p>
+<p>where <code>...</code> is milestone name</p></td>
+<td><code>n_events_&lt;interim&gt;_&lt;patient_id&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>Number of observed events/readouts per arm for a TTE/non-TTE
+endpoint</td>
+<td>data frame</td>
+<td><p><code>n_events_&lt;...&gt;_&lt;arms&gt;</code></p>
+<p>where <code>...</code> is milestone name</p></td>
+<td><code>n_events_&lt;final&gt;_&lt;arms&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>We can define arbitrary number of milestones in a trial. For example,
+the final analysis might be triggered when both <code>PFS</code> and
+<code>OS</code> events reach their required numbers:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;final analysis&#39;</span>, </span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                   <span class="at">action =</span> doNothing, </span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                   <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="st">&#39;PFS&#39;</span>, <span class="at">n =</span> <span class="dv">800</span>) <span class="sc">&amp;</span> </span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>                     <span class="fu">eventNumber</span>(<span class="st">&#39;OS&#39;</span>, <span class="at">n =</span> <span class="dv">500</span>))</span></code></pre></div>
+<p>Here the trial is considered complete once sufficient events are
+observed for both endpoints to ensure targeted statistical power.</p>
+<p>Note that a milestone is only triggered if</p>
+<ul>
+<li><p>its <code>when</code> condition is satisfied,
+<strong>and</strong></p></li>
+<li><p>the milestone has been registered to a
+<code>listener</code>.</p></li>
+</ul>
+<p>The following code snippet shows how to register milestones and run a
+trial with a controller. You may have seen it in many of the documents
+of this package:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>listener <span class="ot">&lt;-</span> <span class="fu">listener</span>()</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&#39; register milestones with listener</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>listener<span class="sc">$</span><span class="fu">add_milestones</span>(interim, final)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>controller <span class="ot">&lt;-</span> <span class="fu">controller</span>(trial, listener)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>()</span></code></pre></div>
+</div>
+<div id="custom-action-functions" class="section level2">
+<h2>Custom Action Functions</h2>
+<p>In most realistic scenarios, we do not simply want to record the
+timing of a milestone and number of events/readouts. Instead, we want to
+analyze the data snapshot available at that time and possibly take
+actions based on the results. To achieve this, we define a custom action
+function and assign it to the <code>action</code> argument of a
+milestone.</p>
+<p>A custom action function must always takes two arguments</p>
+<ul>
+<li><code>trial</code>: a trial object created by the function
+<code>trial()</code>.</li>
+<li><code>milestone_name</code>: a character string indicating the
+milestone being triggered.</li>
+</ul>
+<p>The first step inside every action function should be to call
+<code>trial$get_locked_data()</code> to retrieve the data snapshot.
+After this, we are free to perform any analyses or decision-making
+steps.</p>
+<p>For example, the following action function illustrates how one might
+analyze survival data at an interim milestone. Here, hazard ratios are
+estimated from proportional hazard models, and p-values (or other
+statistics) can also be calculated if desired.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>action_at_interim <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  </span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  </span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="do">## write your own codes to fit coxph model on locked_data</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="do">## extract estimate and p-value of hazard ratio</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  </span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="do">## no return value is needed in an action function</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  </span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>}</span></code></pre></div>
+<p>By default, <code>TrialSimulator</code> prints the return value of an
+action function to the console. Since this is often unnecessary, it is
+good practice to end the function with <code>invisible(NULL)</code> to
+suppress output. However, we can still return something for debugging
+purpose.</p>
+<p>One the functions is defined, it can be passed to the
+<code>action</code> argument of a milestone:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>interim <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;interim analysis&#39;</span>, </span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                     <span class="at">action =</span> action_at_interim, </span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                     <span class="at">when =</span> <span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">20</span>) <span class="sc">&amp;</span> </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                       <span class="fu">eventNumber</span>(<span class="st">&#39;PFS&#39;</span>, <span class="at">n =</span> <span class="dv">450</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                     )</span></code></pre></div>
+<p>Thus, whenever the milestone is triggered, the action function will
+be executed.</p>
+<p>Within a custom action function, we can go beyond simple data access.
+The main possibilities include</p>
+<ul>
+<li><p>performing statistical analyses;</p></li>
+<li><p>saving intermediate results;</p></li>
+<li><p>altering the trial through adaptation.</p></li>
+</ul>
+<p>Each of these topics will be discussed in the following sections.</p>
+<div id="perform-statistical-analyses-on-data-snapshot" class="section level3">
+<h3>Perform statistical analyses on data snapshot</h3>
+<p>Statisticians rarely stop at just locking the data–we want to analyze
+it!</p>
+<p>A milestone provide an opportunity to perform formal analysis on the
+accumulated data, guiding decisions such as continuing, adapting, or
+stopping the trial.</p>
+<p>Let’s revisit the interim milestone. The following example shows how
+one might compute hazard ratios for two active arms (low and high dose)
+compared against placebo. The action function extracts the snapshot of
+patient-level data, fits separate Cox proportional hazards models, and
+then computes the hazard ratios.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>action_at_interim <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  </span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  </span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="do">## write your own codes to fit coxph model on locked_data</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  fit_high <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(PFS, PFS_event) <span class="sc">~</span> arm, </span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                    <span class="at">data =</span> locked_data <span class="sc">%&gt;%</span> </span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                      <span class="fu">filter</span>(arm <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;pbo&#39;</span>, <span class="st">&#39;high&#39;</span>))</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                    )</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  </span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  fit_low <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(PFS, PFS_event) <span class="sc">~</span> arm, </span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>                   <span class="at">data =</span> locked_data <span class="sc">%&gt;%</span> </span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>                     <span class="fu">filter</span>(arm <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;pbo&#39;</span>, <span class="st">&#39;low&#39;</span>))</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>                   )</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  </span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  hr <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">high =</span> <span class="fu">exp</span>(<span class="fu">coef</span>(fit_high)), </span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>                   <span class="at">low =</span> <span class="fu">exp</span>(<span class="fu">coef</span>(fit_low)))</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>  </span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>  <span class="do">## write more codes to compute one- or two-sided p-values, etc. </span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>  </span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  </span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>}</span></code></pre></div>
+<p>This function illustrates the flexibility of action functions: any
+valid R code can be executed at the milestone. However, writing such
+functions from scratch may become <strong>cumbersome</strong> and
+<strong>error-prone</strong>, especially when:</p>
+<ul>
+<li><p>multiple treatment arms exist,</p></li>
+<li><p>one-sided tests are required, or</p></li>
+<li><p>different trial scenarios have varying arm names or
+endpoints</p></li>
+</ul>
+<p>To reduce coding burden and promote standardization,
+<code>TrialSimulator</code> provides a collection of <strong>helper
+functions</strong> for common statistical analyses. These wrappers
+ensure consistent inputs and outputs, making downstream use (such as
+saving or combining results) much easier.</p>
+<p>Here is a rewritten version of the interim action function using
+these helper functions:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>action_at_interim <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  </span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  </span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  fit_PFS <span class="ot">&lt;-</span> <span class="fu">fitCoxph</span>(<span class="fu">Surv</span>(PFS, PFS_event) <span class="sc">~</span> arm, </span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                      <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, </span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>                      <span class="at">data =</span> locked_data, </span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>                      <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>, </span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>                      <span class="at">scale =</span> <span class="st">&#39;hazard ratio&#39;</span>) <span class="co"># also also request other scales</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  </span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  fit_OS <span class="ot">&lt;-</span> <span class="fu">fitLogrank</span>(<span class="fu">Surv</span>(OS, OS_event) <span class="sc">~</span> arm, </span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>                       <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, </span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>                       <span class="at">data =</span> locked_data, </span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>                       <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>, </span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>                       biomarker1 <span class="sc">==</span> <span class="st">&#39;positive&#39;</span> <span class="sc">&amp;</span> </span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>                         biomarker2 <span class="sc">==</span> <span class="st">&#39;negative&#39;</span>) <span class="co"># specify subgroup through ...</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  </span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  </span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>}</span></code></pre></div>
+<p>In this example,</p>
+<ul>
+<li><p><code>fitCoxph</code> estimates hazard ratio for <code>PFS</code>
+against placebo, with a one-sided test.</p></li>
+<li><p><code>figLogrank</code> performs logrank test for
+<code>OS</code>, restricted to a biomarker-defined subgroup through the
+argument <code>...</code> in helper functions.</p></li>
+</ul>
+<p>Both helper functions return results in a standardized format, which
+integrates seamlessly with other utilities of
+<code>TrialSimulator</code>. This is particularly useful when saving
+outputs across milestones or performing multiplicity adjustments.</p>
+<p>For more complete description of these helper functions for common
+statistical analyses, see the vignette <a href="wrappers.html">Wrapper
+Functions of Common Statistical Methods in TrialSimulator</a>.</p>
+<p>At this stage, we are only calculating statistics. In the next
+section, we will show how to save these results for later use—either to
+summarize operating characteristics or to carry information forward into
+future milestones.</p>
+</div>
+<div id="save-intermediate-results" class="section level3">
+<h3>Save intermediate results</h3>
+<p><code>TrialSimulator</code> offers dedicated member functions for
+saving intermediate results during a trial. The stored information can
+be broadly classified into two categories:</p>
+<ul>
+<li><p><strong>Trial output</strong>—results that directly contribute to
+the summary of trial operating characteristics (e.g., effect estimates,
+test decisions) or anything that we need for each simulated trial. They
+are stored in a private single-row data frame within the
+<code>trial</code> object. We cannot access or modify it directly.
+Instead, they should be inserted and accessed using member functions
+<code>trial$save()</code> and <code>trial$get_output()</code>. Since
+outputs are stored in a single-row data frame, only scalars or
+single-row data frame are accepted by <code>trial$save()</code></p></li>
+<li><p><strong>auxiliary information</strong>—results that may be useful
+in subsequent analysis (e.g., in action functions of other milestones).
+Any results that are not directly part of trial-level summaries should
+be considered as auxiliary information. These are stored using member
+function <code>trial$save_custom_data()</code>. To retrieve it later,
+simply call <code>trial$get()</code>. This mechanism provides a safe way
+to pass data across milestones without relying on global variables.
+Unlike <code>trial$save()</code>, <code>trial$save_custom_data()</code>
+can save any objects, which provides flexibility.</p></li>
+</ul>
+<p>In addition, a convenience function <code>trial$bind()</code> is
+provided for sequentially appending rows to a stored data frame—useful
+when accumulating results across milestones.</p>
+<p>Here we give more details of those member functions. We can also
+refer to their manuals by running <code>?Trials</code> in R console.</p>
+<ul>
+<li><p><code>save(value, name)</code>: saves a scalar or a single-row
+data frame into the trial’s output.</p>
+<ul>
+<li><p>later retrieved with
+<code>trial$get_output(cols = name)</code>.</p></li>
+<li><p>calling <code>trial$get_output()</code> without argument returns
+all saved outputs available so far.</p></li>
+</ul></li>
+<li><p><code>save_custom_data(value, name)</code>: saves an object of
+any type as auxiliary information as a temporary and private list within
+the trial.</p>
+<ul>
+<li>retrieved later by calling <code>trial$get(name)</code>.</li>
+</ul></li>
+<li><p><code>bind(value, name)</code>: a special case of
+<code>save_custom_data</code> for data frames.</p>
+<ul>
+<li><p>If the named data frame already exists, the new
+<code>value</code> is row-bound to it. Otherwise, a new data frame is
+created and saved.</p></li>
+<li><p>retrieved later by
+<code>trial$get_custom_data(name)</code>.</p></li>
+<li><p>particularly useful for accumulating results across multiple
+milestones in group sequential designs. For example, we may want to save
+estimates, p-values, etc. across milestones to a data frame, so that we
+can test it with a graphical testing strategy when all p-values are
+collected (i.e. at the last milestone).</p></li>
+</ul></li>
+</ul>
+<div id="example-1-saving-hazard-ratio-and-p-value" class="section level4">
+<h4>Example 1: saving hazard ratio and p-value</h4>
+<p>Below, the interim action function computes a hazard ratio
+<code>hr</code> and its p-value <code>pval</code>, then saves them as
+part of the trial output:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>action_at_interim <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  </span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  </span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="do">## fit coxph model on locked_data</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="do">## extract estimate and p-value of hazard ratio</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="do">## assume that hr is estimate, and pval is p-value</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> hr, <span class="at">name =</span> <span class="st">&#39;pfs_interim_hazard_ratio&#39;</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> pval, <span class="at">name =</span> <span class="st">&#39;pfs_interim_p_value&#39;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  </span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="do">## values of hr and pval can be accessed anywhere later by calling</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="do">## trial$get_output(cols = &#39;pfs_interim_hazard_ratio&#39;)</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="do">## trial$get_output(cols = &#39;pfs_interim_p_value&#39;)</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="do">## trial$get_output(cols = c(&#39;pfs_interim_hazard_ratio&#39;, &#39;pfs_interim_hazard_ratio&#39;))</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="do">## If a colum specified in cols does not exist (e.g., typo in codes), </span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>  <span class="do">## an informative error message will be prompted. </span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>  </span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  </span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="example-2-passing-complex-objects-between-milestones" class="section level4">
+<h4>Example 2: passing complex objects between milestones</h4>
+<p>Sometimes we want to carry more complex information forward, such as
+lists of results, which cannot be stored in the single-row output. In
+this case, we use <code>save_custom_data()</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>action_at_interim <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  </span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  </span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="do">## fit coxph model on locked_data</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="do">## extract estimate and p-value of hazard ratio</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="do">## assume that hr is estimate, and pval is p-value</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> hr, <span class="at">name =</span> <span class="st">&#39;pfs_interim_hazard_ratio&#39;</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> pval, <span class="at">name =</span> <span class="st">&#39;pfs_interim_p_value&#39;</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  </span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="do">## assume that we also compute other values that may be useful in later milestone, </span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="do">## we save them in a list and call</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  more_results <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">numeric =</span> <span class="dv">1</span>, </span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>                       <span class="at">string =</span> <span class="st">&#39;abc&#39;</span>, </span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>                       <span class="at">list =</span> <span class="fu">list</span>(<span class="at">e1 =</span> <span class="dv">100</span>, <span class="at">e2 =</span> <span class="st">&#39;AA&#39;</span>))</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  </span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save_custom_data</span>(<span class="at">value =</span> more_results, <span class="at">name =</span> <span class="st">&#39;more_results&#39;</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  <span class="do">## value of more_results can be accessed anywhere later by calling</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>  <span class="do">## tmp &lt;- trial$get(name = &#39;more_results&#39;)</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>  </span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>  <span class="do">## no return value is needed in an action function</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>  </span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>}</span></code></pre></div>
+<p>In the final analysis, we can then retrieve both the saved trial
+outputs and the auxiliary information:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>action_at_final <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  </span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  </span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="do">## extract outputs</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  pfs_hr_interim <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_output</span>(<span class="at">cols =</span> <span class="st">&#39;pfs_interim_hazard_ratio&#39;</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  pfs_hr_pval <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_output</span>(<span class="at">cols =</span> <span class="st">&#39;pfs_interim_p_value&#39;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  </span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="do">## extract auxiliary information</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  custom_list <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get</span>(<span class="st">&#39;more_results&#39;</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  </span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>  </span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="example-3-defining-auxiliary-information-before-the-trial-runs" class="section level4">
+<h4>Example 3: defining auxiliary information before the trial runs</h4>
+<p>All member functions discussed in this section can be called before
+any milestone is triggered, as long as the <code>trial</code> object has
+been created by calling the function <code>trial()</code>. For example,
+we may want to define the level of family-wise error rate (FWER) once,
+and then use it later in interim and final analysis:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(...) <span class="do">## initialize a trial with necessary arguments in ...</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>), pbo, low, high)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">save_custom_data</span>(<span class="at">value =</span> <span class="fl">0.025</span>, <span class="at">name =</span> <span class="st">&#39;fwer&#39;</span>)</span></code></pre></div>
+<p>This auxiliary information can then be retrieved in later action
+functions to adjust boundaries or multiplicity procedures:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>action_at_interim <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  </span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  </span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="do">## compute p-values of PFS and OS at interim</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="do">## then extract FWER</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  alpha <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get</span>(<span class="at">name =</span> <span class="st">&#39;fwer&#39;</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>  </span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>  <span class="do">## compute decision boundaries at interim based on FWER</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="do">## then test PFS and OS</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  </span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  <span class="do">## save testing results for interim</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  <span class="co"># trial$save(...)</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  </span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>  </span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>}</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>action_at_final <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>  </span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>  </span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a>  <span class="do">## compute p-values of PFS and OS at final</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a>  <span class="do">## then extract FWER and testing result at interim to adjust boundaries</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a>  alpha <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get</span>(<span class="at">name =</span> <span class="st">&#39;fwer&#39;</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a>  <span class="co"># interim_results &lt;- trial$get_output(...)</span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a>  </span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a>  <span class="do">## test PFS and OS again</span></span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a>  </span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a>  <span class="do">## save testing results for final</span></span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a>  <span class="co"># trial$save(...)</span></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a>  </span>
+<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a>  </span>
+<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a>}</span></code></pre></div>
+<p>In summary, <code>TrialSimulator</code> provides a structured saving
+system that allows users to:</p>
+<ul>
+<li><p>record scalar results directly into trial outputs;</p></li>
+<li><p>carry forward complex objects across milestones, and</p></li>
+<li><p>accumulate data frames across multiple milestones.</p></li>
+</ul>
+<p>This ensures smooth information flow between milestones and avoids
+ad-hoc workarounds such as global variables.</p>
+</div>
+</div>
+<div id="alter-a-trial-via-adaptation" class="section level3">
+<h3>Alter a trial via adaptation</h3>
+<p>Beyond analyzing data and saving results, one of the most powerful
+uses of action functions is the ability to adapt the ongoing trial.</p>
+<p>Adaptation means that trial features—such as randomization ratios,
+sample size, trial duration, or active arms—can be modified in response
+to accumulated data. This reflects how many modern clinical trials are
+designed in practice, aiming to increase efficiency, ethical and cost
+balance.</p>
+<p>In <code>TrialSimulator</code>, such adaptations are implemented
+directly within action functions. At a milestone, after retrieving the
+locked data and performing statistical analyses, the action function can
+call methods of the <code>trial</code> object to alter its internal
+state. These changes will then influence the subsequent course of the
+trial simulation.</p>
+<p>Adaptations that are currently supported are summarized below:</p>
+<table style="width:99%;">
+<colgroup>
+<col width="21%" />
+<col width="38%" />
+<col width="39%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Adaptation</th>
+<th>Member Function</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Remove an arm</td>
+<td><code>trial$remove_arms()</code></td>
+<td>dose selection; seamless design</td>
+</tr>
+<tr class="even">
+<td>Add an arm</td>
+<td><code>trial$add_arms()</code></td>
+<td>adaptive platform trials</td>
+</tr>
+<tr class="odd">
+<td>Update sample ratio</td>
+<td><code>trial$update_sample_ratio()</code></td>
+<td>response-adaptive design</td>
+</tr>
+<tr class="even">
+<td>Extend trial duration</td>
+<td><code>trial$set_duration()</code> or add a event-driven
+milestone</td>
+<td>actual patient or event accrual is slower than expected</td>
+</tr>
+<tr class="odd">
+<td>Increase sample size<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></td>
+<td><code>trial$set_sample_size()</code></td>
+<td>sample size reassessment</td>
+</tr>
+<tr class="even">
+<td>Eliminate sub-population<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></td>
+<td><code>trial$update_generator()</code></td>
+<td>enrichment design</td>
+</tr>
+</tbody>
+</table>
+<p>These adaptive features allow users to simulate complex, data-driven
+designs where trial conduct is not static but evolves in response to
+accumulating evidence. At the time of writing, the vignette dedicated to
+trial adaptation is still under development. Detailed examples will be
+provided in that vignette.</p>
+</div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>experimental<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>work in progress<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

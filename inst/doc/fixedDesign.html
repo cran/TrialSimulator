@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>An Example of Fixed Design with Two Correlated Endpoints</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>$(document).ready(function(){
+    if (typeof $('[data-toggle="tooltip"]').tooltip === 'function') {
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+    if ($('[data-toggle="popover"]').popover === 'function') {
+        $('[data-toggle="popover"]').popover();
+    }
+});
+</script>
+<style type="text/css">
+.lightable-minimal {
+border-collapse: separate;
+border-spacing: 16px 1px;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-minimal td {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal th {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal thead tr:last-child th {
+border-bottom: 2px solid #00000050;
+empty-cells: hide;
+}
+.lightable-minimal tbody tr:first-child td {
+padding-top: 0.5em;
+}
+.lightable-minimal.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-minimal.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic {
+border-top: 0.16em solid #111111;
+border-bottom: 0.16em solid #111111;
+width: 100%;
+margin-bottom: 10px;
+margin: 10px 5px;
+}
+.lightable-classic tfoot tr td {
+border: 0;
+}
+.lightable-classic tfoot tr:first-child td {
+border-top: 0.14em solid #111111;
+}
+.lightable-classic caption {
+color: #222222;
+}
+.lightable-classic td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic thead tr:last-child th {
+border-bottom: 0.10em solid #111111;
+}
+.lightable-classic.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic-2 {
+border-top: 3px double #111111;
+border-bottom: 3px double #111111;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-classic-2 tfoot tr td {
+border: 0;
+}
+.lightable-classic-2 tfoot tr:first-child td {
+border-top: 3px double #111111;
+}
+.lightable-classic-2 caption {
+color: #222222;
+}
+.lightable-classic-2 td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic-2 th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic-2 tbody tr:last-child td {
+border-bottom: 3px double #111111;
+}
+.lightable-classic-2 thead tr:last-child th {
+border-bottom: 1px solid #111111;
+}
+.lightable-classic-2.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic-2.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #EEE;
+border-collapse: collapse;
+margin-bottom: 10px;
+}
+.lightable-material tfoot tr td {
+border: 0;
+}
+.lightable-material tfoot tr:first-child td {
+border-top: 1px solid #EEE;
+}
+.lightable-material th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+}
+.lightable-material td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+border-top: 1px solid #eeeeee;
+}
+.lightable-material.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #ddd;
+}
+.lightable-material-dark {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #FFFFFF12;
+border-collapse: collapse;
+margin-bottom: 10px;
+background-color: #363640;
+}
+.lightable-material-dark tfoot tr td {
+border: 0;
+}
+.lightable-material-dark tfoot tr:first-child td {
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF60;
+}
+.lightable-material-dark td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF;
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark.lightable-hover tbody tr:hover {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody tr:nth-child(even) {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material-dark.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #FFFFFF12;
+}
+.lightable-paper {
+width: 100%;
+margin-bottom: 10px;
+color: #444;
+}
+.lightable-paper tfoot tr td {
+border: 0;
+}
+.lightable-paper tfoot tr:first-child td {
+border-top: 1px solid #00000020;
+}
+.lightable-paper thead tr:last-child th {
+color: #666;
+vertical-align: bottom;
+border-bottom: 1px solid #00000020;
+line-height: 1.15em;
+padding: 10px 5px;
+}
+.lightable-paper td {
+vertical-align: middle;
+border-bottom: 1px solid #00000010;
+line-height: 1.15em;
+padding: 7px 5px;
+}
+.lightable-paper.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-paper.lightable-striped tbody tr:nth-child(even) {
+background-color: #00000008;
+}
+.lightable-paper.lightable-striped tbody td {
+border: 0;
+}
+</style>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">An Example of Fixed Design with Two
+Correlated Endpoints</h1>
+
+
+
+<p>In this vignette, we illustrate how to use
+<code>TrialSimulator</code> to simulate a trial of two correlated
+endpoints. Under a fixed design, only one milestone is specified for
+final analysis.</p>
+<div id="simulation-settings" class="section level2">
+<h2>Simulation Settings</h2>
+<ul>
+<li><p>Trial consists of two active arms of high and low dose, and a
+standard-of-care arm.</p></li>
+<li><p>Patients are randomized into the trial with ratio
+<code>1:1:1</code>.</p></li>
+<li><p>30 patients are randomized per month for the first 10 months, and
+50 patients per month after then until 1000 patients.</p></li>
+<li><p>Dropout rate is 10% at month 18, which is modeled by an
+exponential distribution, with rate parameter
+<code>-log(1 - 0.1)/18</code>.</p></li>
+<li><p>Modeled by a three-state ill-death model, two endpoints
+<code>PFS</code> and <code>OS</code> are simulated.</p>
+<ul>
+<li>Primary endpoint <code>OS</code> has a medians of 15, 18.5, 20
+months in standard-of-care, low dose and high dose arms,
+respectively.</li>
+<li>Key secondary endpoint <code>PFS</code> has a median of 7, 9, 10
+months in the three arms.</li>
+<li>Pearson’s correlation between <code>OS</code> and <code>PFS</code>
+are 0.68, 0.65, and 0.60 in the three arms.</li>
+</ul></li>
+<li><p>To ensures sufficient powers for both endpoints, final analysis
+is set when we have at least a total of 800 <code>PFS</code> events in
+the standard-of-care and high dose arm, meanwhile a total of 550
+<code>OS</code> events are observed in three arms</p>
+<ul>
+<li><code>OS</code> is tested using one-sided logrank test.</li>
+<li><code>PFS</code> is tested using one-sided p-value from the Cox
+proportional hazard model as the PH assumption is assumed.</li>
+<li>The Bonferroni correction is adopted to split overall <span class="math inline">\(\alpha = 5\%\)</span>, i.e., claiming significant
+effect for an endpoint when p-value is lower than <span class="math inline">\(0.05/4\)</span>.</li>
+</ul></li>
+</ul>
+</div>
+<div id="transition-hazards-of-pfs-and-os" class="section level2">
+<h2>Transition Hazards of <code>PFS</code> and <code>OS</code></h2>
+<p>We adopt the ill-death model to simulate the two endpoints. This
+ensures <code>PFS</code> <span class="math inline">\(\leq\)</span>
+<code>OS</code> with probability one, and makes no assumption on latent
+variables or copula parameters. <code>TrialSimulator</code> offers a
+function <code>solveThreeStateModel()</code> to convert endpoints’
+medians and correlation to the transition hazards, which are required by
+the built-in generator <code>CorrelatedPfsAndOs3()</code>. Refer to the
+vignette <a href="simulatePfsAndOs.html">Simulate Correlated
+Progression-Free Survival and Overall Survival as Endpoints in Clinical
+Trials</a> for more details.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>pars_soc <span class="ot">&lt;-</span> <span class="fu">solveThreeStateModel</span>(<span class="at">median_pfs =</span> <span class="dv">7</span>, <span class="at">median_os =</span> <span class="dv">15</span>, <span class="at">corr =</span> .<span class="dv">68</span>, </span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                                 <span class="at">h12 =</span> <span class="fu">seq</span>(.<span class="dv">07</span>, .<span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">50</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>pars_soc</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt;   corr        h01       h02        h12        error</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; 1 0.68 0.07498342 0.0240376 0.08959184 0.0001363832</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>pars_low <span class="ot">&lt;-</span> <span class="fu">solveThreeStateModel</span>(<span class="at">median_pfs =</span> <span class="dv">9</span>, <span class="at">median_os =</span> <span class="fl">18.5</span>, <span class="at">corr =</span> .<span class="dv">65</span>, </span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                                 <span class="at">h12 =</span> <span class="fu">seq</span>(.<span class="dv">04</span>, .<span class="dv">07</span>, <span class="at">length.out =</span> <span class="dv">50</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>pars_low</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;   corr        h01        h02        h12       error</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; 1 0.65 0.05059501 0.02642134 0.06204082 0.001646964</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>pars_high <span class="ot">&lt;-</span> <span class="fu">solveThreeStateModel</span>(<span class="at">median_pfs =</span> <span class="dv">10</span>, <span class="at">median_os =</span> <span class="dv">20</span>, <span class="at">corr =</span> .<span class="dv">60</span>, </span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                                  <span class="at">h12 =</span> <span class="fu">seq</span>(.<span class="dv">02</span>, .<span class="dv">06</span>, <span class="at">length.out =</span> <span class="dv">50</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>pars_high</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;   corr        h01        h02        h12      error</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1  0.6 0.03964373 0.02967099 0.04693878 0.00208503</span></span></code></pre></div>
+<table>
+<caption>
+Transition hazards in three treatment arms
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+arm
+</th>
+<th style="text-align:right;">
+h01
+</th>
+<th style="text-align:right;">
+h02
+</th>
+<th style="text-align:right;">
+h12
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+soc
+</td>
+<td style="text-align:right;">
+0.075
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+<td style="text-align:right;">
+0.090
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+low
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+<td style="text-align:right;">
+0.026
+</td>
+<td style="text-align:right;">
+0.062
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+high
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="define-treatment-arms" class="section level2">
+<h2>Define Treatment Arms</h2>
+<p>We use generator <code>CorrelatedPfsAndOs3()</code> with
+<code>endpoint()</code> and <code>arm()</code> to define the three
+treatment arms.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co">#&#39; define SoC</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>pfs_os_in_soc <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="fu">c</span>(<span class="st">&#39;pfs&#39;</span>, <span class="st">&#39;os&#39;</span>), </span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                          <span class="at">type =</span> <span class="fu">c</span>(<span class="st">&#39;tte&#39;</span>, <span class="st">&#39;tte&#39;</span>), </span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                          <span class="at">generator =</span> CorrelatedPfsAndOs3, </span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                          <span class="at">h01 =</span> <span class="fl">0.075</span>, <span class="at">h02 =</span> <span class="fl">0.024</span>, <span class="at">h12 =</span> <span class="fl">0.090</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>soc <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;soc&#39;</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>soc<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_os_in_soc)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&#39; define low dose arm</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>pfs_os_in_low <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="fu">c</span>(<span class="st">&#39;pfs&#39;</span>, <span class="st">&#39;os&#39;</span>), </span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>                          <span class="at">type =</span> <span class="fu">c</span>(<span class="st">&#39;tte&#39;</span>, <span class="st">&#39;tte&#39;</span>), </span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>                          <span class="at">generator =</span> CorrelatedPfsAndOs3, </span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>                          <span class="at">h01 =</span> <span class="fl">0.051</span>, <span class="at">h02 =</span> <span class="fl">0.026</span>, <span class="at">h12 =</span> <span class="fl">0.062</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>low <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;low&#39;</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>low<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_os_in_low)</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&#39; define high dose arm</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>pfs_os_in_high <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="fu">c</span>(<span class="st">&#39;pfs&#39;</span>, <span class="st">&#39;os&#39;</span>), </span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>                           <span class="at">type =</span> <span class="fu">c</span>(<span class="st">&#39;tte&#39;</span>, <span class="st">&#39;tte&#39;</span>), </span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>                           <span class="at">generator =</span> CorrelatedPfsAndOs3, </span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>                          <span class="at">h01 =</span> <span class="fl">0.040</span>, <span class="at">h02 =</span> <span class="fl">0.030</span>, <span class="at">h12 =</span> <span class="fl">0.047</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>high <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;high&#39;</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>high<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_os_in_high)</span></code></pre></div>
+<p>We can request for a summary report of, e.g., the high dose arm, by
+printing the arm object in R console. The medians of <code>PFS</code>
+and <code>OS</code> matches to the settings very well.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>high</span></code></pre></div>
+<iframe role="img" src="data:text/html;charset=utf-8;base64,CjwhRE9DVFlQRSBodG1sPgo8aHRtbD4KPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSJVVEYtOCI+CiAgICA8dGl0bGU+QXJtIE5hbWU6IGhpZ2g8L3RpdGxlPgogICAgPHN0eWxlPgogICAgICAgIGJvZHkgewogICAgICAgICAgICBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7CiAgICAgICAgICAgIG1hcmdpbjogMjBweDsKICAgICAgICAgICAgYmFja2dyb3VuZC1jb2xvcjogd2hpdGU7CiAgICAgICAgICAgIGRpc3BsYXk6IGZsZXg7CiAgICAgICAgICAgIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47CiAgICAgICAgICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgICAgICAgfQogICAgICAgIGgxIHsKICAgICAgICAgICAgY29sb3I6IGJsYWNrOwogICAgICAgICAgICB0ZXh0LWFsaWduOiBjZW50ZXI7CiAgICAgICAgICAgIG1hcmdpbi1ib3R0b206IDIwcHg7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMjBweDsKICAgICAgICB9CiAgICAgICAgLnN1YnRpdGxlIHsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgICAgICBjb2xvcjogIzY2NjsKICAgICAgICAgICAgbWFyZ2luLWJvdHRvbTogMjBweDsKICAgICAgICAgICAgZm9udC1zaXplOiAxNnB4OwogICAgICAgIH0KICAgICAgICB0YWJsZSB7CiAgICAgICAgICAgIGJvcmRlci1jb2xsYXBzZTogY29sbGFwc2U7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMTRweDsKICAgICAgICAgICAgYm9yZGVyOiAxcHggc29saWQgIzk5OTsKICAgICAgICAgICAgd2lkdGg6IGF1dG87CiAgICAgICAgICAgIG1hcmdpbjogMCBhdXRvOwogICAgICAgIH0KICAgICAgICB0aCB7CiAgICAgICAgICAgIGJhY2tncm91bmQtY29sb3I6ICNmMGYwZjA7CiAgICAgICAgICAgIGNvbG9yOiBibGFjazsKICAgICAgICAgICAgcGFkZGluZzogMTBweDsKICAgICAgICAgICAgdGV4dC1hbGlnbjogbGVmdDsKICAgICAgICAgICAgZm9udC13ZWlnaHQ6IG5vcm1hbDsKICAgICAgICAgICAgYm9yZGVyOiAxcHggc29saWQgIzk5OTsKICAgICAgICAgICAgd2hpdGUtc3BhY2U6IG5vd3JhcDsKICAgICAgICAgICAgZm9udC1zaXplOiAxNHB4OwogICAgICAgIH0KICAgICAgICB0ZCB7CiAgICAgICAgICAgIHBhZGRpbmc6IDEwcHg7CiAgICAgICAgICAgIGJvcmRlcjogMXB4IHNvbGlkICM5OTk7CiAgICAgICAgICAgIHZlcnRpY2FsLWFsaWduOiB0b3A7CiAgICAgICAgICAgIGxpbmUtaGVpZ2h0OiAxLjQ7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMTRweDsKICAgICAgICB9CiAgICAgICAgLm5vLWNvbCB7CiAgICAgICAgICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICAgICAgICAgICAgd2hpdGUtc3BhY2U6IG5vd3JhcDsKICAgICAgICB9CiAgICAgICAgLnZhcmlhYmxlLWNvbCB7CiAgICAgICAgICAgIHdoaXRlLXNwYWNlOiBub3dyYXA7CiAgICAgICAgfQogICAgICAgIC5zdGF0cy1jb2wgewogICAgICAgIH0KICAgICAgICAuZnJlcXMtY29sIHsKICAgICAgICAgICAgbGluZS1oZWlnaHQ6IDIwcHg7CiAgICAgICAgfQogICAgICAgIC5ncmFwaC1jb2wgewogICAgICAgICAgICB0ZXh0LWFsaWduOiBjZW50ZXI7CiAgICAgICAgICAgIHdoaXRlLXNwYWNlOiBub3dyYXA7CiAgICAgICAgICAgIHZlcnRpY2FsLWFsaWduOiB0b3A7CiAgICAgICAgfQogICAgICAgIGltZyB7CiAgICAgICAgICAgIGRpc3BsYXk6IGJsb2NrOwogICAgICAgICAgICBtYXJnaW46IDAgYXV0bzsKICAgICAgICAgICAgdmVydGljYWwtYWxpZ246IHRvcDsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGgxPkFybSBOYW1lOiBoaWdoPC9oMT4KICAgIDxkaXYgY2xhc3M9InN1YnRpdGxlIiBzdHlsZT0idGV4dC1hbGlnbjogbGVmdDsiPgogICAgICAgIEVuZHBvaW50cyAoMik6cGZzLCBvczxicj4KICAgIDwvZGl2PgoKICAgIDx0YWJsZT4KICAgICAgICA8dGhlYWQ+CiAgICAgICAgICAgIDx0cj4KICAgICAgICAgICAgICAgIDx0aCBjbGFzcz0ibm8tY29sIj5ObzwvdGg+CiAgICAgICAgICAgICAgICA8dGggY2xhc3M9InZhcmlhYmxlLWNvbCI+VmFyaWFibGU8L3RoPgogICAgICAgICAgICAgICAgPHRoIGNsYXNzPSJzdGF0cy1jb2wiPlN0YXRzIC8gRnJlcXM8L3RoPgogICAgICAgICAgICAgICAgPHRoIGNsYXNzPSJncmFwaC1jb2wiPkdyYXBoPC90aD4KICAgICAgICAgICAgPC90cj4KICAgICAgICA8L3RoZWFkPgogICAgICAgIDx0Ym9keT4KICAgICAgICAgICAgPHRyPgogICAgICAgICAgICAgICAgPHRkIGNsYXNzPSJuby1jb2wiPjE8L3RkPgogICAgICAgICAgICAgICAgPHRkIGNsYXNzPSJ2YXJpYWJsZS1jb2wiPnBmczxicj5bdGltZS10by1ldmVudF08L3RkPgogICAgICAgICAgICAgICAgPHRkIGNsYXNzPSJzdGF0cy1jb2wiPk1lZGlhbiB0aW1lOiAxMC4wOTxicj5FdmVudHM6IDEwMDAwPGJyPk1pc3Npbmc6IDAgKDAlKTwvdGQ+CiAgICAgICAgICAgICAgICA8dGQgY2xhc3M9ImdyYXBoLWNvbCI+PGltZyBzcmM9ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBSGdBQUFCUUNBWUFBQURTbTdHSkFBQUVEbWxEUTFCclEwZERiMnh2Y2xOd1lXTmxSMlZ1WlhKcFkxSkhRZ0FBT0kyTlZWMW9IRlVVUHB1NXN5c2t6b1BVcHFhU0R2NDFsTFJzVXRHRTJ1aitaYk50M0N5VGJMUkJrTW5zM1oxcEpqUGovS1JwS1Q0VVFSREJxT0NUNFA5YndTY2hhcXZ0aXkyaXRGQ2lCSU1vK05ENlI2SFNGd25ydVRPenU1TzRhNzNMM1BubW5POSs1OTV6N3Q0TGtMZ3NXNWJlSlFJc0dxNHQ1ZFBpczhmbXhNUTZkTUY5MEExOTBDMHJqcFVxbFNZQkcrUEN2OXJ0N3lERzN0ZjJ0L2YvWit1dVVFY0JpTjJGMkt3NHlpTGlaUUQrRmNXeVhZQUVRZnZJQ2RkaStBbkVPMnljSU9JU3c3VUFWeGllRC9DeXo1bVJNb2hmUlN3b3Fveit4TnVJQitjajlsb0VCM1B3MjQ0OE5haXRLU0xMUmNrMnE1cE9JOU85Zy90L3RrWGRhOFRiZzArUHN6QjlGTjhEdVBhWEtuS1c0WWNRbjFYazNIU0lyeTVwczhVUS8yVzVhUW54SXdCZHU3eUZjZ3J4UHNSalZYdThIT2gwcWFvMzBjQXJwOVNaWnhEZmczaDF3VHpLeHU1RS9MVXhYNXdLZFg1U25Bem1EeDRBNE9JcUxiQjY5eU1lc0UxcEtvakxqVmRvTnNmeWlQaTQ1aFptQW4zdUxXZHBPdGZRT2FWbWlrRXM3b3ZqOGhGV3B6N0VWNm1lbDBMOVh5MjNGTVlsUFlaZW5BeDB5REIxL1BYNmRsZWRtUWppa2prWEN4cU1KUzlXdGZGQ3lIOVh0U2VrRUYrMmRIK1A0dHpJVGR1VHlnR2Z2NThhNVZDVEg1UHRYRDdFRlppTnlVREJoSG5zRlRCZ0UwU1FJQTlwZkZ0Z282Y0tHdWhvb2VpbGFLSDQxZURzMzhJcCtmNEF0MVJxL3NqcjZORXdRcWIvSS9EUXFzTHZhRlVqdkF4K2VXaXJkZEFKWm5BajFERkpMMG1TZy9nY0lwUGtNQmtob3lDU0o4bFRaSXhrMFRwS0RqWEhsaUp6WlBPNTBkUjVBU05TbnplTHZJdm9kMEhHL21ka21PQzB6OFZLbnpjUTJNL1l6MnZLbGRkdVhqcDlibGVMdTBaV243dldjK2wwSkdjYWFpMTB5TnJVblhMUC84SmY1OWV3WCtjM1dneitCMzREZit2YlZyYzE2elRNVmdwOXVtOWJ4RWZ6UFU1a1BxVXRWV3hoczZPaVdUVlcrZ0lmeXdCOXVYaTdDR2NHVy96azk4ay9rbXZKOTVJZkpuL2ozdVErNGM1em4zS2ZjZCtBeUYzZ0xuSmZjbDl4SDNPZlIyclVlZTgwYSs2dm83RUs1bW1YVWR5ZlFscllMVHdvWklVOXdzUENaRXRQNkJXR2hBbGhMM3AyTjZzVGpSZGR1d2JIc0c5a3EzMnNnQmVwYyt4dXJMUFc0VDlVUnBZR0ozeW00Kzh6QTA1dTQ0UWpTVDhaSW9WdHUzcUU3ZldtZG41TFBkcXZnY1p6OFd3OEJXSjhYM3cwUGhRL3duQ0RHZCtMdmxIczhkUnk2YkxMRHVLTWFaMjB0WnJxaXNQSjVPTmlDcTh5S2hZTTVjQ2dLT3U2NkxzYzBhWU90WmRvNVFDd2V6STR3bTlKL3YwWDIzbWxaWE9mQmpqOEp6djNXclk1RCtDc0E5RDdhTXMyZ0dmanZlOEFyRDZtZVBaU2VDZkVZdDhDT05XRHc4RlhUeHJQcXgvcjlWdDRiaVhlQU5oOHZWNy8rLzE2ZmZNRDFOOEF1S0QvQS84bGVBdkZZOWJMQUFBQU9HVllTV1pOVFFBcUFBQUFDQUFCaDJrQUJBQUFBQUVBQUFBYUFBQUFBQUFDb0FJQUJBQUFBQUVBQUFCNG9BTUFCQUFBQUFFQUFBQlFBQUFBQU5xYkV4RUFBQWNoU1VSQlZIZ0I3VjFkU0JWQkZENTNXeWlMN01kK3BhTFFvcUNJQ2xLaGdqQWZnaXpMQjEvRUlFaXdwMTRFZThuWDNncUNmSkFvb1RlZitzR1h5QlF0c2lBeDBzSTBsWDdzeC80c1RGRzczVzlnbHJYV2U4L3EzcjMzcm1mZ3NudDN6c3ljODMwN3N6Tm5abWRENFVnZ0NZRkZ3QWlzWldLWVFrQUlEdmlOSUFRTHdRRkhJT0RtbVE4ZlBxU2hvU0dhbUppZ0V5ZE9CTnpjdVdlZXVXSERCdnI2OVN0bFpXV3hySytwcWFIdjM3OVRaMmNuM2JoeHcwb1RDb1ZJT3VRV0hFbHpZcTVidDQ3d2UvLytQVXVwd2NGQit2anhJOTI4ZWRPU0I3a1NraE9CMEpNblQ4TFBuajJqYmR1MlVWNWVIa3RMa0x4bnp4N3JwdEFFU3cxbXdlZXJVR2dtam81L0NZYkdRckt2dkxFTGsyRVNHNnJVRkJTQ1U1TTN0dFpDTUJ1cTFCUVVnbE9UTjdiV25oSDg1Y3NYVmVqZXZYdlpoWXRnL0JId2pPRGx5NWNyYlNQRHJ2aHJMU1d3RVRENyt2cW92YjJkVnExYVJmdjI3V01uRk1IVVFNQWNIaDVXcnNlRkN4ZXlOSDcrL0RsaEhEdytQczZTRjZIRUltQTVPdUNxek16TWpLbk53WU1INmZQbnovVHExU3NhR3h1YklpL09qaWx3Sk1XZjBJTUhEOEp1WjVPY1BGbmFHaUZaSTVFY1J3T3pTWVpoc0dlVGtrTnQwWUtMZ0RXYnhFMGdjcW1GZ0dmRHBOUXllKzVvNnpuQmVzcXdxS2hvN3FDWXhKWjZUckMyMWI0Z1FGK1RvLzhJeEkxZy8wMlJFcDBRRUlLZFVBblFOZVBYcjEvMDl1MWI2dTN0OWN5cyt2cDZsVmRaV1psbmVVcEdNME1nMU5qWUdPN3Y3NmVsUzVmUzhlUEhXYmxFYzNUb0RNVGhvWkZJN0ZHNUtsKy9mcTJjSFJzM2JveXB6ZWJObTlVNmF0VDhhUDVvSVRnbWxMNElHRDA5UFlRSkJOUmlUc0IwWU1TOVNSa1pHUnh4a1Vrd0F1YlBuejlWN1oyY25HU3BncWI4OSsvZktrMjBCQmdQb3hianA4ZkcwZVFsTGo0SW1MdDI3U0w4SkFRVEFSa21CWk5YeTZxNEVxeWJadDNoc2txVkU5OFFpQ3ZCdmxraEJVMkxnQkE4TFRUQmlJZzd3ZEpNSi9aR2lUdkJpVFZQU2plZlBuMnFYdVllSFIybDA2ZFBDeUlCUThEY3ZYdTNja2FNakl5d1REdDE2aFI5K3ZSSkxiVmxKWWdJaWRPRGk1VDNjZ1pxTHJad1dMOStQU3QzVEVnY08zYU1GaXhZd0pJWG9jUWlZTnk3ZDQ5V3JGaEJUVTFOTEUwS0N3dnB5SkVqcmdtdXFLaFErYTljdVpKVmpnaDVnMEFvNG9NT2QzZDMwNlpObTJqKy9QbXNYRG5UaFU0WmFZZUg3bGs3eWNnMWJ4R0lMSWsyYU92V3JXeHlaMVA4Z1FNSFZISk45R3p5a3JROEJId2RKalUzTi9PMEVpblBFUENWWUx2V2VNZEpRdndSOEoxZy9memxkdXJpRDBHd1MvQ2RZTUI1OSs1ZGhhbzhpK04vY3lXRTRFT0hEc1hmTWlsQklXQzJ0YlVSRnQybHBhV1JuNitiaUhmTG56dlF3RXZmY0Z5QVlFNjRkdTBhMWRYVkVkZTFHUzNQaXhjdnFtaHBxcU9oTkxzNEE1Nmx4NDhmSzI4V0o2c1hMMTRRZnRoK2VMYmg3Tm16VmhaQ3NnV0ZweWVoTzNmdWhMSGJiRWRIQjNIZlJKaXBKMnM2emUzazZsNzJkTEp5M1IwQ3h1SERoNVVYcTZTa3hGMUtENlh0cE5ySjlyQ0lPWnVWcVYyVmlVWkFkN3FnQjBpMms1NW8zVks1L0lRTWs2WURES1JxQndoSXZuMzc5blNpY3AySmdMV05FbE5laVhuOURIWXEyOTVVUzIxMlFvaDNMYWxxc0YxbE82a2dHeis5SDZaZFRzNmpJMkJHajA1c3JDWloxMllzVE5CQngrbi9jblJHSUdscnNGMWRrSW5mNnRXcnJjdTZWdXNqdmdRajRYOEUxT3VqdDI3ZG9wYVdsdjlqayt6S2h3OGZGTkVndTd5OGZJcDJ5NVl0VTgyNEpoeEhyRkM1ZXZVcUlkMWNEYUhJc3Rud3UzZnZsS3N5UHo4L0pnN1k2Z0dkTEh4RUM2c3JreVZnOGVDbFM1Zm8zTGx6czFMcDZOR2pxaWRmWFYxTldLQ0FMOUZncTJUc3l3bWNkdTdjU1hqbGR1M2F0ZXJ6UXRuWjJTcHUwYUpGcXR4NTgrYXBteEJIREVGeE0rS0kvenJ1ejU4L3JsZlE2THpzeG1HSDRGanZhVnU5YU81bXBMbTV1V296VXV4ditlUEhEM3Q1U1gyT1hYVWZQWHBFRFEwTjZuVlpBTlBhMnFwSXpNbkpzVDcydFgzN2RycCsvVHFWbHBhcUQzOEJXQUNwV3dHc1BuM3o1czEvdG1JamRPeDYwTlhWcGVKMjdOaEJBd01ENnJHQ2pWdE4wMVR1M1MxYnRoRFd3Q0hnSEtSekF0ekRXRnFsQTI2Yy9mdjNVMjF0cmI3a2VKelJacVNPT2NuRnBFVEE5YWZ0bkt5b3JLeWtLMWV1MEpJbFM1eWlIYTloUjRGdjM3NnhKemwwSm1nNThMemwzdmxJaDVZR3oyTTNhN2t4VzRZSmxmVDBkRjEwekNQa1VWYXNadlBmalBDb3d3Z0JyUVUzb0ZONS92eDVxcXFxaXByRWs4MUkwWFRBcDMzNTh1V29oZGtqMGN3VkZ4ZXJtU3o3OVZqbitPSWFQRnljdmExMVhtZk9uS0dDZ2dMMkxrSkloeWxSTklzWExselEyY1E4dm56NWtyRCsrLzc5K3pGbDdRTEFEeDQ4TnhYazVNbVRxb20zNStOMDdzazRlUEhpeGVwWmc0NEhOK0J1eDFTbG16VElHM2M2eUhXVERzL1FOV3ZXdUVxRElSbmUrSEJURG1ydmJHeHkwMXJBSnQyeGk0YTUxY21LSmlSeHFZc0F2OUZQWFJ2bnRPWkNjTURwRjRLRjRJQWpFSER6cEFZTHdRRkhJT0RtU1EwV2dnT09RTUROa3hvc0JBY2NnWUNiSnpVNDRBVC9CUkpvaU9tbU16WkFBQUFBQUVsRlRrU3VRbUNDIiBhbHQ9IktNIGN1cnZlIj48L3RkPgogICAgICAgICAgICA8L3RyPgogICAgICAgICAgICA8dHI+CiAgICAgICAgICAgICAgICA8dGQgY2xhc3M9Im5vLWNvbCI+MjwvdGQ+CiAgICAgICAgICAgICAgICA8dGQgY2xhc3M9InZhcmlhYmxlLWNvbCI+b3M8YnI+W3RpbWUtdG8tZXZlbnRdPC90ZD4KICAgICAgICAgICAgICAgIDx0ZCBjbGFzcz0ic3RhdHMtY29sIj5NZWRpYW4gdGltZTogMjAuMTU8YnI+RXZlbnRzOiAxMDAwMDxicj5NaXNzaW5nOiAwICgwJSk8L3RkPgogICAgICAgICAgICAgICAgPHRkIGNsYXNzPSJncmFwaC1jb2wiPjxpbWcgc3JjPSJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUhnQUFBQlFDQVlBQUFEU203R0pBQUFFRG1sRFExQnJRMGREYjJ4dmNsTndZV05sUjJWdVpYSnBZMUpIUWdBQU9JMk5WVjFvSEZVVVBwdTVzeXNrem9QVXBxYVNEdjQxbExSc1V0R0UydWorWmJOdDNDeVRiTFJCa01uczNaMXBKalBqL0tScEtUNFVRUkRCcU9DVDRQOWJ3U2NoYXF2dGl5Mml0RkNpQklNbytORDZSNkhTRnducnVUT3p1NU80YTczTDNQbm1uTzkrNTk1ejd0NExrTGdzVzViZUpRSXNHcTR0NWRQaXM4Zm14TVE2ZE1GOTBBMTkwQzByanBVcWxTWUJHK1BDdjlydDd5REczdGYydC9mL1ordXVVRWNCaU4yRjJLdzR5aUxpWlFEK0ZjV3lYWUFFUWZ2SUNkZGkrQW5FTzJ5Y0lPSVN3N1VBVnhpZUQvQ3l6NW1STW9oZlJTd29xb3oreE51SUIrY2o5bG9FQjNQdzI0NDhOYWl0S1NMTFJjazJxNXBPSTlPOWcvdC90a1hkYThUYmcwK1BzekI5Rk44RHVQYVhLbktXNFljUW4xWGszSFNJcnk1cHM4VVEvMlc1YVFueEl3QmR1N3lGY2dyeFBzUmpWWHU4SE9oMHFhbzMwY0FycDlTWlp4RGZnM2gxd1R6S3h1NUUvTFV4WDV3S2RYNVNuQXptRHg0QTRPSXFMYkI2OXlNZXNFMXBLb2pMalZkb05zZnlpUGk0NWhabUFuM3VMV2RwT3RmUU9hVm1pa0VzN292ajhoRldwejdFVjZtZWwwTDlYeTIzRk1ZbFBZWmVuQXgweURCMS9QWDZkbGVkbVFqaWtqa1hDeHFNSlM5V3RmRkN5SDlYdFNla0VGKzJkSCtQNHR6SVRkdVR5Z0dmdjU4YTVWQ1RINVB0WEQ3RUZaaU55VURCaEhuc0ZUQmdFMFNRSUE5cGZGdGdvNmNLR3Vob29laWxhS0g0MWVEczM4SXArZjRBdDFScS9zanI2TkV3UXFiL0kvRFFxc0x2YUZVanZBeCtlV2lyZGRBSlpuQWoxREZKTDBtU2cvZ2NJcFBrTUJraG95Q1NKOGxUWkl4azBUcEtEalhIbGlKelpQTzUwZFI1QVNOU256ZUx2SXZvZDBIRy9tZGttT0MwejhWS256Y1EyTS9ZejJ2S2xkZHVYanA5YmxlTHUwWlduN3ZXYytsMEpHY2FhaTEweU5yVW5YTFAvOEpmNTlld1grYzNXZ3orQjM0RGYrdmJWcmMxNnpUTVZncDl1bTlieEVmelBVNWtQcVV0Vld4aHM2T2lXVFZXK2dJZnl3Qjl1WGk3Q0djR1cvems5OGsva212Sjk1SWZKbi9qM3VRKzRjNXpuM0tmY2QrQXlGM2dMbkpmY2w5eEgzT2ZSMnJVZWU4MGErNnZvN0VLNW1tWFVkeWZRbHJZTFR3b1pJVTl3c1BDWkV0UDZCV0doQWxoTDNwMk42c1RqUmRkdXdiSHNHOWtxMzJzZ0JlcGMreHVyTFBXNFQ5VVJwWUdKM3ltNCs4ekEwNXU0NFFqU1Q4WklvVnR1M3FFN2ZXbWRuNUxQZHF2Z2NaejhXdzhCV0o4WDN3MFBoUS93bkNER2QrTHZsSHM4ZFJ5NmJMTER1S01hWjIwdFpycWlzUEo1T05pQ3E4eUtoWU01Y0NnS091NjZMc2MwYVlPdFpkbzVRQ3dlekk0d205Si92MFgyM21sWlhPZkJqajhKenYzV3JZNUQrQ3NBOUQ3YU1zMmdHZmp2ZThBckQ2bWVQWlNlQ2ZFWXQ4Q09OV0R3OEZYVHhyUHF4L3I5VnQ0YmlYZUFOaDh2VjcvKy8xNmZmTUQxTjhBdUtEL0EvOGxlQXZGWTliTEFBQUFPR1ZZU1daTlRRQXFBQUFBQ0FBQmgya0FCQUFBQUFFQUFBQWFBQUFBQUFBQ29BSUFCQUFBQUFFQUFBQjRvQU1BQkFBQUFBRUFBQUJRQUFBQUFOcWJFeEVBQUFiTVNVUkJWSGdCN1YzSlN4eE5GSDh6Tkdod0N5UkdFNklJeG1DQ0tDWVhBN25rR01paVhyeDVFRDE3RXJ5WmYwQ01FZlRnSVFjWFRBaUVyRGRCa0NSb0luRkYzTDJvaVlwRVRlS3UzN3lDNnZRMzB6MiswZXFabXZFVnROTmQ5ZnJWcTkrdnE3cjYxYUxueUJlQVE4d2k0STNaa25IQkJBSk1jSXcvQ0V3d0V4empDTVI0OFl6UG56L0Q2dW9xN08vdlEybHBhWXdYOSt3Vno4ak16SVMxdFRYSXpzNG1sYjZscFFWKy9mb0ZZMk5qME43ZWJ0N2o4WGlBTytRbUhOcWNHRmV2WGdVOEZoY1hTVVl0TFMzQno1OC80YzJiTjZZOGtzdEJUd1E4WDc5K1BSb2VIb1liTjI3QW5UdDNTRllpeWJkdjN6WWZDa2t3MTJBU2ZHRVY4cHpFMGVGUE1Gck1KSWVWTjNKbS9KbEVoaW82QlpuZzZPU05iRFVUVElZcU9nV1ZFU3c3V1BKZEhKMXd4SjdWeWdpT1BXaGlvMFJNY0d6dzZGZ0tZMjV1RHI1Ly93NlhMbDJDdTNmdk9ncHlRblFpNE4zWTJCQ3V4OSsvZjVOS01EbzZDbmpzN2UwRnlBOE9Eb3E0MnRyYWdEU09pQXdDcHFNRFhaVlhybHc1MW9wNzkrN0J5c29LVEUxTndjN09Ub0M4N0dUSlRsZUFBRWVFRlFIUHAwK2Zqa0lkVGJMelpFbXJtV0NKaEI2L1hoeE44bnE5NU5Fa1BjeG1LNmdJZUhFazZjR0RCMUJRVUVDOUo2aWNISlZDblJ3aWo0RHl6NlRMbHkrTFVuMzQ4Q0h5cFdNTFFEbkJqS2xlQ0REQmV2R2gzQnBYQ043YTJoS0dwcWVuS3plWUZZYUdnQ3NFeDhmSEN5dHdhZytIeUNKZ29BY0xKOUdoMDRJNjhTNnlKblB1b1NCZytPWmt3Zno4UEp3L2Y1NEpEZ1c1S0pFVnJzcloyVm5oN01qS3lqclc3SnljSERHUEdtdStuVC9hcW9DOVdsWTBJblB1blo2ZUZvTUhXSXNwQVd1OHo3MEpGeTVjb0lpelRJUVJNRFkzTjBYdFBUZzRJSm1DVFRuMmt0Rzl5VUYvQkl6Q3drTEF3NDJBbzA2cHFhbVFrSkFBZi83OGNTTUwxbmtNQXE1V3c0c1hMNHJzLy83OWU0d1puT3dXQXE0UzdKYlJySmVPZ09zRWw1U1VDR3VlUEhsQ3Q0b2xsU0ZnenVnSVJXT3dBWDg3UGZ5NVpJZEtlT0pjcjhIaEtRYm40b1JBV0FodWFtb1MrY3VhN0dRTXg2dEh3RE13TUhDRWk3bTN0N2VocXFxS2xFT29UVFFxbGVUeVpEd1N4TXFFakZ1M2JnbndxWjh5RlJVVnNMeThMQVlvbEZuQmlseER3SXMxRjdkd3lNaklJR1dDdmVMSGp4K0RIQklrM2VRVGtqVlgxbVRxZlN4M09nUzgzZDNkZ0E2Sm5wNGVrcWFIRHgrS1NYcWhFa3hTemtMS0VmRGV2MzhmNHVMaW9LeXNUTGx5ZjRWeXhpWFhZbjlrM0xzMmNOQWdOemZYdlJ3c211V01TMHNVbjdxTVFGZytrNnhsd0JZREE5ZGlLeXJ1blllZDRJOGZQN3BYR3RZY2dFRFlDYlphVUY1ZWJyM2tjeGNRaUFqQjhwT3ByYTNOaFNLeFNpc0NFU0VZRFhqOStyV3dnOS9GVmpyVW54dDlmWDJBays3T25Uc0h4Y1hGNm5OdzBCak92QnhNT0JQUkJpNzZ2bm56SnVDdXM1VHcvUGx6c1ZjbDFiVVpUQ2MyMVZpRDhaRE5kakI1VGdzZEFTL09tZXJ2N3hmZUxNcnQ0K1BqZ0FkdVA2d2l5RjBGdUtsV2dXYWdEcy83OSsrUGNJM3cwTkFRVUh1MUp4bE5Dc3o2WDR5VlhLN0ovM0JSY1JaV1Y2V1R3VlpTMzc1OTZ5VEc4U2RBSUN4VGRxaDJjVTJtSWtXWGk5aG5rcDJKMXBwc0pkdE9sdU5vQ0doRk1KcnNUekp1MThUaDVBaG9SekFXQlVtV1JGKy9mbDE4UnVIRUJBNmhJNkFsd2JJWWttUzhSa2NNTnR0MWRYVXltWDhKQ0dqVnlRcG1yOU03MmZvUUJMdi9yS2FKNWFQNGFkTGIyNnMxQnJMWmx2dC9TR09SZVAvajNidDNaaE12NWM3cXI3bDhkSGQzbDRUQnpNd01vS05EbFNlTGxLbEZDT2VDV1d2dHMyZlBvTHE2MmlJQjhPalJvLzlkMjEwa0ppWkNsbS9CTzA0aXhOV1ArSTdIaVljL2Z2d1FPeDNJMlNjNDR3VWZLbHcyaXdHdnJVdG44UndmTUxUSkdpOWxwYTMrYVVMWktmNWducmhEOEhIcnRNMG1tcm9aYVZGUmtkaU1GUGUzWEY5ZlA0V0o3dCtLdTkvaUxnVGZ2bjJEeWNsSmVQWHFsYmltYkE2RCs1WGd3eXgvOGNIQ2ZnQ1crZkR3RVBMejg4VytKamhRZzNuZ3Z5VkNGMjVlWHA0b0dPN2l1N0N3SUtaRFlXV1ltSmdRTWlwS2pmcnc2Nkt5c2hKYVcxdURxanpSWnFSQk5YS2lWZ2lFL0svdDdLeXZxYW1CNXVabVNFbEpzVXNteDJGVGlLOEtuZlJnN1V4T1RpYVh3VTRReTZWS3o3VnIxd0MzMGFBRzgxL2JVVyt3azhOWm1UaVpUcTVCc3BPaHhMMTgrVkxzLzlIWTJFZ1JkNVI1OGVJRmZQbnlCWjQrZmVvb1Ewbm82dW9DSEM5dmFHaWdpRHZLZEhaMmdtK0pFTlRYMXp2S1VCSTZPanBnWkdTRUltcktHT2JaS1U2U2twSWdMUzBOWk1ma3BLcHdaenpzT0xBZWV3UVJIM3l2aHhMTVRsWW9ON0ZzOUNDZ3RTY3JlbURVMTFJbVdGOXVsRmpHQkN1QlVWOGxUTEMrM0NpeGpBbFdBcU8rU3BoZ2ZibFJZaGtUckFSR2ZaVXd3ZnB5bzhReUpsZ0pqUG9xWVlMMTVVYUpaVXl3RWhqMVZmSWZQZTEzblM4cHY0WUFBQUFBU1VWT1JLNUNZSUk9IiBhbHQ9IktNIGN1cnZlIj48L3RkPgogICAgICAgICAgICA8L3RyPgogICAgICAgICAgICA8dHI+CiAgICAgICAgICAgICAgICA8dGQgY2xhc3M9Im5vLWNvbCI+MzwvdGQ+CiAgICAgICAgICAgICAgICA8dGQgY2xhc3M9InZhcmlhYmxlLWNvbCI+cGZzX2V2ZW50PGJyPltldmVudCBpbmRpY2F0b3JdPC90ZD4KICAgICAgICAgICAgICAgIDx0ZCBjbGFzcz0ic3RhdHMtY29sIj4xOiAxMDAwMCAoMTAwJSk8YnI+TWlzc2luZzogMCAoMCUpPC90ZD4KICAgICAgICAgICAgICAgIDx0ZCBjbGFzcz0iZ3JhcGgtY29sIj48aW1nIHNyYz0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFIZ0FBQUFvQ0FZQUFBQTE2ajRsQUFBRURtbERRMUJyUTBkRGIyeHZjbE53WVdObFIyVnVaWEpwWTFKSFFnQUFPSTJOVlYxb0hGVVVQcHU1c3lza3pvUFVwcWFTRHY0MWxMUnNVdEdFMnVqK1piTnQzQ3lUYkxSQmtNbnMzWjFwSmpQai9LUnBLVDRVUVJEQnFPQ1Q0UDlid1NjaGFxdnRpeTJpdEZDaUJJTW8rTkQ2UjZIU0Z3bnJ1VE96dTVPNGE3M0wzUG5tbk85KzU5NXo3dDRMa0xnc1c1YmVKUUlzR3E0dDVkUGlzOGZteE1RNmRNRjkwQTE5MEMwcmpwVXFsU1lCRytQQ3Y5cnQ3eURHM3RmMnQvZi9aK3V1VUVjQmlOMkYyS3c0eWlMaVpRRCtGY1d5WFlBRVFmdklDZGRpK0FuRU8yeWNJT0lTdzdVQVZ4aWVEL0N5ejVtUk1vaGZSU3dvcW96K3hOdUlCK2NqOWxvRUIzUHcyNDQ4TmFpdEtTTExSY2sycTVwT0k5TzlnL3QvdGtYZGE4VGJnMCtQc3pCOUZOOER1UGFYS25LVzRZY1FuMVhrM0hTSXJ5NXBzOFVRLzJXNWFRbnhJd0JkdTd5RmNncnhQc1JqVlh1OEhPaDBxYW8zMGNBcnA5U1paeERmZzNoMXdUekt4dTVFL0xVeFg1d0tkWDVTbkF6bUR4NEE0T0lxTGJCNjl5TWVzRTFwS29qTGpWZG9Oc2Z5aVBpNDVoWm1BbjN1TFdkcE90ZlFPYVZtaWtFczdvdmo4aEZXcHo3RVY2bWVsMEw5WHkyM0ZNWWxQWVplbkF4MHlEQjEvUFg2ZGxlZG1RamlramtYQ3hxTUpTOVd0ZkZDeUg5WHRTZWtFRisyZEgrUDR0eklUZHVUeWdHZnY1OGE1VkNUSDVQdFhEN0VGWmlOeVVEQmhIbnNGVEJnRTBTUUlBOXBmRnRnbzZjS0d1aG9vZWlsYUtINDFlRHMzOElwK2Y0QXQxUnEvc2pyNk5Fd1FxYi9JL0RRcXNMdmFGVWp2QXgrZVdpcmRkQUpabkFqMURGSkwwbVNnL2djSXBQa01Ca2hveUNTSjhsVFpJeGswVHBLRGpYSGxpSnpaUE81MGRSNUFTTlNuemVMdkl2b2QwSEcvbWRrbU9DMHo4VktuemNRMk0vWXoydktsZGR1WGpwOWJsZUx1MFpXbjd2V2MrbDBKR2NhYWkxMHlOclVuWExQLzhKZjU5ZXdYK2MzV2d6K0IzNERmK3ZiVnJjMTZ6VE1WZ3A5dW05YnhFZnpQVTVrUHFVdFZXeGhzNk9pV1RWVytnSWZ5d0I5dVhpN0NHY0dXL3prOThrL2ttdko5NUlmSm4vajN1USs0YzV6bjNLZmNkK0F5RjNnTG5KZmNsOXhIM09mUjJyVWVlODBhKzZ2bzdFSzVtbVhVZHlmUWxyWUxUd29aSVU5d3NQQ1pFdFA2QldHaEFsaEwzcDJONnNUalJkZHV3YkhzRzlrcTMyc2dCZXBjK3h1ckxQVzRUOVVScFlHSjN5bTQrOHpBMDV1NDRRalNUOFpJb1Z0dTNxRTdmV21kbjVMUGRxdmdjWno4V3c4QldKOFgzdzBQaFEvd25DREdkK0x2bEhzOGRSeTZiTExEdUtNYVoyMHRacnFpc1BKNU9OaUNxOHlLaFlNNWNDZ0tPdTY2THNjMGFZT3RaZG81UUN3ZXpJNHdtOUovdjBYMjNtbFpYT2ZCamo4Snp2M1dyWTVEK0NzQTlEN2FNczJnR2ZqdmU4QXJENm1lUFpTZUNmRVl0OENPTldEdzhGWFR4clBxeC9yOVZ0NGJpWGVBTmg4dlY3LysvMTZmZk1EMU44QXVLRC9BLzhsZUF2Rlk5YkxBQUFBT0dWWVNXWk5UUUFxQUFBQUNBQUJoMmtBQkFBQUFBRUFBQUFhQUFBQUFBQUNvQUlBQkFBQUFBRUFBQUI0b0FNQUJBQUFBQUVBQUFBb0FBQUFBQk01dUI4QUFBRWdTVVJCVkhnQjdab2hEb1JBRUFSbkNRYUxJZUVMUEprbkVaNUFzS3dnSWNGZzRJNjluSmczMVBRYXhsWVZBMmJUNXozUDg5ajdNQjJlZ1hyZmR4dkgwVkpLUExyZ1JHVnBmNEc3cnJOaEdJTHI0T0d2NjJvVkQwdEUzb0FDZXh2QVdZR0JVVDJTQW5zYndGbUJnVkU5a2dKN0c4QlpnWUZSUFpJQ2V4dkFXWUdCVVQyU0Fuc2J3Rm1CZ1ZFOWtnSjdHOEJaZ1lGUlBaSUNleHZBdVM1TTkzM2JlWjVBdk5oSXBXbmQ5NzFkMTJYTHNzUzJBYVEvanNOU3ViSURaQlBTMzREK3dmQlhvY281MnpSTmNNeTRlTlcyYlRiUGMxd0RjSEo5b2hVWWJnQ09wdzFXWUxnQk9KNDJXSUhoQnVCNDJtQUZoaHVBNDJtREZSaHVBSTZuRFZaZ3VBRTRualpZZ2VFRzRIamFZSHJncG1tc2JWczRabHc4M2NtQ3QvOENkc2M3MVV1TjZXZ0FBQUFBU1VWT1JLNUNZSUk9IiBhbHQ9ImJhcnBsb3QiIHN0eWxlPSJoZWlnaHQ6IGF1dG87IHdpZHRoOiAxMjBweDsiPjwvdGQ+CiAgICAgICAgICAgIDwvdHI+CiAgICAgICAgICAgIDx0cj4KICAgICAgICAgICAgICAgIDx0ZCBjbGFzcz0ibm8tY29sIj40PC90ZD4KICAgICAgICAgICAgICAgIDx0ZCBjbGFzcz0idmFyaWFibGUtY29sIj5vc19ldmVudDxicj5bZXZlbnQgaW5kaWNhdG9yXTwvdGQ+CiAgICAgICAgICAgICAgICA8dGQgY2xhc3M9InN0YXRzLWNvbCI+MTogMTAwMDAgKDEwMCUpPGJyPk1pc3Npbmc6IDAgKDAlKTwvdGQ+CiAgICAgICAgICAgICAgICA8dGQgY2xhc3M9ImdyYXBoLWNvbCI+PGltZyBzcmM9ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBSGdBQUFBb0NBWUFBQUExNmo0bEFBQUVEbWxEUTFCclEwZERiMnh2Y2xOd1lXTmxSMlZ1WlhKcFkxSkhRZ0FBT0kyTlZWMW9IRlVVUHB1NXN5c2t6b1BVcHFhU0R2NDFsTFJzVXRHRTJ1aitaYk50M0N5VGJMUkJrTW5zM1oxcEpqUGovS1JwS1Q0VVFSREJxT0NUNFA5YndTY2hhcXZ0aXkyaXRGQ2lCSU1vK05ENlI2SFNGd25ydVRPenU1TzRhNzNMM1BubW5POSs1OTV6N3Q0TGtMZ3NXNWJlSlFJc0dxNHQ1ZFBpczhmbXhNUTZkTUY5MEExOTBDMHJqcFVxbFNZQkcrUEN2OXJ0N3lERzN0ZjJ0L2YvWit1dVVFY0JpTjJGMkt3NHlpTGlaUUQrRmNXeVhZQUVRZnZJQ2RkaStBbkVPMnljSU9JU3c3VUFWeGllRC9DeXo1bVJNb2hmUlN3b3Fveit4TnVJQitjajlsb0VCM1B3MjQ0OE5haXRLU0xMUmNrMnE1cE9JOU85Zy90L3RrWGRhOFRiZzArUHN6QjlGTjhEdVBhWEtuS1c0WWNRbjFYazNIU0lyeTVwczhVUS8yVzVhUW54SXdCZHU3eUZjZ3J4UHNSalZYdThIT2gwcWFvMzBjQXJwOVNaWnhEZmczaDF3VHpLeHU1RS9MVXhYNXdLZFg1U25Bem1EeDRBNE9JcUxiQjY5eU1lc0UxcEtvakxqVmRvTnNmeWlQaTQ1aFptQW4zdUxXZHBPdGZRT2FWbWlrRXM3b3ZqOGhGV3B6N0VWNm1lbDBMOVh5MjNGTVlsUFlaZW5BeDB5REIxL1BYNmRsZWRtUWppa2prWEN4cU1KUzlXdGZGQ3lIOVh0U2VrRUYrMmRIK1A0dHpJVGR1VHlnR2Z2NThhNVZDVEg1UHRYRDdFRlppTnlVREJoSG5zRlRCZ0UwU1FJQTlwZkZ0Z282Y0tHdWhvb2VpbGFLSDQxZURzMzhJcCtmNEF0MVJxL3NqcjZORXdRcWIvSS9EUXFzTHZhRlVqdkF4K2VXaXJkZEFKWm5BajFERkpMMG1TZy9nY0lwUGtNQmtob3lDU0o4bFRaSXhrMFRwS0RqWEhsaUp6WlBPNTBkUjVBU05TbnplTHZJdm9kMEhHL21ka21PQzB6OFZLbnpjUTJNL1l6MnZLbGRkdVhqcDlibGVMdTBaV243dldjK2wwSkdjYWFpMTB5TnJVblhMUC84SmY1OWV3WCtjM1dneitCMzREZit2YlZyYzE2elRNVmdwOXVtOWJ4RWZ6UFU1a1BxVXRWV3hoczZPaVdUVlcrZ0lmeXdCOXVYaTdDR2NHVy96azk4ay9rbXZKOTVJZkpuL2ozdVErNGM1em4zS2ZjZCtBeUYzZ0xuSmZjbDl4SDNPZlIyclVlZTgwYSs2dm83RUs1bW1YVWR5ZlFscllMVHdvWklVOXdzUENaRXRQNkJXR2hBbGhMM3AyTjZzVGpSZGR1d2JIc0c5a3EzMnNnQmVwYyt4dXJMUFc0VDlVUnBZR0ozeW00Kzh6QTA1dTQ0UWpTVDhaSW9WdHUzcUU3ZldtZG41TFBkcXZnY1p6OFd3OEJXSjhYM3cwUGhRL3duQ0RHZCtMdmxIczhkUnk2YkxMRHVLTWFaMjB0WnJxaXNQSjVPTmlDcTh5S2hZTTVjQ2dLT3U2NkxzYzBhWU90WmRvNVFDd2V6STR3bTlKL3YwWDIzbWxaWE9mQmpqOEp6djNXclk1RCtDc0E5RDdhTXMyZ0dmanZlOEFyRDZtZVBaU2VDZkVZdDhDT05XRHc4RlhUeHJQcXgvcjlWdDRiaVhlQU5oOHZWNy8rLzE2ZmZNRDFOOEF1S0QvQS84bGVBdkZZOWJMQUFBQU9HVllTV1pOVFFBcUFBQUFDQUFCaDJrQUJBQUFBQUVBQUFBYUFBQUFBQUFDb0FJQUJBQUFBQUVBQUFCNG9BTUFCQUFBQUFFQUFBQW9BQUFBQUJNNXVCOEFBQUVnU1VSQlZIZ0I3Wm9oRG9SQUVBUm5DUWFMSWVFTFBKa25FWjVBc0t3Z0ljRmc0STY5bkpnMzFQUWF4bFlWQTJiVDV6M1A4OWo3TUIyZWdYcmZkeHZIMFZKS1BMcmdSR1ZwZjRHN3JyTmhHSUxyNE9HdjYyb1ZEMHRFM29BQ2V4dkFXWUdCVVQyU0Fuc2J3Rm1CZ1ZFOWtnSjdHOEJaZ1lGUlBaSUNleHZBV1lHQlVUMlNBbnNid0ZtQmdWRTlrZ0o3RzhCWmdZRlJQWklDZXh2QXVTNU05MzNiZVo1QXZOaElwV25kOTcxZDEyWExzc1MyQWFRL2pzTlN1YklEWkJQUzM0RCt3ZkJYb2NvNTJ6Uk5jTXk0ZU5XMmJUYlBjMXdEY0hKOW9oVVliZ0NPcHcxV1lMZ0JPSjQyV0lIaEJ1QjQybUFGaGh1QTQybURGUmh1QUk2bkRWWmd1QUU0bmpaWWdlRUc0SGphWUhyZ3BtbXNiVnM0Wmx3ODNjbUN0LzhDZHNjNzFVdU42V2dBQUFBQVNVVk9SSzVDWUlJPSIgYWx0PSJiYXJwbG90IiBzdHlsZT0iaGVpZ2h0OiBhdXRvOyB3aWR0aDogMTIwcHg7Ij48L3RkPgogICAgICAgICAgICA8L3RyPgogICAgICAgIDwvdGJvZHk+CiAgICA8L3RhYmxlPgo8L2JvZHk+CjwvaHRtbD4K" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 4px;">
+</iframe>
+</div>
+<div id="define-a-trial" class="section level2">
+<h2>Define a Trial</h2>
+<p>With three arms, we can define a trial using the function
+<code>trial()</code>. Recruitment curve are specified through
+<code>enroller</code> with a built-in function
+<code>StaggeredRecruiter</code> of piecewise constant rate. We set
+<code>duration</code> to be an arbitrary large number (500) but
+controlling the end of trial through a pre-defined milestone later. Note
+that if <code>seed = NULL</code>, <code>TrialSimulator</code> will pick
+a seed for the purpose of reproducibility.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>accrual_rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">end_time =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="cn">Inf</span>),</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                           <span class="at">piecewise_rate =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">50</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;Trial-3415&#39;</span>, <span class="at">n_patients =</span> <span class="dv">1000</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1727811904</span>, <span class="at">duration =</span> <span class="dv">500</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">enroller =</span> StaggeredRecruiter, <span class="at">accrual_rate =</span> accrual_rate,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">dropout =</span> rexp, <span class="at">rate =</span> <span class="sc">-</span><span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.1</span>)<span class="sc">/</span><span class="dv">18</span>, <span class="do">## 10% by month 18</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">silent =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), soc, low, high) <span class="do">## 1:1:1</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>trial</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Trial Name:  Trial-3415  </span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Description:  Trial-3415  </span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Arms:  3  </span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Registered Arms:  soc, low, high  </span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Sample Ratio:  1, 1, 1  </span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Patients:  1000  </span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Planned Duration:  500  </span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Random Seed:  1727811904</span></span></code></pre></div>
+</div>
+<div id="define-milestone-and-action-for-final-analysis" class="section level2">
+<h2>Define Milestone and Action for Final Analysis</h2>
+<p>To ensure sufficient powers of testing <code>PFS</code> and
+<code>OS</code>, final analysis is performed when we have at least 700
+events for <code>OS</code> and 800 events for <code>PFS</code>. In the
+action function, we compute one-sided p-value of <code>PFS</code> using
+the proportional hazard Cox model, and one-sided p-value of
+<code>OS</code> using the logrank test. This is consistent with the
+assumption of ill-death model implemented in data generator
+<code>CorrelatedPfsAndOs3()</code>. Note that five columns are available
+in locked data: <code>arm</code>, <code>pfs</code>, ‘os’, ‘pfs_event’,
+and ‘os_event’, which are used to construct model formula. Estimates of
+hazard ratio are also computed. Built-in functions <code>fitCoxph</code>
+and <code>fitLogrank</code> return data frames. Refer to their help
+documants for more details.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>action <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  </span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  </span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  pfs <span class="ot">&lt;-</span> <span class="fu">fitCoxph</span>((<span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm), <span class="at">placebo =</span> <span class="st">&#39;soc&#39;</span>, </span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                  <span class="at">data =</span> locked_data, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>, </span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>                  <span class="at">scale =</span> <span class="st">&#39;hazard ratio&#39;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  </span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  os <span class="ot">&lt;-</span> <span class="fu">fitLogrank</span>((<span class="fu">Surv</span>(os, os_event) <span class="sc">~</span> arm), <span class="at">placebo =</span> <span class="st">&#39;soc&#39;</span>, </span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>                   <span class="at">data =</span> locked_data, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  </span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="do">## Bonferroni test is applied to four hypotheses: </span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="do">## PFS_low, PFS_high, OS_low, and OS_high</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  pfs<span class="sc">$</span>decision <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(pfs<span class="sc">$</span>p <span class="sc">&lt;</span> .<span class="dv">05</span><span class="sc">/</span><span class="dv">4</span>, <span class="st">&#39;reject&#39;</span>, <span class="st">&#39;accept&#39;</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  os<span class="sc">$</span>decision <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(os<span class="sc">$</span>p <span class="sc">&lt;</span> .<span class="dv">05</span><span class="sc">/</span><span class="dv">4</span>, <span class="st">&#39;reject&#39;</span>, <span class="st">&#39;accept&#39;</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  </span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>    <span class="at">value =</span> pfs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(arm <span class="sc">==</span> <span class="st">&#39;low&#39;</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(estimate, decision, info), </span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&#39;pfs_low&#39;</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>  </span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>    <span class="at">value =</span> pfs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(arm <span class="sc">==</span> <span class="st">&#39;high&#39;</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(estimate, decision, info), </span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&#39;pfs_high&#39;</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>  </span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>    <span class="at">value =</span> os <span class="sc">%&gt;%</span> <span class="fu">filter</span>(arm <span class="sc">==</span> <span class="st">&#39;low&#39;</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(decision, info), </span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&#39;os_low&#39;</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>  </span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(</span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>    <span class="at">value =</span> os <span class="sc">%&gt;%</span> <span class="fu">filter</span>(arm <span class="sc">==</span> <span class="st">&#39;high&#39;</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(decision, info), </span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&#39;os_high&#39;</span>)</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>  </span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a>  </span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>}</span></code></pre></div>
+<p>Now we can define and register the milestone to a listener, which
+monitors the trial for us through a controller</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;final&#39;</span>, <span class="at">action =</span> action, </span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                   <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">450</span>, </span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                                      <span class="at">arms =</span> <span class="fu">c</span>(<span class="st">&#39;soc&#39;</span>, <span class="st">&#39;high&#39;</span>)) <span class="sc">&amp;</span> </span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>                     <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;os&#39;</span>, <span class="at">n =</span> <span class="dv">550</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>                   )</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>listener <span class="ot">&lt;-</span> <span class="fu">listener</span>()</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>listener<span class="sc">$</span><span class="fu">add_milestones</span>(final)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; A milestone &lt;final&gt; is registered.</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>controller <span class="ot">&lt;-</span> <span class="fu">controller</span>(trial, listener)</span></code></pre></div>
+<p>We can run a massive number of replicates in simulation to study
+operating characteristics of a trial design by specifying <code>n</code>
+in <code>Controller$run()</code>. We can set
+<code>plot_event = FALSE</code> to turn off plotting to save running
+time. The simulation results can be accessed by calling the member
+function <code>get_output()</code> of the controller.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">plot_event =</span> <span class="cn">FALSE</span>, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>output <span class="ot">&lt;-</span> controller<span class="sc">$</span><span class="fu">get_output</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>output <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">5</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">escape =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="st">&quot;striped&quot;</span>, </span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                <span class="at">position =</span> <span class="st">&quot;left&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">&quot;100%&quot;</span>)</span></code></pre></div>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; ">
+<table class="table table-striped" style="width: auto !important; ">
+<thead>
+<tr>
+<th style="text-align:left;">
+trial
+</th>
+<th style="text-align:right;">
+seed
+</th>
+<th style="text-align:right;">
+milestone_time_&lt;final&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;final&gt;_&lt;patient_id&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;final&gt;_&lt;pfs&gt;
+</th>
+<th style="text-align:right;">
+n_events_&lt;final&gt;_&lt;os&gt;
+</th>
+<th style="text-align:left;">
+n_events_&lt;final&gt;_&lt;arms&gt;
+</th>
+<th style="text-align:right;">
+pfs_low_&lt;estimate&gt;
+</th>
+<th style="text-align:left;">
+pfs_low_&lt;decision&gt;
+</th>
+<th style="text-align:right;">
+pfs_low_&lt;info&gt;
+</th>
+<th style="text-align:right;">
+pfs_high_&lt;estimate&gt;
+</th>
+<th style="text-align:left;">
+pfs_high_&lt;decision&gt;
+</th>
+<th style="text-align:right;">
+pfs_high_&lt;info&gt;
+</th>
+<th style="text-align:left;">
+os_low_&lt;decision&gt;
+</th>
+<th style="text-align:right;">
+os_low_&lt;info&gt;
+</th>
+<th style="text-align:left;">
+os_high_&lt;decision&gt;
+</th>
+<th style="text-align:right;">
+os_high_&lt;info&gt;
+</th>
+<th style="text-align:left;">
+error_message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Trial-3415
+</td>
+<td style="text-align:right;">
+1727811904
+</td>
+<td style="text-align:right;">
+39.79807
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+726
+</td>
+<td style="text-align:right;">
+550
+</td>
+<td style="text-align:left;">
+c(334, 2….
+</td>
+<td style="text-align:right;">
+0.8373861
+</td>
+<td style="text-align:left;">
+accept
+</td>
+<td style="text-align:right;">
+490
+</td>
+<td style="text-align:right;">
+0.8470156
+</td>
+<td style="text-align:left;">
+accept
+</td>
+<td style="text-align:right;">
+485
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+372
+</td>
+<td style="text-align:left;">
+accept
+</td>
+<td style="text-align:right;">
+378
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Trial-3415
+</td>
+<td style="text-align:right;">
+1580839845
+</td>
+<td style="text-align:right;">
+36.97289
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+731
+</td>
+<td style="text-align:right;">
+550
+</td>
+<td style="text-align:left;">
+c(334, 2….
+</td>
+<td style="text-align:right;">
+0.8293869
+</td>
+<td style="text-align:left;">
+accept
+</td>
+<td style="text-align:right;">
+504
+</td>
+<td style="text-align:right;">
+0.7566906
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+491
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+383
+</td>
+<td style="text-align:left;">
+accept
+</td>
+<td style="text-align:right;">
+372
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Trial-3415
+</td>
+<td style="text-align:right;">
+1644140445
+</td>
+<td style="text-align:right;">
+35.81142
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+738
+</td>
+<td style="text-align:right;">
+550
+</td>
+<td style="text-align:left;">
+c(334, 2….
+</td>
+<td style="text-align:right;">
+0.7382446
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+498
+</td>
+<td style="text-align:right;">
+0.7208539
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+504
+</td>
+<td style="text-align:left;">
+accept
+</td>
+<td style="text-align:right;">
+368
+</td>
+<td style="text-align:left;">
+accept
+</td>
+<td style="text-align:right;">
+372
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Trial-3415
+</td>
+<td style="text-align:right;">
+157892763
+</td>
+<td style="text-align:right;">
+36.98769
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+732
+</td>
+<td style="text-align:right;">
+550
+</td>
+<td style="text-align:left;">
+c(334, 2….
+</td>
+<td style="text-align:right;">
+0.6802710
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+502
+</td>
+<td style="text-align:right;">
+0.6518396
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+490
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+389
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+380
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Trial-3415
+</td>
+<td style="text-align:right;">
+1672612707
+</td>
+<td style="text-align:right;">
+37.67231
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+745
+</td>
+<td style="text-align:right;">
+550
+</td>
+<td style="text-align:left;">
+c(334, 2….
+</td>
+<td style="text-align:right;">
+0.8062252
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+513
+</td>
+<td style="text-align:right;">
+0.6809993
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+493
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+381
+</td>
+<td style="text-align:left;">
+reject
+</td>
+<td style="text-align:right;">
+374
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For example, we can compute the powers and summarize the estimates of
+hazard ratio for <code>PFS</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>output <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">matches</span>(<span class="st">&#39;_&lt;decision&gt;$&#39;</span>), <span class="sc">~</span> <span class="fu">mean</span>(. <span class="sc">==</span> <span class="st">&#39;reject&#39;</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="at">.names =</span> <span class="st">&#39;Power_{.col}&#39;</span>), </span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">matches</span>(<span class="st">&#39;_&lt;estimate&gt;$&#39;</span>), <span class="sc">~</span> <span class="fu">mean</span>(.x), <span class="at">.names =</span> <span class="st">&#39;HR_{.col}&#39;</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">rename_with</span>(<span class="sc">~</span> <span class="fu">sub</span>(<span class="st">&#39;_&lt;decision&gt;$&#39;</span>, <span class="st">&#39;&#39;</span>, .), <span class="fu">starts_with</span>(<span class="st">&#39;Power_&#39;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="fu">rename_with</span>(<span class="sc">~</span> <span class="fu">sub</span>(<span class="st">&#39;_&lt;estimate&gt;$&#39;</span>, <span class="st">&#39;&#39;</span>, .), <span class="fu">starts_with</span>(<span class="st">&#39;HR_&#39;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.name =</span> <span class="cn">NULL</span>, <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">align =</span> <span class="st">&#39;r&#39;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">&#39;Low&#39;</span>, <span class="st">&#39;High&#39;</span>, <span class="st">&#39;Low&#39;</span>, <span class="st">&#39;High&#39;</span>, <span class="st">&#39;Low&#39;</span>, <span class="st">&#39;High&#39;</span>), <span class="at">align =</span> <span class="st">&#39;r&#39;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">&#39;PFS&#39;</span> <span class="ot">=</span> <span class="dv">2</span>, <span class="st">&#39;OS&#39;</span> <span class="ot">=</span> <span class="dv">2</span>, <span class="st">&#39;PFS&#39;</span> <span class="ot">=</span> <span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">&#39;Power (%)&#39;</span> <span class="ot">=</span> <span class="dv">4</span>, <span class="st">&#39;Hazard Ratio&#39;</span> <span class="ot">=</span> <span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Power (%)
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Hazard Ratio
+</div>
+</th>
+</tr>
+<tr>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+PFS
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+OS
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+PFS
+</div>
+</th>
+</tr>
+<tr>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Low
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+High
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Low
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+High
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Low
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+High
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:right;">
+</th>
+<th style="text-align:right;">
+</th>
+<th style="text-align:right;">
+</th>
+<th style="text-align:right;">
+</th>
+<th style="text-align:right;">
+</th>
+<th style="text-align:right;">
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+69
+</td>
+<td style="text-align:right;">
+96
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+84
+</td>
+<td style="text-align:right;">
+0.785
+</td>
+<td style="text-align:right;">
+0.707
+</td>
+</tr>
+</tbody>
+</table>
+<p>Note that <code>OS</code> does not satisfy the proportional hazard
+assumption, and a composite condition on event numbers is used to
+trigger the final analysis. Thus, the powers in the table above would
+not match to the output from power calculation packages, which is as
+expected.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

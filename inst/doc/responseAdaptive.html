@@ -272,8 +272,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -284,7 +285,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -581,7 +582,7 @@ topic:</p>
 <li><p><a href="https://www.youtube.com/watch?v=-ADsHASLimM&amp;list=PL_qOo99xv_nRJU8MEBO_VzBjH8duFy01n&amp;index=3&amp;ab_channel=MedianaOnline">Part
 1</a></p></li>
 <li><p><a href="https://www.youtube.com/watch?v=2agD_9qP1cU&amp;t=1447s&amp;ab_channel=MedianaOnline">Part
-2</a>.</p></li>
+2</a></p></li>
 </ul>
 <p>However, the original <code>MedianaDesigner::ADRand()</code> function
 is no longer functional, even for examples provided on <a href="https://medianasoft.github.io/CaseStudyF1">this</a> page.
@@ -706,11 +707,11 @@ analysis. The same action is used for both interims, while a separate
 one is used for the final.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>stage1 <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;stage 1&#39;</span>,</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                    <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="st">&#39;fev1&#39;</span>, <span class="at">n =</span> <span class="dv">50</span>),</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                    <span class="at">action =</span> stage_action)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                    <span class="at">action =</span> stage_action, <span class="at">milestone_name =</span> <span class="st">&#39;stage 1&#39;</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>stage2 <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;stage 2&#39;</span>,</span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                    <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="st">&#39;fev1&#39;</span>, <span class="at">n =</span> <span class="dv">120</span>),</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>                    <span class="at">action =</span> stage_action)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>                    <span class="at">action =</span> stage_action, <span class="at">milestone_name =</span> <span class="st">&#39;stage 2&#39;</span>)</span>
 <span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;final&#39;</span>,</span>
 <span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>                   <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="st">&#39;fev1&#39;</span>, <span class="at">n =</span> <span class="dv">200</span>),</span>
@@ -732,16 +733,14 @@ below.</p>
 <span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="fu">table</span>(locked_data<span class="sc">$</span>arm), new_sample_ratio) <span class="sc">%&gt;%</span></span>
 <span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">&#39;dose&#39;</span>, <span class="st">&#39;total_n&#39;</span>, <span class="st">&#39;new_ratio&#39;</span>)) <span class="sc">%&gt;%</span> <span class="fu">print</span>()</span>
 <span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>}</span></code></pre></div>
 <p>At the final milestone, the function <code>final_action()</code>
 performs the multiple contrast test and stores the result. It calls a
 helper function <code>multiple_contrast_test()</code>, which can be
 found in the Appendix below.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>final_action <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>final_action <span class="ot">&lt;-</span> <span class="cf">function</span>(trial){</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(<span class="st">&#39;final&#39;</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  </span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&#39;final: &#39;</span>)</span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="fu">table</span>(locked_data<span class="sc">$</span>arm)) <span class="sc">%&gt;%</span></span>
@@ -749,9 +748,7 @@ found in the Appendix below.</p>
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> <span class="fu">multiple_contrast_test</span>(locked_data),</span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>             <span class="at">name =</span> <span class="st">&#39;MC_test&#39;</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="execute-a-trial" class="section level2">
 <h2>Execute a Trial</h2>

@@ -48,8 +48,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -362,11 +363,12 @@ to define the earliest possible time for triggering a milestone:</p>
 <ul>
 <li><p><code>calendarTime(time)</code>: Specifies a minimum trial
 duration before a milestone can occur.</p></li>
-<li><p><code>enrollment(n)</code>: Specifies a minimum number of
-patients that must be enrolled before a milestone can occur.</p></li>
-<li><p><code>eventNumber(endpoint, n, arms)</code>: Specifies a minimum
-number of observed events for a given endpoint before triggering a
-milestone This condition can apply to specific arms or the entire
+<li><p><code>enrollment(n, ..., arms, min_treatment_duration)</code>:
+Specifies a minimum number of patients that must be enrolled before a
+milestone can occur.</p></li>
+<li><p><code>eventNumber(endpoint, n, ..., arms)</code>: Specifies a
+minimum number of observed events for a given endpoint before triggering
+a milestone This condition can apply to specific arms or the entire
 trial.</p></li>
 </ul>
 <p>The following sections illustrate various ways to define milestone
@@ -379,49 +381,55 @@ triggers using these functions, which could be passed to the argument
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">6</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Calendar time &gt;=  6</span></span></code></pre></div>
 </div>
-<div id="at-least-520-patients-are-enrolled" class="section level4">
-<h4>At least 520 patients are enrolled</h4>
+<div id="at-least-520-patients-have-been-enrolled" class="section level4">
+<h4>At least 520 patients have been enrolled</h4>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">enrollment</span>(<span class="at">n =</span> <span class="dv">520</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; Number of randomized patients &gt;=  520</span></span></code></pre></div>
 </div>
+<div id="at-least-400-patients-have-been-enrolled-and-each-has-received-a-minimum-of-3-weeks-of-treatment" class="section level4">
+<h4>At least 400 patients have been enrolled, and each has received a
+minimum of 3 weeks of treatment</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">enrollment</span>(<span class="at">n =</span> <span class="dv">400</span>, <span class="at">min_treatment_duration =</span> <span class="dv">3</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; Number of randomized patients &gt;=  400 and all enrolled patients have been treated for &lt; 3 &gt; (unit time)</span></span></code></pre></div>
+</div>
 <div id="at-least-340-pfs-events-are-observed" class="section level4">
 <h4>At least 340 PFS events are observed</h4>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="do">## condition is based on number of event in the placebo arm</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="do">## Note: &#39;pfs&#39; is the name of the endpoint, i.e., endpoints(name = &#39;pfs&#39;, ...)</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="do">## Note: &#39;pbo&#39; is the name of the placebo arm, i.e., arm(name = &#39;pbo&#39;, ...)</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">340</span>, <span class="at">arms =</span> <span class="st">&#39;pbo&#39;</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; Number of events (pfs) &gt;= 340 in arms &lt;pbo&gt;.</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="do">## condition can be based on number of event in specific arms</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">340</span>, <span class="at">arms =</span> <span class="fu">c</span>(<span class="st">&#39;pbo&#39;</span>, <span class="st">&#39;trt&#39;</span>))</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; Number of events (pfs) &gt;= 340 in arms &lt;pbo, trt&gt;.</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="do">## condition can be based on number of event in the trial</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">## Note: for example, a trial of more than two arms. </span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">##       Here the number of PFS events are counted on all arms in trial</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">340</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Number of events (pfs) &gt;= 340 in all arms in a trial.</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="do">## condition is based on number of event in the placebo arm</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="do">## Note: &#39;pfs&#39; is the name of the endpoint, i.e., endpoints(name = &#39;pfs&#39;, ...)</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="do">## Note: &#39;pbo&#39; is the name of the placebo arm, i.e., arm(name = &#39;pbo&#39;, ...)</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">340</span>, <span class="at">arms =</span> <span class="st">&#39;pbo&#39;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; Number of events (pfs) &gt;= 340 in arms &lt;pbo&gt;.</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="do">## condition can be based on number of event in specific arms</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">340</span>, <span class="at">arms =</span> <span class="fu">c</span>(<span class="st">&#39;pbo&#39;</span>, <span class="st">&#39;trt&#39;</span>))</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; Number of events (pfs) &gt;= 340 in arms &lt;pbo, trt&gt;.</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="do">## condition can be based on number of event in the trial</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="do">## Note: for example, a trial of more than two arms. </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="do">##       Here the number of PFS events are counted on all arms in trial</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">340</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Number of events (pfs) &gt;= 340 in all arms in a trial.</span></span></code></pre></div>
 </div>
 <div id="other-examples" class="section level4">
 <h4>Other examples</h4>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="do">## observe at least 200 OS events on at least 500 enrolled patients, or</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="do">## the trial has been running for at least 12 months</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>(<span class="fu">enrollment</span>(<span class="at">n =</span> <span class="dv">500</span>) <span class="sc">&amp;</span> <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;os&#39;</span>, <span class="at">n =</span> <span class="dv">200</span>)) <span class="sc">|</span> </span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">12</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; Combined Condition (or):</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; Combined Condition (and):</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;     Number of randomized patients &gt;=  500</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;     Number of events (os) &gt;= 200 in all arms in a trial. </span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; Calendar time &gt;=  12</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="do">## observe 320 OS or 480 PFS event when the trial has been running for 6 months</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">6</span>) <span class="sc">&amp;</span> </span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  (<span class="fu">eventNumber</span>(<span class="st">&#39;os&#39;</span>, <span class="at">n =</span> <span class="dv">320</span>) <span class="sc">|</span> <span class="fu">eventNumber</span>(<span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">480</span>))</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Combined Condition (and):</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Calendar time &gt;=  6 </span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; Combined Condition (or):</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt;     Number of events (os) &gt;= 320 in all arms in a trial. </span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt;     Number of events (pfs) &gt;= 480 in all arms in a trial.</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">## observe at least 200 OS events on at least 500 enrolled patients, or</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="do">## the trial has been running for at least 12 months</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>(<span class="fu">enrollment</span>(<span class="at">n =</span> <span class="dv">500</span>) <span class="sc">&amp;</span> <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;os&#39;</span>, <span class="at">n =</span> <span class="dv">200</span>)) <span class="sc">|</span> </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">12</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; Combined Condition (or):</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; Combined Condition (and):</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;     Number of randomized patients &gt;=  500</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt;     Number of events (os) &gt;= 200 in all arms in a trial. </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Calendar time &gt;=  12</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="do">## observe 320 OS or 480 PFS event when the trial has been running for 6 months</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">6</span>) <span class="sc">&amp;</span> </span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  (<span class="fu">eventNumber</span>(<span class="st">&#39;os&#39;</span>, <span class="at">n =</span> <span class="dv">320</span>) <span class="sc">|</span> <span class="fu">eventNumber</span>(<span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">480</span>))</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; Combined Condition (and):</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; Calendar time &gt;=  6 </span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; Combined Condition (or):</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;     Number of events (os) &gt;= 320 in all arms in a trial. </span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;     Number of events (pfs) &gt;= 480 in all arms in a trial.</span></span></code></pre></div>
 </div>
 
 

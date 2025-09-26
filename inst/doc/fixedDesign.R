@@ -82,9 +82,9 @@ trial$add_arms(sample_ratio = c(1, 1, 1), soc, low, high) ## 1:1:1
 trial
 
 ## ----wewfal-------------------------------------------------------------------
-action <- function(trial, milestone_name){
+action <- function(trial){
   
-  locked_data <- trial$get_locked_data(milestone_name)
+  locked_data <- trial$get_locked_data('final')
   
   pfs <- fitCoxph((Surv(pfs, pfs_event) ~ arm), placebo = 'soc', 
                   data = locked_data, alternative = 'less', 
@@ -113,8 +113,6 @@ action <- function(trial, milestone_name){
   trial$save(
     value = os %>% filter(arm == 'high') %>% select(decision, info), 
     name = 'os_high')
-  
-  invisible(NULL)
   
 }
 

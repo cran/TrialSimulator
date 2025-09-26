@@ -7,12 +7,16 @@
 summarizeMilestoneTime(output)
 }
 \arguments{
-\item{output}{a data frame. It assumes that triggering time of milestones
-are store in columns \code{milestone_time_<...>}. It can be data frames
-returned by \code{controller$get_output()}.}
+\item{output}{a data frame.
+It assumes that triggering time of milestones
+are store in columns \code{milestone_time_<...>}. It can be a data frame
+returned by \code{controller$get_output()}, or row-binded from multiple
+data frames returned by \code{controller$get_output()} (e.g., users may
+run simulation under the \code{targets} framework).}
 }
 \value{
-A data frame of class \code{milestone_time_summary}.
+A data frame of class \code{milestone_time_summary}. It comes with a
+\code{plot} method for visualization.
 }
 \description{
 Summary of Milestone Time from Simulated Trials
@@ -42,8 +46,8 @@ trial <- trial(name = 'trial',
 
 trial$add_arms(sample_ratio = c(1, 1), control, active)
 
-action_at_final <- function(trial, milestone_name){
-  locked_data <- trial$get_locked_data(milestone_name)
+action_at_final <- function(trial){
+  locked_data <- trial$get_locked_data('final analysis')
   fitLogrank(Surv(PFS, PFS_event) ~ arm, placebo = 'control arm',
              data = locked_data, alternative = 'less')
   invisible(NULL)

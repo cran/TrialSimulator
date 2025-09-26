@@ -76,9 +76,9 @@ trial <- trial(
 trial$add_arms(sample_ratio = c(1, 1, 1), low, high, pbo)
 
 ## ----ieaong, class.source='fold-show'-----------------------------------------
-action1 <- function(trial, milestone_name){
+action1 <- function(trial){
   
-  locked_data <- trial$get_locked_data(milestone_name)
+  locked_data <- trial$get_locked_data('dose selection')
   
   fit <- fitFarringtonManning(endpoint = 'surrogate', placebo = 'placebo',
                               data = locked_data, alternative = 'greater')
@@ -96,14 +96,12 @@ action1 <- function(trial, milestone_name){
     trial$save(value = 'both', name = 'kept_arm')
   }
 
-  invisible(NULL)
-
 }
 
 ## ----aotel, class.source="fold-show"------------------------------------------
-action2 <- function(trial, milestone_name){
+action2 <- function(trial){
   
-  locked_data <- trial$get_locked_data(milestone_name)
+  locked_data <- trial$get_locked_data('interim')
 
   fit <- fitLogrank(Surv(pfs, pfs_event) ~ arm, placebo = 'placebo', 
                     data = locked_data, alternative = 'less')
@@ -118,14 +116,12 @@ action2 <- function(trial, milestone_name){
     trial$save(value = 'positive', name = 'futility')
   }
 
-  invisible(NULL)
-
 }
 
 ## ----alkdae, class.source="fold-show"-----------------------------------------
-action3 <- function(trial, milestone_name){
+action3 <- function(trial){
   
-  locked_data <- trial$get_locked_data(milestone_name)
+  locked_data <- trial$get_locked_data('final')
 
   ## test PFS
   dt_pfs <- trial$dunnettTest(Surv(pfs, pfs_event) ~ arm, placebo = 'placebo',
@@ -162,8 +158,6 @@ action3 <- function(trial, milestone_name){
   
   trial$save(value = ct_os$decision[ct_os$arm == 'low dose'], 
              name = 'os_low_dose_decision')
-
-  invisible(NULL)
 }
 
 ## -----------------------------------------------------------------------------

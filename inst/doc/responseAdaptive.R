@@ -119,13 +119,11 @@ stage_action <- function(trial, milestone_name){
   data.frame(table(locked_data$arm), new_sample_ratio) %>%
     setNames(c('dose', 'total_n', 'new_ratio')) %>% print()
 
-  invisible(NULL)
-
 }
 
-final_action <- function(trial, milestone_name){
+final_action <- function(trial){
 
-  locked_data <- trial$get_locked_data(milestone_name)
+  locked_data <- trial$get_locked_data('final')
   
   message('final: ')
   data.frame(table(locked_data$arm)) %>%
@@ -133,18 +131,16 @@ final_action <- function(trial, milestone_name){
 
   trial$save(value = multiple_contrast_test(locked_data),
              name = 'MC_test')
-
-  invisible(NULL)
 }
 
 ## ----gfdassfl-----------------------------------------------------------------
 stage1 <- milestone(name = 'stage 1',
                     when = eventNumber('fev1', n = 50),
-                    action = stage_action)
+                    action = stage_action, milestone_name = 'stage 1')
 
 stage2 <- milestone(name = 'stage 2',
                     when = eventNumber('fev1', n = 120),
-                    action = stage_action)
+                    action = stage_action, milestone_name = 'stage 2')
 
 final <- milestone(name = 'final',
                    when = eventNumber('fev1', n = 200),
@@ -163,15 +159,13 @@ final <- milestone(name = 'final',
 #   data.frame(table(locked_data$arm), new_sample_ratio) %>%
 #     setNames(c('dose', 'total_n', 'new_ratio')) %>% print()
 # 
-#   invisible(NULL)
-# 
 # }
 # 
 
 ## ----vnbnvz, eval=FALSE-------------------------------------------------------
-# final_action <- function(trial, milestone_name){
+# final_action <- function(trial){
 # 
-#   locked_data <- trial$get_locked_data(milestone_name)
+#   locked_data <- trial$get_locked_data('final')
 # 
 #   message('final: ')
 #   data.frame(table(locked_data$arm)) %>%
@@ -179,8 +173,6 @@ final <- milestone(name = 'final',
 # 
 #   trial$save(value = multiple_contrast_test(locked_data),
 #              name = 'MC_test')
-# 
-#   invisible(NULL)
 # }
 
 ## ----sdlatiow-----------------------------------------------------------------

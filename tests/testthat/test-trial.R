@@ -198,26 +198,22 @@ test_that('filters are supported when defining milestones', {
 
   }
 
-  interim_action <- function(trial, milestone_name){
+  interim_action <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('interim')
     trial$save(value = locked_data %>% filter(dll3 == 'high' & x > -2) %>% nrow(),
                name = 'n_at_lock')
-
-    invisible(NULL)
   }
 
-  final_action <- function(trial, milestone_name){
+  final_action <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
     tmp1 <- locked_data %>% filter(dll3 == 'high' & x > -2)
     trial$save(value = sum(tmp1$pfs_event), name = 'n_pfs_high')
     trial$save(value = sum(locked_data$pfs_event), name = 'n_pfs_all')
 
     tmp2 <- locked_data %>% filter(dll3 != 'high')
     trial$save(value = sum(tmp2$os_event), name = 'n_os_low')
-
-    invisible(NULL)
   }
 
 
@@ -282,7 +278,7 @@ test_that('endpoint event counts work as expected when duration is adapted', {
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
-  action_at_interim <- function(trial, milestone_name){
+  action_at_interim <- function(trial){
     trial$set_duration(duration = 40)
   }
 
@@ -388,7 +384,7 @@ test_that('endpoint event counts work as expected when an arm is removed', {
 
   interim1 <- milestone(name = 'interim1',
                         when = eventNumber(endpoint = 'or', n = 200),
-                        action = function(trial, milestone_name){trial$remove_arms('trt1')})
+                        action = function(trial){trial$remove_arms('trt1')})
 
   interim2 <- milestone(name = 'interim2',
                         when = eventNumber(endpoint = 'pfs', n = 240) &
@@ -495,7 +491,7 @@ test_that('custom data can be re-used in multiple trials', {
   trial$save_custom_data(value = list(x = 1, y = 'a'), name = 'config')
 
   final <- milestone(name = 'final',
-                     action = function(trial, milestone_name) {
+                     action = function(trial) {
                        trial$get_custom_data('config')},
                      when = calendarTime(time = 40))
 
@@ -524,9 +520,9 @@ test_that('trial data can be replicated', {
 
   trial$add_arms(sample_ratio = 1, pbo)
 
-  act <- function(trial, milestone_name){
+  act <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
     trial$save(value = median(locked_data$ep), name = 'median')
     trial$save(value = mean(locked_data$ep), name = 'mean')
     trial$save(value = sd(locked_data$ep), name = 'sd')
@@ -599,9 +595,9 @@ test_that('fitLinear works as expected', {
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
-  act <- function(trial, milestone_name){
+  act <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
 
     n <- nrow(locked_data)
     locked_data$covar1 <- rnorm(n)
@@ -615,8 +611,6 @@ test_that('fitLinear works as expected', {
                  mutate(p = 1 - pt(z, df = fit_$df.residual - 2)) %>%
                  mutate(info = fit_$df.residual + fit_$rank),
                name = 'lm_output')
-
-    invisible(NULL)
 
   }
 
@@ -661,9 +655,9 @@ test_that('fitLinear can compute ATE as expected in additive model', {
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
-  act <- function(trial, milestone_name){
+  act <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
 
     n <- nrow(locked_data)
     locked_data$covar1 <- rnorm(n)
@@ -679,8 +673,6 @@ test_that('fitLinear can compute ATE as expected in additive model', {
                  mutate(p = 1 - pt(z, df = fit_$df.residual - 2)) %>%
                  mutate(info = fit_$df.residual + fit_$rank),
                name = 'lm_output')
-
-    invisible(NULL)
 
   }
 
@@ -726,9 +718,9 @@ test_that('fitLogistic can compute ATE as expected in model without covariates',
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
-  act <- function(trial, milestone_name){
+  act <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
 
     trial$save(value = nrow(locked_data), name = 'n')
 
@@ -779,8 +771,6 @@ test_that('fitLogistic can compute ATE as expected in model without covariates',
 
     trial$save(value = probs$prob[probs$arm == 'trt'] - probs$prob[probs$arm == 'pbo'],
                name = 'glm_RD')
-
-    invisible(NULL)
 
   }
 
@@ -849,9 +839,9 @@ test_that('fitLogistic can compute regression coefficient as expected in model w
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
-  act <- function(trial, milestone_name){
+  act <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
     locked_data$x <- rnorm(nrow(locked_data))
     locked_data$y <- rnorm(nrow(locked_data))
     locked_data$z <- rbinom(nrow(locked_data), 1, .5)
@@ -870,8 +860,6 @@ test_that('fitLogistic can compute regression coefficient as expected in model w
                  mutate(p = 1 - pnorm(z)) %>%
                  mutate(info = fit$df.residual + fit$rank),
                name = 'glm_coef')
-
-    invisible(NULL)
 
   }
 
@@ -924,9 +912,9 @@ test_that('fitLogrank works as expected', {
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
-  act <- function(trial, milestone_name){
+  act <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
 
     fit <- fitLogrank(Surv(ep, ep_event) ~ arm, placebo = 'pbo', data = locked_data, alternative = 'less')
 
@@ -939,7 +927,6 @@ test_that('fitLogrank works as expected', {
 
     trial$save(value = p, name = 'logrank_p')
     trial$save(value = p_, name = 'survdiff_p')
-    invisible(NULL)
 
   }
 
@@ -980,9 +967,9 @@ test_that('fitCoxph can compute main effect of arm', {
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
-  act <- function(trial, milestone_name){
+  act <- function(trial){
 
-    locked_data <- trial$get_locked_data(milestone_name)
+    locked_data <- trial$get_locked_data('final')
 
     n <- nrow(locked_data)
     locked_data$covar1 <- rnorm(n)
@@ -1000,8 +987,6 @@ test_that('fitCoxph can compute main effect of arm', {
                  mutate(p = pnorm(z)) %>%
                  mutate(info = sum(locked_data$ep_event)),
                name = 'coxph_output')
-
-    invisible(NULL)
 
   }
 
@@ -1060,9 +1045,9 @@ test_that('sample ratio can be updated to switch between permuted block and samp
   trial$add_arms(sample_ratio = c(1, 1, 1, 1), pbo, low, med, high)
 
 
-  action1 <- function(trial, milestone_name){
+  action1 <- function(trial){
 
-    dat1 <- trial$get_locked_data(milestone_name)
+    dat1 <- trial$get_locked_data('interim1')
 
     prob <- prop.table(trial$get_sample_ratio())
 
@@ -1071,8 +1056,6 @@ test_that('sample ratio can be updated to switch between permuted block and samp
 
     trial$update_sample_ratio(c('med', 'high'), c(2, 2))
 
-    invisible(NULL)
-
   }
 
   interim1 <- milestone(name = 'interim1',
@@ -1080,10 +1063,10 @@ test_that('sample ratio can be updated to switch between permuted block and samp
                         action = action1
   )
 
-  action2 <- function(trial, milestone_name){
+  action2 <- function(trial){
 
     dat1 <- trial$get_locked_data('interim1')
-    dat2 <- trial$get_locked_data(milestone_name) %>%
+    dat2 <- trial$get_locked_data('interim2') %>%
       filter(!(patient_id %in% dat1$patient_id))
 
     prob <- prop.table(trial$get_sample_ratio())
@@ -1093,8 +1076,6 @@ test_that('sample ratio can be updated to switch between permuted block and samp
 
     trial$update_sample_ratio(c('low', 'high'), c(.5, 2.5))
 
-    invisible(NULL)
-
   }
 
   interim2 <- milestone(name = 'interim2',
@@ -1102,10 +1083,10 @@ test_that('sample ratio can be updated to switch between permuted block and samp
                         action = action2
   )
 
-  action3 <- function(trial, milestone_name){
+  action3 <- function(trial){
 
     dat2 <- trial$get_locked_data('interim2')
-    dat3 <- trial$get_locked_data(milestone_name) %>%
+    dat3 <- trial$get_locked_data('interim3') %>%
       filter(!(patient_id %in% dat2$patient_id))
 
     prob <- prop.table(trial$get_sample_ratio())
@@ -1114,8 +1095,6 @@ test_that('sample ratio can be updated to switch between permuted block and samp
                name = 'stage3')
 
     trial$update_sample_ratio(c('low', 'high'), c(1.5, 3))
-
-    invisible(NULL)
   }
 
   interim3 <- milestone(name = 'interim3',
@@ -1124,18 +1103,16 @@ test_that('sample ratio can be updated to switch between permuted block and samp
   )
 
 
-  action4 <- function(trial, milestone_name){
+  action4 <- function(trial){
 
     dat3 <- trial$get_locked_data('interim3')
-    dat4 <- trial$get_locked_data(milestone_name) %>%
+    dat4 <- trial$get_locked_data('final') %>%
       filter(!(patient_id %in% dat3$patient_id))
 
     prob <- prop.table(trial$get_sample_ratio())
 
     trial$save(value = chisq.test(table(dat4$arm)[names(prob)], p = prob)$p.value,
                name = 'stage4')
-
-    invisible(NULL)
 
   }
 
@@ -1149,6 +1126,41 @@ test_that('sample ratio can be updated to switch between permuted block and samp
   controller$run(n = 10, plot_event = FALSE, silen = TRUE)
 
   expect_true(all(controller$get_output() %>% select(contains('stage')) > .1/10))
+
+})
+
+test_that('milestone can be triggerd when all patients have received treatment for a while', {
+  ep <- endpoint(name = 'x', type = 'tte', generator = rexp, rate = log(2)/10)
+  pbo <- arm(name = 'pbo')
+  pbo$add_endpoints(ep)
+  ep <- endpoint(name = 'x', type = 'tte', generator = rexp, rate = log(2)/12)
+  trt <- arm(name = 'trt')
+  trt$add_endpoints(ep)
+
+  accrual_rate <- data.frame(end_time = c(6, 12, 16, Inf),
+                             piecewise_rate = c(20, 30, 40, 60))
+  ## enrollment of 580 patients will be done by the 18th month
+  ## if min treatment duration is 2 months, then triggering time would be 20
+
+  trial <- trial(
+    name = 'test', n_patients = 580, duration = 25,
+    enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
+    dropout = rexp, rate = -log(1 - .08)/2,
+    silent = TRUE
+  )
+
+  trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
+
+  final <- milestone(name = 'final',
+                     when = enrollment(n = 580, min_treatment_duration = 2))
+
+  listener <- listener(silent = TRUE)
+  listener$add_milestones(final)
+
+  controller <- controller(trial, listener)
+  controller$run(n = 10, plot_event = FALSE, silen = TRUE)
+
+  expect_true(all(controller$get_output('milestone_time_<final>') - 19.98333 < .001))
 
 })
 

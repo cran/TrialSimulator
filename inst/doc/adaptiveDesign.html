@@ -272,8 +272,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -284,7 +285,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -720,15 +721,14 @@ pick a seed for the purpose of reproducibility.</p>
 <h2>Define Trial Milestones and Action Functions</h2>
 <p>Next, we define action functions for trial milestones, i.e., dose
 selection, interim and final analysis. Note that an action function
-should always has arguments <code>trial</code> of class
-<code>Trial</code> and a character <code>milestone_name</code>. We
-calculate z statistics of the Farrington-Manning test for binary
-endpoint <code>surrogate</code> using helper function
-<code>fitFarringtonManning</code>, which returns a data frame (see
-<code>?fitFarringtonManning</code>).</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>action1 <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+should always has argument <code>trial</code> returned from
+<code>trial()</code>. We calculate z statistics of the
+Farrington-Manning test for binary endpoint <code>surrogate</code> using
+helper function <code>fitFarringtonManning</code>, which returns a data
+frame (see <code>?fitFarringtonManning</code>).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>action1 <span class="ot">&lt;-</span> <span class="cf">function</span>(trial){</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  </span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(<span class="st">&#39;dose selection&#39;</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  </span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">fitFarringtonManning</span>(<span class="at">endpoint =</span> <span class="st">&#39;surrogate&#39;</span>, <span class="at">placebo =</span> <span class="st">&#39;placebo&#39;</span>,</span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                              <span class="at">data =</span> locked_data, <span class="at">alternative =</span> <span class="st">&#39;greater&#39;</span>)</span>
@@ -746,9 +746,7 @@ endpoint <code>surrogate</code> using helper function
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> <span class="st">&#39;both&#39;</span>, <span class="at">name =</span> <span class="st">&#39;kept_arm&#39;</span>)</span>
 <span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  }</span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>}</span></code></pre></div>
 <p>At the interim, we test <code>PFS</code> using the logrank test to
 carry out a non-binding futility analysis in the following action
 function. Depending on how many arms are carried forward in dose
@@ -757,9 +755,9 @@ two dose arms. Note that a formal test for <code>PFS</code> will be done
 at the end of the trial when we have all p-values. If no futility
 analysis is planned, we can simply set <code>action = doNothing</code>
 in <code>milestone</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>action2 <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>action2 <span class="ot">&lt;-</span> <span class="cf">function</span>(trial){</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  </span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(<span class="st">&#39;interim&#39;</span>)</span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">fitLogrank</span>(<span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm, <span class="at">placebo =</span> <span class="st">&#39;placebo&#39;</span>, </span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                    <span class="at">data =</span> locked_data, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>)</span>
@@ -774,14 +772,12 @@ in <code>milestone</code>.</p>
 <span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>    trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> <span class="st">&#39;positive&#39;</span>, <span class="at">name =</span> <span class="st">&#39;futility&#39;</span>)</span>
 <span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  }</span>
 <span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>}</span></code></pre></div>
 <p>At final analysis, we conduct a closed test using Dunnett’s test for
 intersection hypotheses. The action function is as follows.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>action3 <span class="ot">&lt;-</span> <span class="cf">function</span>(trial, milestone_name){</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>action3 <span class="ot">&lt;-</span> <span class="cf">function</span>(trial){</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  </span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(milestone_name)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  locked_data <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(<span class="st">&#39;final&#39;</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="do">## test PFS</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  dt_pfs <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">dunnettTest</span>(<span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm, <span class="at">placebo =</span> <span class="st">&#39;placebo&#39;</span>,</span>
@@ -818,9 +814,7 @@ intersection hypotheses. The action function is as follows.</p>
 <span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>  </span>
 <span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(<span class="at">value =</span> ct_os<span class="sc">$</span>decision[ct_os<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;low dose&#39;</span>], </span>
 <span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>             <span class="at">name =</span> <span class="st">&#39;os_low_dose_decision&#39;</span>)</span>
-<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a></span>
-<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
-<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>}</span></code></pre></div>
 <p>Next, we register three trial milestones to a listener</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>dose_selection <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;dose selection&#39;</span>, <span class="at">action =</span> action1,   </span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                            <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;surrogate&#39;</span>, <span class="at">n =</span> <span class="dv">300</span>)</span>
@@ -1075,7 +1069,7 @@ locked data loaded. Note that the member functions
 make use of locked data at multiple stages (through the
 <code>milestones</code> argument) automatically, thus, unlike in
 <code>action3</code>, an explicit call of
-<code>Trial$get_locked_data(milestone_name)</code> is unnecessary.</p>
+<code>Trial$get_locked_data(&#39;final&#39;)</code> is unnecessary.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="do">## test PFS</span></span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>dt_pfs <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">dunnettTest</span>(<span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm, <span class="at">placebo =</span> <span class="st">&#39;placebo&#39;</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                            <span class="at">treatments =</span> <span class="fu">c</span>(<span class="st">&#39;high dose&#39;</span>, <span class="st">&#39;low dose&#39;</span>),</span>

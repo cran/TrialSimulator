@@ -1,3 +1,29 @@
+# TrialSimulator 1.3.0
+
+## Major Updates
+
+- Action function no longer needs argument `milestone_name`. Now action function only requires argument `trial` and supports optional arguments. 
+- `milestone()` now support `...` to pass arguments to action functions. 
+- Documents and vignettes are updated. 
+
+## Minor Updates
+
+- Some minor fixes. 
+
+# TrialSimulator 1.2.0
+
+## New Feature
+
+- `enrollment()` now supports `min_treatment_duration` to ensure minimum treatment duration received by patients at a milestone. With its default value 0, milestone is triggered when a specific number of patients are enrolled. 
+- No longer print the return value of action function, thus `invisible(NULL)` is no longer recommended as return value of action function. 
+
+# TrialSimulator 1.1.0
+
+## Update
+
+- Add notes to R6 class indicating public methods that can be used by end users. 
+- Update help documents.
+
 # TrialSimulator 1.0.0
 
 ## Update

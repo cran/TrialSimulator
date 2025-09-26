@@ -19,6 +19,9 @@ calendarTime(time = 6)
 ## ----ioea---------------------------------------------------------------------
 enrollment(n = 520)
 
+## ----ghafl--------------------------------------------------------------------
+enrollment(n = 400, min_treatment_duration = 3)
+
 ## ----uuea---------------------------------------------------------------------
 ## condition is based on number of event in the placebo arm
 ## Note: 'pfs' is the name of the endpoint, i.e., endpoints(name = 'pfs', ...)

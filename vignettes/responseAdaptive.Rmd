@@ -31,7 +31,7 @@ This vignette demonstrates how to simulate a trial with response-adaptive design
 
 - [Part 1](https://www.youtube.com/watch?v=-ADsHASLimM&list=PL_qOo99xv_nRJU8MEBO_VzBjH8duFy01n&index=3&ab_channel=MedianaOnline)
 
-- [Part 2](https://www.youtube.com/watch?v=2agD_9qP1cU&t=1447s&ab_channel=MedianaOnline).
+- [Part 2](https://www.youtube.com/watch?v=2agD_9qP1cU&t=1447s&ab_channel=MedianaOnline)
 
 However, the original `MedianaDesigner::ADRand()` function is no longer functional, even for examples provided on [this](https://medianasoft.github.io/CaseStudyF1) page. Therefore, this vignette focuses on implementing a similar response-adaptive design using `TrialSimulator`. The core algorithm for updating the randomization ratio is re-implemented based on the logic of the `DoseFinding` package and may differ slightly from that used in Dr. Dmitrienko's materials.
 
@@ -184,13 +184,11 @@ stage_action <- function(trial, milestone_name){
   data.frame(table(locked_data$arm), new_sample_ratio) %>%
     setNames(c('dose', 'total_n', 'new_ratio')) %>% print()
 
-  invisible(NULL)
-
 }
 
-final_action <- function(trial, milestone_name){
+final_action <- function(trial){
 
-  locked_data <- trial$get_locked_data(milestone_name)
+  locked_data <- trial$get_locked_data('final')
   
   message('final: ')
   data.frame(table(locked_data$arm)) %>%
@@ -198,8 +196,6 @@ final_action <- function(trial, milestone_name){
 
   trial$save(value = multiple_contrast_test(locked_data),
              name = 'MC_test')
-
-  invisible(NULL)
 }
 ```
 
@@ -211,11 +207,11 @@ Three milestones are defined: two interim analyses and one final analysis. The s
 ```{r gfdassfl}
 stage1 <- milestone(name = 'stage 1',
                     when = eventNumber('fev1', n = 50),
-                    action = stage_action)
+                    action = stage_action, milestone_name = 'stage 1')
 
 stage2 <- milestone(name = 'stage 2',
                     when = eventNumber('fev1', n = 120),
-                    action = stage_action)
+                    action = stage_action, milestone_name = 'stage 2')
 
 final <- milestone(name = 'final',
                    when = eventNumber('fev1', n = 200),
@@ -238,8 +234,6 @@ stage_action <- function(trial, milestone_name){
   data.frame(table(locked_data$arm), new_sample_ratio) %>%
     setNames(c('dose', 'total_n', 'new_ratio')) %>% print()
 
-  invisible(NULL)
-
 }
 
 ```
@@ -248,9 +242,9 @@ stage_action <- function(trial, milestone_name){
 At the final milestone, the function `final_action()` performs the multiple contrast test and stores the result. It calls a helper function `multiple_contrast_test()`, which can be found in the Appendix below. 
 
 ```{r vnbnvz, eval=FALSE}
-final_action <- function(trial, milestone_name){
+final_action <- function(trial){
 
-  locked_data <- trial$get_locked_data(milestone_name)
+  locked_data <- trial$get_locked_data('final')
   
   message('final: ')
   data.frame(table(locked_data$arm)) %>%
@@ -258,8 +252,6 @@ final_action <- function(trial, milestone_name){
 
   trial$save(value = multiple_contrast_test(locked_data),
              name = 'MC_test')
-
-  invisible(NULL)
 }
 ```
 

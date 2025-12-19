@@ -358,7 +358,10 @@ realistic trial design and evaluation.</p>
 using the <code>endpoint()</code> function, focusing on its
 <code>generator</code> argument to specify the data-generating
 mechanism, and the <code>readout</code> argument to determine when each
-endpoint is observed.</p>
+endpoint is observed. Note that longitudinal endpoints are non-TTE
+endpoints, thus <code>type</code> in <code>endpoint()</code> must be set
+as <code>&quot;non-tte&quot;</code> and there <code>readout</code> needs to be
+specified.</p>
 <div id="example-simulating-longitudinal-blood-pressure-endpoints" class="section level2">
 <h2>Example: Simulating Longitudinal Blood Pressure Endpoints</h2>
 <p>Suppose blood pressure is measured for each patient at baseline (week

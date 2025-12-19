@@ -1,3 +1,31 @@
+# TrialSimulator 1.7.0
+
+## New Feature
+
+- Columns automatically recorded at milestones can be eliminated from `get_output()` by setting new argument `tidy = TRUE`. 
+
+## Minor Updates
+
+- Some minor fixes for CRAN submission. 
+
+# TrialSimulator 1.6.0
+
+## New Feature
+
+- Generator of an endpoint can be updated during a running trial with `Trials$update_generator()`. 
+
+# TrialSimulator 1.5.0
+
+## Update
+
+- `enforce = TRUE` is no longer needed when adding new arms to an existing trial with at least one arm through `Trials$add_arms()`. However, for backward compatibility, legacy codes with `enforce = TRUE` still behaves as expected and no need to update. 
+
+# TrialSimulator 1.4.0
+
+## Update
+
+- Add vignette of dose-ranging study.
+
 # TrialSimulator 1.3.0
 
 ## Major Updates

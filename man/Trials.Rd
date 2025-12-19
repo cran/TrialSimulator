@@ -19,6 +19,8 @@ used to extend duration under adaptive designs.
 used in adaptive designs, e.g., dose selection, enrichment design, etc.
 \item \code{$update_sample_ratio()} change sample ratio of arm. This function
 can be used under adaptive designs, e.g., response-adaptive design, etc.
+\item \code{$update_generator()} change endpoint generator of arm. This
+function can be used in enrichment design.
 \item \code{$add_arms()} add arms to a trial. This function is used to add
 arms to a newly defined trial, or add arms under adaptive design, e.g.,
 dose-ranging, etc.
@@ -107,6 +109,7 @@ trial$closedTest(dt, treatments = c('high dose', 'low dose'),
 \item \href{#method-Trials-roll_back}{\code{Trials$roll_back()}}
 \item \href{#method-Trials-remove_arms}{\code{Trials$remove_arms()}}
 \item \href{#method-Trials-update_sample_ratio}{\code{Trials$update_sample_ratio()}}
+\item \href{#method-Trials-update_generator}{\code{Trials$update_generator()}}
 \item \href{#method-Trials-add_arms}{\code{Trials$add_arms()}}
 \item \href{#method-Trials-get_name}{\code{Trials$get_name()}}
 \item \href{#method-Trials-get_description}{\code{Trials$get_description()}}
@@ -388,6 +391,31 @@ simulation.}
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-update_generator"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-update_generator}{}}}
+\subsection{Method \code{update_generator()}}{
+update endpoint generator in an arm
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$update_generator(arm_name, endpoint_name, generator, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{arm_name}}{character. Name of an arm.}
+
+\item{\code{endpoint_name}}{character. A vector of endpoint names whose
+generator is updated.}
+
+\item{\code{generator}}{a random number generation (RNG) function.
+See \code{generator} of \code{endpoint()}.}
+
+\item{\code{...}}{optional arguments for \code{generator}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Trials-add_arms"></a>}}
 \if{latex}{\out{\hypertarget{method-Trials-add_arms}{}}}
 \subsection{Method \code{add_arms()}}{
@@ -413,13 +441,13 @@ no way to track this.
 \item{\code{sample_ratio}}{integer vector. Sample ratio for permuted block
 randomization. It will be appended to existing sample ratio in the trial.}
 
-\item{\code{...}}{one or more objects returned from \code{arm()}. One exception in
-\code{...} is an argument \code{enforce}. When \code{enforce = TRUE},
+\item{\code{...}}{one or more objects returned from \code{arm()}.
+Randomization is carried out with updated
 sample ratio of newly added arm. It rolls back all patients after
 \code{Trials$get_current_time()}, i.e. redo randomization for those
 patients. This can be useful to add arms one by one when creating a trial.
 Note that we can run \code{Trials$add_arm(sample_ratio1, arm1)} followed
-by \code{Trials$add_arm(sample_ratio2, enforce = TRUE, arm2)}.
+by \code{Trials$add_arm(sample_ratio2, arm2)}.
 We would expected similar result with
 \code{Trials$add_arms(c(sample_ratio1, sample_ratio2), arm1, arm2)}. Note
 that these two method won't return exactly the same trial because
@@ -1028,7 +1056,7 @@ return a data frame of all current outputs saved by calling
 \code{Trials$save()}. Usually this function is call at the end of
 simulation for summary.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Trials$get_output(cols = NULL, simplify = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Trials$get_output(cols = NULL, simplify = TRUE, tidy = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -1039,6 +1067,20 @@ simulation for summary.
 
 \item{\code{simplify}}{logical. Return value rather than a data frame of one
 column when \code{length(col) == 1} and \code{simplify == TRUE}.}
+
+\item{\code{tidy}}{logical. \code{TrialSimulator} automatically records a set
+of standard outputs at milestones, even when \code{doNothing} is used
+as action functions. These includes time of triggering milestones,
+number of observed events for time-to-event endpoints, and number of
+non-missing readouts for non-TTE endpoints
+(see \code{vignette('actionFunctions')}). This usually mean a large
+number of columns in outputs. If users have no intent to summarize a
+trial on these columns, setting \code{tidy = TRUE} can eliminate these
+columns from \code{get_output()}. Note that currently we use regex
+\code{"^n_events_<.*?>_<.*?>$"} and
+\code{"^milestone_time_<.*?>$"} to match columns to be eliminated.
+If users plan to use \code{tidy = TRUE}, caution is needed when naming
+custom outputs in \code{save()}. Default \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }

@@ -60,15 +60,14 @@ accrual_rate <- data.frame(end_time = c(24, Inf),
 trial <- trial(
   name = 'Trial-3415', n_patients = 200,
   seed = 1727811904, duration = 40,
-  enroller = StaggeredRecruiter, accrual_rate = accrual_rate
+  enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
+  silent = TRUE
 )
 
 trial$add_arms(sample_ratio = rep(1, 5), pbo, dose1, dose2, dose3, dose4)
 trial
 
-## ----pewria, echo=FALSE-------------------------------------------------------
-## Hide these helper functions for better typesetting. 
-## Displayed in appendix below
+## ----helpers, echo=FALSE------------------------------------------------------
 compute_sample_ratio <- function(data){
 
   data$dose <- as.numeric(data$arm)
@@ -104,9 +103,7 @@ multiple_contrast_test <- function(data){
 
 }
 
-## ----poieuhjd, echo=FALSE-----------------------------------------------------
-## Hide these action functions for better typesetting. 
-## Displayed after milestones
+## ----stage_action, echo=FALSE-------------------------------------------------
 stage_action <- function(trial, milestone_name){
 
   locked_data <- trial$get_locked_data(milestone_name)
@@ -121,6 +118,7 @@ stage_action <- function(trial, milestone_name){
 
 }
 
+## ----final_action, echo=FALSE-------------------------------------------------
 final_action <- function(trial){
 
   locked_data <- trial$get_locked_data('final')
@@ -146,7 +144,7 @@ final <- milestone(name = 'final',
                    when = eventNumber('fev1', n = 200),
                    action = final_action)
 
-## ----poadfieuhjd, eval=FALSE--------------------------------------------------
+## ----ref.label='stage_action', eval=FALSE-------------------------------------
 # stage_action <- function(trial, milestone_name){
 # 
 #   locked_data <- trial$get_locked_data(milestone_name)
@@ -160,9 +158,8 @@ final <- milestone(name = 'final',
 #     setNames(c('dose', 'total_n', 'new_ratio')) %>% print()
 # 
 # }
-# 
 
-## ----vnbnvz, eval=FALSE-------------------------------------------------------
+## ----ref.label='final_action', eval=FALSE-------------------------------------
 # final_action <- function(trial){
 # 
 #   locked_data <- trial$get_locked_data('final')
@@ -198,39 +195,39 @@ output[, 'n_events_<stage 2>_<arms>']
 
 output[, 'n_events_<final>_<arms>']
 
-## ----eapewria-----------------------------------------------------------------
-compute_sample_ratio <- function(data){
-
-  data$dose <- as.numeric(data$arm)
-  fit <- lm(fev1 ~ factor(dose) - 1, data = data)
-  dose <- unique(sort(data$dose))
-  mu_hat <- coef(fit)
-  S_hat <- vcov(fit)
-
-  suppressMessages(
-    ma_fit <- DoseFinding::maFitMod(dose, mu_hat, S = S_hat,
-                                    models = c("emax", "sigEmax", "quadratic"))
-  )
-
-  pred <- predict(ma_fit, doseSeq = c(0, 20, 25, 30, 35), summaryFct = NULL)
-  prob <- apply(pred[, -1] - pred[, 1], 2, function(x){mean(x > .08)})
-  sample_ratio <- c(.2, (1 - .2) * prob / sum(prob)) %>% unname()
-
-  sample_ratio
-}
-
-multiple_contrast_test <- function(data){
-  
-  candidate_models <- DoseFinding::Mods(
-    emax = c(2.6, 12.5), sigEmax = c(30.5, 3.5), quadratic = -0.00776,
-    placEff = 1.25, maxEff = 0.15, doses = c(0, 20, 25, 30, 35))
-
-  data$dose <- as.numeric(data$arm)
-  test <- DoseFinding::MCTtest(dose = dose, resp = fev1,
-                               models = candidate_models, data = data)
-  
-  ## at least one dose shows significant non-flatten pattern
-  any(attr(test$tStat, 'pVal') < .05)
-
-}
+## ----ref.label='helpers', eval=FALSE------------------------------------------
+# compute_sample_ratio <- function(data){
+# 
+#   data$dose <- as.numeric(data$arm)
+#   fit <- lm(fev1 ~ factor(dose) - 1, data = data)
+#   dose <- unique(sort(data$dose))
+#   mu_hat <- coef(fit)
+#   S_hat <- vcov(fit)
+# 
+#   suppressMessages(
+#     ma_fit <- DoseFinding::maFitMod(dose, mu_hat, S = S_hat,
+#                                     models = c("emax", "sigEmax", "quadratic"))
+#   )
+# 
+#   pred <- predict(ma_fit, doseSeq = c(0, 20, 25, 30, 35), summaryFct = NULL)
+#   prob <- apply(pred[, -1] - pred[, 1], 2, function(x){mean(x > .08)})
+#   sample_ratio <- c(.2, (1 - .2) * prob / sum(prob)) %>% unname()
+# 
+#   sample_ratio
+# }
+# 
+# multiple_contrast_test <- function(data){
+# 
+#   candidate_models <- DoseFinding::Mods(
+#     emax = c(2.6, 12.5), sigEmax = c(30.5, 3.5), quadratic = -0.00776,
+#     placEff = 1.25, maxEff = 0.15, doses = c(0, 20, 25, 30, 35))
+# 
+#   data$dose <- as.numeric(data$arm)
+#   test <- DoseFinding::MCTtest(dose = dose, resp = fev1,
+#                                models = candidate_models, data = data)
+# 
+#   ## at least one dose shows significant non-flatten pattern
+#   any(attr(test$tStat, 'pVal') < .05)
+# 
+# }
 

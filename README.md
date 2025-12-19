@@ -9,10 +9,13 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 
 **&#x2695; No `for` loop in clinical trial simulation &#x2695;**
 
-The goal of `TrialSimulator` is to provide a pipeline for implementing simulation of clinical trial more efficiently and reliably. 
-It follows principle of modularity to isolate codes of statistical testing from data generation and management. 
-It provides a set of tools to sample endpoints of common or custom distributions, manage trial data, and summarize simulation results under fixed or adaptive designs. 
-It also provides functions of group sequential design, graphical testing procedure, combination test, and closed test that are widely used in analyzing complex trial designs. 
+`TrialSimulator` is a system for declaratively implementing clinical trial simulations, inspired by the modular grammar of trial design. You provide the components—arms, endpoint-generation rules, milestones, and analysis methods—specify how they are combined under fixed or adaptive designs, and `TrialSimulator` takes care of the details, allowing you to focus on the design while it handles the mechanics.
+
+`TrialSimulator` provides a suite of helper functions to support the full trial life cycle. 
+
+- For **data generation**, it offers utilities to sample endpoints from common distributions. 
+- For **adaptation**, it includes execution functions that modify trial settings *in place*. 
+- For **analysis**, it implements methods such as regression models, group sequential tests, graphical multiple testing procedures, combination tests, and closed tests. These tools are entirely optional, but they make it simple to construct and evaluate complex trial designs without sacrificing flexibility.
 
 ## Shiny App
 
@@ -63,7 +66,7 @@ To efficiently utilize `TrialSimulator` for clinical trial simulations, we recom
   - [Time-to-event (TTE) endpoints](https://zhangh12.github.io/TrialSimulator/articles/defineTimeToEventEndpoints.html)
     - [Simulate correlated PFS and OS](https://zhangh12.github.io/TrialSimulator/articles/simulatePfsAndOs.html)
   - [Non-TTE endpoints](https://zhangh12.github.io/TrialSimulator/articles/defineNonTimeToEventEndpoints.html)
-  - [Longitudinal endpoints](https://zhangh12.github.io/TrialSimulator/articles/defineLongitudinalEndpoints.html)
+    - [Longitudinal endpoints](https://zhangh12.github.io/TrialSimulator/articles/defineLongitudinalEndpoints.html)
   - [Define and summarize arms](https://zhangh12.github.io/TrialSimulator/articles/defineArms.html)
 - Condition system for milestones
   - [Triggering trial milestones](https://zhangh12.github.io/TrialSimulator/articles/conditionSystem.html)
@@ -72,14 +75,17 @@ To efficiently utilize `TrialSimulator` for clinical trial simulations, we recom
 - Examples: fixed design
   - [Design with correlated endpoints, and custom data generator](https://zhangh12.github.io/TrialSimulator/articles/fixedDesign.html)
 - Examples: adaptive design
-  - [Design with dose selection, interim, and multiple endpoints](https://zhangh12.github.io/TrialSimulator/articles/adaptiveDesign.html)
+  - [Seamless design with dose selection, interim, and multiple endpoints](https://zhangh12.github.io/TrialSimulator/articles/adaptiveDesign.html)
   - [Response-adaptive design](https://zhangh12.github.io/TrialSimulator/articles/responseAdaptive.html)
-  - [Enrichment design] Vignette is under development. 
+  - [Dose-ranging study](https://zhangh12.github.io/TrialSimulator/articles/doseRanging.html)
+  - [Enrichment design] vignette is under development. 
+  - [Platform trial] vignette is under development. 
+  - [Basket trial] vignette is under development. 
 - Built-in methods supported in `TrialSimulator`
   - [Wrapper functions of common statistical methods for estimating treatment effect](https://zhangh12.github.io/TrialSimulator/articles/wrappers.html)
   - [Group sequential test] See `?GroupSequentialTest`. 
   - [Graphical testing procedure] See `?GraphicalTesting`. 
-  - [Combination test based on independent increment] Vignette is under development. 
+  - [Combination test based on independent increment] vignette is under development. 
 
 
 

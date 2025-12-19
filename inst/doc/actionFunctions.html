@@ -392,7 +392,7 @@ recruitment and dropout assumptions.</p>
 <p>Importantly, whenever a milestone is reached,
 <code>TrialSimulator</code> <strong>automatically</strong> records a set
 of standard outputs, even when <code>doNothing</code> is used. These are
-summarized in the following table:</p>
+summarized in the following table.</p>
 <table style="width:99%;">
 <caption>Automatically Saved Results At Triggered Milestones</caption>
 <colgroup>
@@ -415,7 +415,7 @@ summarized in the following table:</p>
 <td>scalar</td>
 <td><p><code>milestone_time_&lt;...&gt;</code></p>
 <p>where <code>...</code> is milestone name</p></td>
-<td><code>milestone_name_&lt;interim&gt;</code></td>
+<td><code>milestone_time_&lt;interim&gt;</code></td>
 </tr>
 <tr class="even">
 <td>Number of observed events for a time-to-event endpoint</td>
@@ -450,6 +450,13 @@ endpoint</td>
 </tr>
 </tbody>
 </table>
+<p>Note that these automatically saved columns can be eliminated from
+outputs by setting <code>tidy = TRUE</code> in
+<code>controller$get_output()</code>. Currently, we use regex
+<code>&quot;^n_events_&lt;.*?&gt;_&lt;.*?&gt;$&quot;</code> and
+<code>&quot;^milestone_time_&lt;.*?&gt;$&quot;</code> to match columns to be
+eliminated. If users plan to use <code>tidy = TRUE</code>, caution is
+needed when naming #’ custom outputs in <code>save()</code>.</p>
 <p>We can define arbitrary number of milestones in a trial. For example,
 the final analysis might be triggered when both <code>PFS</code> and
 <code>OS</code> events reach their required numbers:</p>
@@ -808,9 +815,9 @@ trial simulation.</p>
 <p>Adaptations that are currently supported are summarized below:</p>
 <table style="width:99%;">
 <colgroup>
-<col width="21%" />
-<col width="38%" />
+<col width="18%" />
 <col width="39%" />
+<col width="40%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -847,9 +854,9 @@ milestone</td>
 <td>sample size reassessment</td>
 </tr>
 <tr class="even">
-<td>Eliminate sub-population<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></td>
+<td>Eliminate sub-population</td>
 <td><code>trial$update_generator()</code></td>
-<td>enrichment design</td>
+<td>enrichment design; data model changes over time</td>
 </tr>
 </tbody>
 </table>
@@ -864,7 +871,6 @@ provided in that vignette.</p>
 <hr />
 <ol>
 <li id="fn1"><p>experimental<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>work in progress<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 

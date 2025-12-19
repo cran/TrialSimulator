@@ -683,22 +683,23 @@ to account for a 4-month follow-up after last enrollment.</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;Trial-3415&#39;</span>, <span class="at">n_patients =</span> <span class="dv">200</span>,</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1727811904</span>, <span class="at">duration =</span> <span class="dv">40</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">enroller =</span> StaggeredRecruiter, <span class="at">accrual_rate =</span> accrual_rate</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>)</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">5</span>), pbo, dose1, dose2, dose3, dose4)</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; Arm(s) &lt;0.0, 20.0, 25.0, 30.0, 35.0&gt; are added to the trial.</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; Randomization is done for 200 potential patients.</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Data of 200 potential patients are generated for the trial with 5 arm(s) &lt;0.0, 20.0, 25.0, 30.0, 35.0&gt;.</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>trial</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Trial Name:  Trial-3415  </span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Description:  Trial-3415  </span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Arms:  5  </span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Registered Arms:  0.0, 20.0, 25.0, 30.0, 35.0  </span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Sample Ratio:  1, 1, 1, 1, 1  </span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Patients:  200  </span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Planned Duration:  40  </span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Random Seed:  1727811904</span></span></code></pre></div>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">enroller =</span> StaggeredRecruiter, <span class="at">accrual_rate =</span> accrual_rate,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">silent =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">5</span>), pbo, dose1, dose2, dose3, dose4)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>trial</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Trial Name:  Trial-3415  </span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Description:  Trial-3415  </span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Arms:  5  </span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Registered Arms:  0.0, 20.0, 25.0, 30.0, 35.0  </span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Sample Ratio:  1, 1, 1, 1, 1  </span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ # of Patients:  200  </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Planned Duration:  40  </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Random Seed:  1727811904</span></span></code></pre></div>
+<!-- Hide this helper function and display it in Appendix for better typesetting. -->
+<!-- Hide this action function and display it later for better typesetting. -->
+<!-- Hide this action function and display it later for better typesetting. -->
 </div>
 <div id="define-milestones-and-associated-actions" class="section level2">
 <h2>Define Milestones and Associated Actions</h2>

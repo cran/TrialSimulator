@@ -14,6 +14,8 @@
 #' used in adaptive designs, e.g., dose selection, enrichment design, etc.
 #' \item \code{$update_sample_ratio()} change sample ratio of arm. This function
 #' can be used under adaptive designs, e.g., response-adaptive design, etc.
+#' \item \code{$update_generator()} change endpoint generator of arm. This
+#' function can be used in enrichment design.
 #' \item \code{$add_arms()} add arms to a trial. This function is used to add
 #' arms to a newly defined trial, or add arms under adaptive design, e.g.,
 #' dose-ranging, etc.
@@ -398,13 +400,72 @@ Trials <- R6::R6Class(
       ## time should be randomized again.
       self$roll_back()
 
-      ## update data for unrolled patients based on new arms and possibly
-      ## new sample ratio. Note that if sample ratio is not whole number,
+      ## update data for unrolled patients based on new sample ratios.
+      ## Note that if sample ratio is not whole number,
       ## the permuted block algorithm will be switched to sample() because
       ## it is not easy to specify a block with proper size automatically.
       self$enroll_patients()
     },
 
+    #' @description
+    #' update endpoint generator in an arm
+    #'
+    #' @param arm_name character. Name of an arm.
+    #' @param endpoint_name character. A vector of endpoint names whose
+    #' generator is updated.
+    #' @param generator a random number generation (RNG) function.
+    #' See \code{generator} of \code{endpoint()}.
+    #' @param ... optional arguments for \code{generator}.
+    update_generator = function(arm_name, endpoint_name, generator, ...){
+
+      stopifnot(is.character(arm_name))
+      if(length(arm_name) != 1){
+        stop('Only one arm can be updated at a time. ',
+             'You specified <', length(arm_name), '> arms: <',
+             paste0(arm_name, collapse = ', '), '>. ')
+      }
+
+      if(!(arm_name %in% self$get_arms_name())){
+        stop('The arm <', arm_name,
+             '> is not in the trial or has been dropped from the trial. ')
+      }
+
+      selected_arm <- self$get_an_arm(arm_name)
+
+      stopifnot(is.character(endpoint_name))
+
+      unknown_endpoints <- setdiff(endpoint_name, selected_arm$get_endpoints_name())
+
+      if(length(unknown_endpoints) > 0){
+        stop('Endpoint(s) <', paste0(unknown_endpoints, collapse = ', '),
+             '> are not in the arm <', selected_arm$get_name(), '>. ')
+      }
+
+      endpoint_name_ <- paste0(endpoint_name, collapse = '/')
+      if(!(endpoint_name_ %in% names(selected_arm$get_endpoints()))){
+        stop('Some more endpoint(s) are needed to define the arm <',
+             selected_arm$get_name(), '> with <',
+             paste0(endpoint_name, collapse = ', '), '>. ')
+      }
+
+      stopifnot(is.function(generator))
+
+      private$arms[[arm_name]]$update_endpoint_generator(endpoint_name, generator, ...)
+
+      if(!private$silent){
+        message('Generator of endpoints <',
+                paste0(endpoint_name, collapse = ', '),
+                '> in the arm <', arm_name, '> has been udpated. ')
+      }
+
+      ## with generator of an arm is updated, unenrolled patient at current
+      ## time should be randomized again.
+      self$roll_back()
+
+      ## update data for unrolled patients based on new generator in arm.
+      self$enroll_patients()
+
+    },
 
     #' @description
     #' add one or more arms to the trial. \code{enroll_patients()} will be
@@ -422,14 +483,13 @@ Trials <- R6::R6Class(
     #'
     #' @param sample_ratio integer vector. Sample ratio for permuted block
     #' randomization. It will be appended to existing sample ratio in the trial.
-    #' @param ... one or more objects returned from \code{arm()}. One exception in
-    #' \code{...} is an argument \code{enforce}. When \code{enforce = TRUE},
-    #  it makes sure randomization is carried out with updated
+    #' @param ... one or more objects returned from \code{arm()}.
+    #' Randomization is carried out with updated
     #' sample ratio of newly added arm. It rolls back all patients after
     #' \code{Trials$get_current_time()}, i.e. redo randomization for those
     #' patients. This can be useful to add arms one by one when creating a trial.
     #' Note that we can run \code{Trials$add_arm(sample_ratio1, arm1)} followed
-    #' by \code{Trials$add_arm(sample_ratio2, enforce = TRUE, arm2)}.
+    #' by \code{Trials$add_arm(sample_ratio2, arm2)}.
     #' We would expected similar result with
     #' \code{Trials$add_arms(c(sample_ratio1, sample_ratio2), arm1, arm2)}. Note
     #' that these two method won't return exactly the same trial because
@@ -444,6 +504,13 @@ Trials <- R6::R6Class(
       enforce <- arm_list$enforce
       if(is.null(enforce)){
         enforce <- FALSE
+      }
+
+      ## This line ensures that enforce = TRUE is no longer needed by end users.
+      ## However, specifying enforce = TRUE when calling $add_arms() is still valid,
+      ## it is simply unnecessary.
+      if(self$has_arm()){
+        enforce = TRUE
       }
 
       arm_list$enforce <- NULL
@@ -635,7 +702,7 @@ Trials <- R6::R6Class(
     #' n_patients is greater than remaining patients as planned.
     enroll_patients = function(n_patients = NULL){
 
-      if(length(self$get_arms()) == 0){
+      if(!self$has_arm()){
         stop('No arm is added in the trial yet. Patient cannot be enrolled. ')
       }
 
@@ -1664,7 +1731,20 @@ Trials <- R6::R6Class(
     #' \code{NULL}, all columns are returned.
     #' @param simplify logical. Return value rather than a data frame of one
     #' column when \code{length(col) == 1} and \code{simplify == TRUE}.
-    get_output = function(cols = NULL, simplify = TRUE){
+    #' @param tidy logical. \code{TrialSimulator} automatically records a set
+    #' of standard outputs at milestones, even when \code{doNothing} is used
+    #' as action functions. These includes time of triggering milestones,
+    #' number of observed events for time-to-event endpoints, and number of
+    #' non-missing readouts for non-TTE endpoints
+    #' (see \code{vignette('actionFunctions')}). This usually mean a large
+    #' number of columns in outputs. If users have no intent to summarize a
+    #' trial on these columns, setting \code{tidy = TRUE} can eliminate these
+    #' columns from \code{get_output()}. Note that currently we use regex
+    #' \code{"^n_events_<.*?>_<.*?>$"} and
+    #' \code{"^milestone_time_<.*?>$"} to match columns to be eliminated.
+    #' If users plan to use \code{tidy = TRUE}, caution is needed when naming
+    #' custom outputs in \code{save()}. Default \code{FALSE}.
+    get_output = function(cols = NULL, simplify = TRUE, tidy = FALSE){
       if(is.null(cols)){
         cols <- colnames(private$output)
       }
@@ -1674,6 +1754,13 @@ Trials <- R6::R6Class(
              '> are not found in trial$output. Check if there is a typo. ')
       }
       ret <- private$output[, cols, drop = FALSE]
+
+      if(tidy){
+        ret <- ret %>%
+          select(!matches("^n_events_<.*?>_<.*?>$")) %>%
+          select(!matches("^milestone_time_<.*?>$"))
+      }
+
       if(simplify && ncol(ret) == 1){
         return(ret[1, 1])
       }else{

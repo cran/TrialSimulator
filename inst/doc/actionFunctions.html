@@ -349,8 +349,10 @@ dynamic trial behaviors, such as:</p>
 <ul>
 <li><p>Conducting interim analyses</p></li>
 <li><p>Early stopping for efficacy or futility</p></li>
-<li><p>Dropping or selecting treatment arms</p></li>
-<li><p>Adjusting enrollment rules adaptively</p></li>
+<li><p>Dropping, adding or selecting treatment arms</p></li>
+<li><p>Resizing based on sample size reassessment</p></li>
+<li><p>extending trial duration</p></li>
+<li><p>Adjusting enrollment rules</p></li>
 <li><p>Logging or tracking intermediate results</p></li>
 <li><p>Locking and exporting trial data snapshot at specific
 points</p></li>
@@ -850,7 +852,7 @@ milestone</td>
 </tr>
 <tr class="odd">
 <td>Increase sample size<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></td>
-<td><code>trial$set_sample_size()</code></td>
+<td><code>trial$resize()</code></td>
 <td>sample size reassessment</td>
 </tr>
 <tr class="even">
@@ -860,6 +862,11 @@ milestone</td>
 </tr>
 </tbody>
 </table>
+<p>Note that functions in the table above are member functions of
+<code>Trials</code> object. Users who are not familiar with the concept
+of classes may consider using their wrapper functions. The wrapper
+function of <code>trial$foo(...)</code> is
+<code>foo(trial, ...)</code>.</p>
 <p>These adaptive features allow users to simulate complex, data-driven
 designs where trial conduct is not static but evolves in response to
 accumulating evidence. At the time of writing, the vignette dedicated to

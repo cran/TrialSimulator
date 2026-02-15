@@ -209,13 +209,22 @@ output %>%
 ## ----message=FALSE------------------------------------------------------------
 ## important: reset before calling run() again
 controller$reset()
-controller$run(n = 6, plot_event = FALSE, silent = TRUE)
-controller$get_output() %>% 
+controller$run(n = 10, plot_event = FALSE, silent = TRUE)
+res <- controller$get_output()
+
+res %>% 
   kable(escape = FALSE) %>% 
   kable_styling(bootstrap_options = "striped", 
                 full_width = FALSE,
                 position = "left") %>%
   scroll_box(width = "100%")
+
+## ----message=FALSE------------------------------------------------------------
+## Number of overall Go
+sum(res$interim_decision == 'add dose arms' & 'decision' == 'go')
+
+## Number of early trial termination
+sum(res$interim_decision == 'stop trial')
 
 ## ----ref.label='go_nogo', eval=FALSE------------------------------------------
 # go_nogo <- function(data){

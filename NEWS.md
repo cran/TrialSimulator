@@ -1,3 +1,22 @@
+# TrialSimulator 1.10.0
+
+## New Feature
+
+- Support parallelization in `Controllers$run()` through new argument `n_workers`. The package `mirai` is used. Although `mirai` advocates the use of L'Ecuyer-CMRG streams to maintain independence between multiple streams, however, `TrialSimulator` resets it to be Mersenne-Twister streams to force identical behavior between `n_workers = 1` and `n_workers > 1`. This enables debuggability and reproduciability under single-process mode by setting seed that causes issues under multi-process mode.  
+
+# TrialSimulator 1.9.0
+
+## New Feature
+
+- Support wrapper functions for adaptation, including `remove_arms()`, `add_arms()`, `update_sample_ratio()`, `set_duration()`, `resize()` and `update_generator()`. 
+- More informative message is prompted when error is throwed from an action function; milestone's name is printed. 
+
+# TrialSimulator 1.8.0
+
+## New Feature
+
+- Support new adaptation `Trials$resize()` that resizes an ongoing trial. 
+
 # TrialSimulator 1.7.0
 
 ## New Feature

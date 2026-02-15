@@ -141,7 +141,7 @@ action3 <- function(trial){
                              alternative = 'less', 
                              planned_info = 'default')
   
-  ct_os <- trial$closedTest(dt_pfs, treatments = c('high dose', 'low dose'),
+  ct_os <- trial$closedTest(dt_os, treatments = c('high dose', 'low dose'),
                             milestones = c('final'),
                             alpha = .02, alpha_spending = 'asOF')
   
@@ -214,7 +214,7 @@ dt_os <- trial$dunnettTest(Surv(os, os_event) ~ arm, placebo = 'placebo',
                            milestones = c('dose selection', 'final'),
                            alternative = 'less', 
                            planned_info = 'default')
-ct_os <- trial$closedTest(dt_pfs, treatments = c('high dose', 'low dose'),
+ct_os <- trial$closedTest(dt_os, treatments = c('high dose', 'low dose'),
                           milestones = c('final'),
                           alpha = .02, alpha_spending = 'asOF')
 

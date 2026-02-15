@@ -30,9 +30,13 @@ In `TrialSimulator`, we can define custom action functions that will be executed
 
 -   Early stopping for efficacy or futility
 
--   Dropping or selecting treatment arms
+-   Dropping, adding or selecting treatment arms
 
--   Adjusting enrollment rules adaptively
+-   Resizing based on sample size reassessment
+
+-   extending trial duration
+
+-   Adjusting enrollment rules
 
 -   Logging or tracking intermediate results
 
@@ -419,11 +423,13 @@ Adaptations that are currently supported are summarized below:
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
 | Extend trial duration    | `trial$set_duration()` or add a event-driven milestone | actual patient or event accrual is slower than expected |
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
-| Increase sample size[^1] | `trial$set_sample_size()`                              | sample size reassessment                                |
+| Increase sample size[^1] | `trial$resize()`                                       | sample size reassessment                                |
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
 | Eliminate sub-population | `trial$update_generator()`                             | enrichment design; data model changes over time         |
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
 
 [^1]: experimental
+
+Note that functions in the table above are member functions of `Trials` object. Users who are not familiar with the concept of classes may consider using their wrapper functions. The wrapper function of `trial$foo(...)` is `foo(trial, ...)`.
 
 These adaptive features allow users to simulate complex, data-driven designs where trial conduct is not static but evolves in response to accumulating evidence. At the time of writing, the vignette dedicated to trial adaptation is still under development. Detailed examples will be provided in that vignette.

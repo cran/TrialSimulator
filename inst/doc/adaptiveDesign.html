@@ -1119,10 +1119,8 @@ adaptive design.</p>
 <h2>Execute Trial Simulation</h2>
 <p>We can run a massive number of replicates in simulation to study
 operating characteristics of a trial design by specifying <code>n</code>
-in <code>Controller$run()</code>. We can set
-<code>plot_event = FALSE</code> to turn off plotting to save running
-time. Parallelization is also supported by setting
-<code>n_workers</code>.</p>
+in <code>Controller$run()</code>. Parallelization is also supported by
+setting <code>n_workers</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="do">## reset a controller if $run has been executed before</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">reset</span>()</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">plot_event =</span> <span class="cn">FALSE</span>, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>

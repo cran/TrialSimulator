@@ -17,10 +17,6 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 - For **adaptation**, it includes execution functions that modify trial settings *in place*. 
 - For **analysis**, it implements methods such as regression models, group sequential tests, graphical multiple testing procedures, combination tests, and closed tests. These tools are entirely optional, but they make it simple to construct and evaluate complex trial designs without sacrificing flexibility.
 
-## Shiny App
-
-An online version of this app is hosted on [shinyapps.io](https://bx7ttm-han-zhang.shinyapps.io/trialsimulatorstarter/). 
-
 ## Validation
 
 The validation documents for this R package are hosted [here](https://github.com/zhangh12/TrialSimulatorDocuments) and are continuously updated.
@@ -41,14 +37,12 @@ You can install the development version from
 [GitHub](https://github.com/zhangh12/TrialSimulator) with:
 
 ``` r
-if (!require("remotes")) {
+if(!requireNamespace("remotes", quietly = TRUE)){
   install.packages("remotes")
 }
 remotes::install_github(
   "zhangh12/TrialSimulator", 
-  build_manual = TRUE, 
-  build_vignettes = TRUE, 
-  force = TRUE
+  dependencies = TRUE
 )
 ```
 
@@ -81,6 +75,10 @@ To efficiently utilize `TrialSimulator` for clinical trial simulations, we recom
   - [Enrichment design] vignette is under development. 
   - [Platform trial] vignette is under development. 
   - [Basket trial] vignette is under development. 
+- Examples: crossover
+  - [Crossover trial with wash-out periods](https://zhangh12.github.io/TrialSimulator/articles/crossoverWashout.html)
+  - [Dynamic treatment switching](https://zhangh12.github.io/TrialSimulator/articles/dynamicTreatmentSwitching.html)
+  - [Crossover at specified time points] vignette is coming!
 - Built-in methods supported in `TrialSimulator`
   - [Wrapper functions of common statistical methods for estimating treatment effect](https://zhangh12.github.io/TrialSimulator/articles/wrappers.html)
   - [Group sequential test] See `?GroupSequentialTest`. 

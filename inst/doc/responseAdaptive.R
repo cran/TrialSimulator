@@ -23,7 +23,7 @@ rng <- function(n, dose){
     doses = c(0, 20, 25, 50, 100))
 
   data.frame(
-    fev1 = rnorm(n, mean = getResp(model, doses = dose), sd = .05)
+    fev1 = rnorm(n, mean = DoseFinding::getResp(model, doses = dose), sd = .05)
   )
 
 }
@@ -177,7 +177,7 @@ listener <- listener()
 listener$add_milestones(stage1, stage2, final)
 
 controller <- controller(trial, listener)
-controller$run(n = 1, plot_event = TRUE, silent = TRUE)
+controller$run(n = 1, silent = TRUE)
 
 output <- controller$get_output()
 

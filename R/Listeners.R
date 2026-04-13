@@ -115,10 +115,14 @@ Listeners <- R6::R6Class(
         tryCatch(
           {milestone$trigger_milestone(trial)},
           error = function(e){
+            trial$save(e$message, 'error_message', overwrite = TRUE)
             stop('Error in executing action function of milestone <',
-                 milestone$get_name(), '>. \n',
+                 milestone$get_name(), '>: \n',
+                 e$message, '\n\n',
                  'Please set a breakpoint in its action function to debug it. \n',
-                 'The browser() function can be helpful for a step-by-step diagnosis. ')
+                 'The browser() function can be helpful for a step-by-step diagnosis. \n',
+                 'To fully replicate the issue in debugging, set seed = ',
+                 trial$get_output('seed'), ' in trial(...). ')
           }
         )
         milestone$set_dry_run(FALSE)

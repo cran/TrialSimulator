@@ -1,3 +1,63 @@
+# TrialSimulator 1.16.0
+
+## New Feature
+
+- Add `n_switches` column to locked data returned by `get_locked_data()`, counting the number of treatment switches per patient within the data lock window.
+- Add `expandRegimen()` to expand the `regimen_trajectory` column in locked data into a long-format data frame with one row per regimen segment per patient.
+
+## Updates
+
+- Cut running time by ~75% via base R rewrites. 
+
+# TrialSimulator 1.15.0
+
+## New Feature
+
+- Support stratified permuted block randomization in `trial()` using argument `stratification_factors`. 
+- Support `...` in `regimen()` to pass arguments to `what()`, `when()` and `how()`. 
+
+## Bug Fix
+
+- Fix a bug in `regimen()` to support both single or multiple switching. 
+
+# TrialSimulator 1.14.0
+
+## New Feature
+
+- Support multiple rounds of dynamic treatment switching through `regimen()`. 
+
+## Updates
+
+- New implementation that is 55% faster without regimen, or 40% faster with regimen. This is achieved by avoid computing redundant event counts. 
+
+# TrialSimulator 1.13.0
+
+## New Feature
+
+- New implementation of regimen that is 60% faster. 
+
+## Update
+
+- Add a vignette of crossover design with wash-out periods. 
+
+## Bug Fix
+
+- Fix a minor bug displaying incorrect event count when using `enrollment()` to define milestone. This bug does not affect milestone triggering. 
+
+# TrialSimulator 1.12.0
+
+## New Feature
+
+- Support editing trajectory of endpoint over time. 
+- Add new argument `tidy` (default: `TRUE`) in `Controllers$run()` to stop computing and saving event count per arm per endpoint for 40% shorter run time. 
+
+# TrialSimulator 1.11.0
+
+## New Feature
+
+- Add function `solvePiecewiseConstantExponentialDistribution()` to compute event rates in time windows given survival probabilities at changepoints. 
+- Add `qPiecewiseExponent()`, the quantile function of piecewise exponential distribution. This function is useful to simulate time-to-event endpoint that is correlated to other endpoints using the copula method. For example, the `simdata` package needs marginal quantile functions. 
+
 # TrialSimulator 1.10.0
 
 ## New Feature

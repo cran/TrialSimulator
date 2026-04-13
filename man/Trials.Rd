@@ -27,6 +27,8 @@ function can be used in enrichment design.
 \item \code{$add_arms()} add arms to a trial. This function is used to add
 arms to a newly defined trial, or add arms under adaptive design, e.g.,
 dose-ranging, etc.
+\item \code{$add_regimen()} register a \code{regimen} object to a trial.
+Must be called before \code{$add_arms()}.
 \item \code{$get_locked_data()} request for data snapshot at a milestone.
 Calling this function is recommended as the first action in any action
 function as long as trial data is needed in statistical analysis or decision
@@ -115,6 +117,9 @@ trial$closedTest(dt, treatments = c('high dose', 'low dose'),
 \item \href{#method-Trials-update_generator}{\code{Trials$update_generator()}}
 \item \href{#method-Trials-resize}{\code{Trials$resize()}}
 \item \href{#method-Trials-add_arms}{\code{Trials$add_arms()}}
+\item \href{#method-Trials-add_regimen}{\code{Trials$add_regimen()}}
+\item \href{#method-Trials-get_regimen}{\code{Trials$get_regimen()}}
+\item \href{#method-Trials-has_regimen}{\code{Trials$has_regimen()}}
 \item \href{#method-Trials-get_name}{\code{Trials$get_name()}}
 \item \href{#method-Trials-get_description}{\code{Trials$get_description()}}
 \item \href{#method-Trials-get_arms}{\code{Trials$get_arms()}}
@@ -126,6 +131,7 @@ trial$closedTest(dt, treatments = c('high dose', 'low dose'),
 \item \href{#method-Trials-get_number_patients}{\code{Trials$get_number_patients()}}
 \item \href{#method-Trials-get_number_enrolled_patients}{\code{Trials$get_number_enrolled_patients()}}
 \item \href{#method-Trials-get_number_unenrolled_patients}{\code{Trials$get_number_unenrolled_patients()}}
+\item \href{#method-Trials-get_stratum_queue}{\code{Trials$get_stratum_queue()}}
 \item \href{#method-Trials-get_randomization_queue}{\code{Trials$get_randomization_queue()}}
 \item \href{#method-Trials-get_enroll_time}{\code{Trials$get_enroll_time()}}
 \item \href{#method-Trials-enroll_patients}{\code{Trials$enroll_patients()}}
@@ -133,6 +139,7 @@ trial$closedTest(dt, treatments = c('high dose', 'low dose'),
 \item \href{#method-Trials-get_current_time}{\code{Trials$get_current_time()}}
 \item \href{#method-Trials-get_event_tables}{\code{Trials$get_event_tables()}}
 \item \href{#method-Trials-get_data_lock_time_by_event_number}{\code{Trials$get_data_lock_time_by_event_number()}}
+\item \href{#method-Trials-get_data_lock_time_by_enrollment}{\code{Trials$get_data_lock_time_by_enrollment()}}
 \item \href{#method-Trials-get_data_lock_time_by_calendar_time}{\code{Trials$get_data_lock_time_by_calendar_time()}}
 \item \href{#method-Trials-get_locked_data}{\code{Trials$get_locked_data()}}
 \item \href{#method-Trials-get_locked_data_name}{\code{Trials$get_locked_data_name()}}
@@ -149,6 +156,7 @@ trial$closedTest(dt, treatments = c('high dose', 'low dose'),
 \item \href{#method-Trials-get}{\code{Trials$get()}}
 \item \href{#method-Trials-get_output}{\code{Trials$get_output()}}
 \item \href{#method-Trials-mute}{\code{Trials$mute()}}
+\item \href{#method-Trials-tidy_output}{\code{Trials$tidy_output()}}
 \item \href{#method-Trials-independentIncrement}{\code{Trials$independentIncrement()}}
 \item \href{#method-Trials-dunnettTest}{\code{Trials$dunnettTest()}}
 \item \href{#method-Trials-closedTest}{\code{Trials$closedTest()}}
@@ -162,6 +170,8 @@ trial$closedTest(dt, treatments = c('high dose', 'low dose'),
 \item \href{#method-Trials-get_arm_added_time}{\code{Trials$get_arm_added_time()}}
 \item \href{#method-Trials-set_arm_removal_time}{\code{Trials$set_arm_removal_time()}}
 \item \href{#method-Trials-get_arm_removal_time}{\code{Trials$get_arm_removal_time()}}
+\item \href{#method-Trials-get_stratification_factors}{\code{Trials$get_stratification_factors()}}
+\item \href{#method-Trials-has_stratification_factors}{\code{Trials$has_stratification_factors()}}
 \item \href{#method-Trials-clone}{\code{Trials$clone()}}
 }
 }
@@ -179,6 +189,7 @@ initialize a trial
   seed = NULL,
   enroller,
   dropout = NULL,
+  stratification_factors = NULL,
   silent = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -214,6 +225,16 @@ It can be any random number generator with first argument \code{n},
 the number of enrolled patients. Usually \code{rexp} if dropout rate
 is set at a single time point, or \code{rweibull} if dropout rates are
 set at two time points. See \code{?TrialSimulator::weibullDropout}.}
+
+\item{\code{stratification_factors}}{character. Names of baseline characteristics
+to define stratums in stratified permuted block randomization.
+Stratification factors must be defined in \code{endpoint()} with
+\code{readout = 0}. As a natural assumption for randomized trial,
+\code{TrialSimulator} assumes that the baseline
+characteristics share the same distribution across arms, but endpoints
+can have same or different distributions given baseline characteristics.
+\code{NULL} by default, i.e., unstratified permuted block randomization is
+executed.}
 
 \item{\code{silent}}{logical. \code{TRUE} to mute messages. However, warning
 message is still displayed.}
@@ -484,6 +505,46 @@ of the same distribution.}
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-add_regimen"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-add_regimen}{}}}
+\subsection{Method \code{add_regimen()}}{
+register regimen to a trial. The regimen consists of three functions
+to determine the patients who may switch to other treatment during a
+a trial, to determine the switching time and how to update patients'
+endpoint data accordingly.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$add_regimen(regimen)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{regimen}}{an object created by \code{regimen()}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-get_regimen"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-get_regimen}{}}}
+\subsection{Method \code{get_regimen()}}{
+return registered regimen.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$get_regimen()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-has_regimen"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-has_regimen}{}}}
+\subsection{Method \code{has_regimen()}}{
+return whether a regimen is registered
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$has_regimen()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Trials-get_name"></a>}}
 \if{latex}{\out{\hypertarget{method-Trials-get_name}{}}}
 \subsection{Method \code{get_name()}}{
@@ -607,6 +668,25 @@ return number of unenrolled patients
 \if{html}{\out{<div class="r">}}\preformatted{Trials$get_number_unenrolled_patients()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-get_stratum_queue"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-get_stratum_queue}{}}}
+\subsection{Method \code{get_stratum_queue()}}{
+return stratum queue of planned but not yet enrolled patients.
+This function does not update stratum_queue, just return its value
+for debugging purpose.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$get_stratum_queue(index = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{index}}{index to be extracted. Return all queue if \code{NULL}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Trials-get_randomization_queue"></a>}}
@@ -761,22 +841,64 @@ data lock time
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-get_data_lock_time_by_enrollment"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-get_data_lock_time_by_enrollment}{}}}
+\subsection{Method \code{get_data_lock_time_by_enrollment()}}{
+given a target number of enrolled patients, determine the data
+lock time for a milestone (futility, interim, final, etc.). This function does
+not change trial object (e.g. rolling back not yet randomized patients after
+the found data lock time). It is similar to get_data_lock_time_by_event_number
+but only focus on patient_id.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$get_data_lock_time_by_enrollment(
+  arms,
+  target_n_patients,
+  min_treatment_duration,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{arms}}{a vector of arms' name on which number of events will be
+counted.}
+
+\item{\code{target_n_patients}}{target number of enrolled patients.}
+
+\item{\code{min_treatment_duration}}{numeric. Zero or positive value.
+minimum treatment duration of enrolled patients.
+If 0, it looks for triggering time based on number of enrolled
+patients in population specified by \code{...} and \code{arms}. If positive,
+it means that milestone is triggered when a specific number of enrolled
+patients have received treatment for at least \code{min_treatment_duration}
+duration. It is users' responsibility to assure that the unit of
+\code{min_treatment_duration} are consistent with
+readout of non-tte endpoints, dropout time, and trial duration.}
+
+\item{\code{...}}{subset conditions compatible with \code{dplyr::filter}. Number
+Time of milestone is based on event counts on the subset of trial data.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+data lock time
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Trials-get_data_lock_time_by_calendar_time"></a>}}
 \if{latex}{\out{\hypertarget{method-Trials-get_data_lock_time_by_calendar_time}{}}}
 \subsection{Method \code{get_data_lock_time_by_calendar_time()}}{
 given the calendar time to lock the data, return it with event counts of
 each of the endpoints.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Trials$get_data_lock_time_by_calendar_time(calendar_time, arms)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Trials$get_data_lock_time_by_calendar_time(calendar_time)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{calendar_time}}{numeric. Calendar time to lock the data}
-
-\item{\code{arms}}{a vector of arms' name on which number of events will be
-counted.}
 }
 \if{html}{\out{</div>}}
 }
@@ -1123,6 +1245,25 @@ mute all messages (not including warnings)
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{silent}}{logical.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-tidy_output"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-tidy_output}{}}}
+\subsection{Method \code{tidy_output()}}{
+save less information in trial output if no intent to use it in summary
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$tidy_output(tidy)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{tidy}}{logical. If \code{TRUE}, event count per arm per endpoint is
+not computed and saved in trial output. This can speed up simulation by
+up to 40\% under some circumstances.}
 }
 \if{html}{\out{</div>}}
 }
@@ -1549,6 +1690,26 @@ get time when an arm is removed from the trial
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-get_stratification_factors"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-get_stratification_factors}{}}}
+\subsection{Method \code{get_stratification_factors()}}{
+return stratification factors
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$get_stratification_factors()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-has_stratification_factors"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-has_stratification_factors}{}}}
+\subsection{Method \code{has_stratification_factors()}}{
+has stratification factors
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$has_stratification_factors()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Trials-clone"></a>}}

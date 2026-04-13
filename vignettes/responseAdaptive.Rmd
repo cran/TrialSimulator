@@ -74,7 +74,7 @@ rng <- function(n, dose){
     doses = c(0, 20, 25, 50, 100))
 
   data.frame(
-    fev1 = rnorm(n, mean = getResp(model, doses = dose), sd = .05)
+    fev1 = rnorm(n, mean = DoseFinding::getResp(model, doses = dose), sd = .05)
   )
 
 }
@@ -242,7 +242,7 @@ listener <- listener()
 listener$add_milestones(stage1, stage2, final)
 
 controller <- controller(trial, listener)
-controller$run(n = 1, plot_event = TRUE, silent = TRUE)
+controller$run(n = 1, silent = TRUE)
 
 output <- controller$get_output()
 
@@ -254,7 +254,7 @@ output %>%
   scroll_box(width = "100%")
 ```
 
-In the output, the columns `n_event_<milestone>_<arms>` contain detailed information on observed events or sample sizes per arm at each milestone. It is evident that we have pipeline patients at both interims. 
+In the output, the columns `n_event_<milestone>_<arms>` contain detailed information on observed events or sample sizes per arm at each milestone. It is evident that we have pipeline patients at both interim. 
 
 ```{r qeaeal}
 output[, 'n_events_<stage 1>_<arms>']
@@ -267,7 +267,7 @@ output[, 'n_events_<final>_<arms>']
 
 ## Appendix: Codes of Helper Functions
 
-For completeness, the full code of the helper functions `compute_sample_ratio()` and `multiple_contrast_test()` is included below, which determine the new sample ratio and performs the multiple contrast test. 
+For completeness, the full code of the helper functions `compute_sample_ratio()` and `multiple_contrast_test()` is included below, which determine the new sample ratio and performs the multiple contrast test. Note that the implementation to these two functions are completely project-specific. 
 
 ```{r ref.label='helpers', eval=FALSE}
 ```

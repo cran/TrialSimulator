@@ -392,7 +392,12 @@ We also ensure that PFS is always less than or equal to OS.</p>
 and 4.5 years, respectively.</li>
 <li>A constraint ensures that PFS does not exceed OS. To define
 correlated PFS and OS that satisfy this constraint in a more natural
-way, refer to the vignette of <a href="simulatePfsAndOs.html">multi-state model</a></li>
+way, refer to the vignette of the <a href="simulatePfsAndOsIdm.html">illness-death model</a>. Note that data
+generated under the illness-death model may induce a time-varying OS
+hazard ratio between treatment arms, violating the proportional hazards
+(PH) assumption in a Cox model. For a data model that is more suitable
+for PH Cox analysis, refer to the built-in generator
+<code>CorrelatedPfsAndOs2()</code> and the vignette of the <a href="simulatePfsAndOsGumbel.html">Gumbel copula method</a>.</li>
 <li>PSA readout times are 0 (at baseline) and 1 (at year 1).</li>
 </ul>
 <p>The following code defines the endpoints and uses the

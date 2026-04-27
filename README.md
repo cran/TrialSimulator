@@ -1,10 +1,11 @@
 
-# TrialSimulator <img src="man/figures/logo.png" align="right" width="175" />
+# TrialSimulator <img src="man/figures/logo.svg" align="right" width="175" />
 
 <!-- badges: start -->
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Code Coverage](https://codecov.io/gh/zhangh12/TrialSimulator/branch/main/graph/badge.svg)](https://app.codecov.io/gh/zhangh12/TrialSimulator)
 <!-- badges: end -->
 
 **&#x2695; No `for` loop in clinical trial simulation &#x2695;**
@@ -16,6 +17,10 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 - For **data generation**, it offers utilities to sample endpoints from common distributions. 
 - For **adaptation**, it includes execution functions that modify trial settings *in place*. 
 - For **analysis**, it implements methods such as regression models, group sequential tests, graphical multiple testing procedures, combination tests, and closed tests. These tools are entirely optional, but they make it simple to construct and evaluate complex trial designs without sacrificing flexibility.
+
+## Shiny App
+
+An online version of this app, `TrialDesigner`, is hosted on [shinyapps.io](https://bx7ttm-han-zhang.shinyapps.io/TrialDesigner/). This app is still under development. 
 
 ## Validation
 
@@ -58,7 +63,8 @@ To efficiently utilize `TrialSimulator` for clinical trial simulations, we recom
 
 - Define endpoints and arms
   - [Time-to-event (TTE) endpoints](https://zhangh12.github.io/TrialSimulator/articles/defineTimeToEventEndpoints.html)
-    - [Special case: simulate correlated PFS and OS](https://zhangh12.github.io/TrialSimulator/articles/simulatePfsAndOs.html)
+    - [Correlated PFS and OS using a Gumbel copula](https://zhangh12.github.io/TrialSimulator/articles/simulatePfsAndOsGumbel.html)
+    - [Correlated PFS and OS under an illness-death model](https://zhangh12.github.io/TrialSimulator/articles/simulatePfsAndOsIdm.html)
   - [Non-TTE endpoints](https://zhangh12.github.io/TrialSimulator/articles/defineNonTimeToEventEndpoints.html)
     - [Special case: longitudinal endpoints](https://zhangh12.github.io/TrialSimulator/articles/defineLongitudinalEndpoints.html)
   - [Define and summarize arms](https://zhangh12.github.io/TrialSimulator/articles/defineArms.html)
@@ -84,7 +90,6 @@ To efficiently utilize `TrialSimulator` for clinical trial simulations, we recom
   - [Group sequential test] See `?GroupSequentialTest`. 
   - [Graphical testing procedure] See `?GraphicalTesting`. 
   - [Combination test based on independent increment] extended from [Jorgens et al. 2019](https://onlinelibrary.wiley.com/doi/10.1002/pst.1926). Vignette is under development. 
-
 
 
 

@@ -648,10 +648,15 @@ to define <code>PFS</code> and <code>OS</code>. This implicitly assumes
 independence between the two time-to-event endpoints.
 <code>TrialSimulator</code> offers a built-in generator
 <code>CorrelatedPfsAndOs3()</code> to generate <code>PFS</code> and
-<code>OS</code> with correlation based on the ill-death model, which
+<code>OS</code> with correlation based on the illness-death model, which
 enjoys several nice properties. For selection of its arguments (i.e. 
-transition hazards), refer to vignette <a href="simulatePfsAndOs.html">Simulate Correlated Progression-Free
-Survival and Overall Survival as Endpoints in Clinical Trials</a>.</p>
+transition hazards), refer to vignette <a href="simulatePfsAndOsIdm.html">Simulate Correlated Progression-Free
+Survival and Overall Survival as Endpoints Under Illness-Death
+Model</a>. Note that data generated under the illness-death model may
+induce a time-varying OS hazard ratio between treatment arms, violating
+the proportional hazards (PH) assumption in a Cox model. For a data
+model that is more suitable for PH Cox analysis, refer to the built-in
+generator <code>CorrelatedPfsAndOs2()</code> and vignette of the <a href="simulatePfsAndOsGumbel.html">Gumbel copula method</a>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co">#&#39; define three arms</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>pbo <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;placebo&#39;</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>low <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;low dose&#39;</span>)</span>

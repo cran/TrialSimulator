@@ -1,7 +1,7 @@
 ## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
-  cache.path = 'cache/simulatePfsAndOs/',
+  cache.path = 'cache/simulatePfsAndOsIdm/',
   comment = '#>',
   dpi = 300,
   out.width = '100%'

@@ -879,14 +879,13 @@ analysis.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="do">## important: reset before calling run() again</span></span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">reset</span>()</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">plot_event =</span> <span class="cn">FALSE</span>, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>res <span class="ot">&lt;-</span> controller<span class="sc">$</span><span class="fu">get_output</span>()</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>res <span class="sc">%&gt;%</span> </span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">escape =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="st">&quot;striped&quot;</span>, </span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>                <span class="at">position =</span> <span class="st">&quot;left&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">&quot;100%&quot;</span>)</span></code></pre></div>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>res <span class="ot">&lt;-</span> controller<span class="sc">$</span><span class="fu">get_output</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>res <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">escape =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="st">&quot;striped&quot;</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>                <span class="at">position =</span> <span class="st">&quot;left&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">&quot;100%&quot;</span>)</span></code></pre></div>
 <div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; ">
 <table class="table table-striped" style="width: auto !important; ">
 <thead>
@@ -1369,55 +1368,55 @@ go
 </tbody>
 </table>
 </div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="do">## Number of overall Go</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">sum</span>(res<span class="sc">$</span>interim_decision <span class="sc">==</span> <span class="st">&#39;add dose arms&#39;</span> <span class="sc">&amp;</span> <span class="st">&#39;decision&#39;</span> <span class="sc">==</span> <span class="st">&#39;go&#39;</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="do">## Number of early trial termination</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="fu">sum</span>(res<span class="sc">$</span>interim_decision <span class="sc">==</span> <span class="st">&#39;stop trial&#39;</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; [1] 9</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="do">## Number of overall Go</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">sum</span>(res<span class="sc">$</span>interim_decision <span class="sc">==</span> <span class="st">&#39;add dose arms&#39;</span> <span class="sc">&amp;</span> <span class="st">&#39;decision&#39;</span> <span class="sc">==</span> <span class="st">&#39;go&#39;</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="do">## Number of early trial termination</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">sum</span>(res<span class="sc">$</span>interim_decision <span class="sc">==</span> <span class="st">&#39;stop trial&#39;</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; [1] 9</span></span></code></pre></div>
 </div>
 <div id="appendix-code-of-helper-function" class="section level2">
 <h2>Appendix: Code of Helper Function</h2>
 <p>For completeness, the full code of the helper functions
 <code>go_nogo()</code> is included below, which informs go/no-go
 decision at the end of the trial.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>go_nogo <span class="ot">&lt;-</span> <span class="cf">function</span>(data){</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="do">## candidate models for MCPMod</span></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  doses <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span>, <span class="fl">2.5</span>, <span class="dv">4</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  candidates <span class="ot">&lt;-</span> <span class="fu">Mods</span>(<span class="at">emax =</span> <span class="fu">c</span>(.<span class="dv">25</span>, <span class="dv">1</span>),</span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>                     <span class="at">sigEmax =</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="fu">c</span>(<span class="fl">2.5</span>, <span class="dv">4</span>)),</span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>                     <span class="at">betaMod =</span> <span class="fu">c</span>(<span class="fl">1.1</span>, <span class="fl">1.1</span>),</span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>                     <span class="at">placEff =</span> <span class="fu">log</span>(.<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">1</span>)),</span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>                     <span class="at">maxEff =</span> <span class="fu">log</span>(.<span class="dv">25</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">25</span>)) <span class="sc">-</span> <span class="fu">log</span>(.<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">1</span>)),</span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>                     <span class="at">doses =</span> doses)</span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(ep <span class="sc">~</span> <span class="fu">factor</span>(arm) <span class="sc">+</span> <span class="dv">0</span>, <span class="at">data =</span> data, <span class="at">family =</span> binomial)</span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  mu_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit)</span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  S_hat <span class="ot">&lt;-</span> <span class="fu">vcov</span>(fit)</span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>  <span class="do">## multiple contrast test</span></span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>  test <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">MCTtest</span>(<span class="at">dose =</span> doses,</span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>                               mu_hat, <span class="at">S =</span> S_hat,</span>
-<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>                               <span class="at">models =</span> candidates, <span class="at">type =</span> <span class="st">&quot;general&quot;</span>)</span>
-<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a></span>
-<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>  <span class="do">## model averaging</span></span>
-<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>  model <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">maFitMod</span>(<span class="at">dose =</span> doses,</span>
-<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a>                                 mu_hat, <span class="at">S =</span> S_hat,</span>
-<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a>                                 <span class="at">models =</span> <span class="fu">c</span>(<span class="st">&quot;emax&quot;</span>, <span class="st">&quot;sigEmax&quot;</span>, <span class="st">&quot;betaMod&quot;</span>))</span>
-<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a>  </span>
-<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a>  <span class="do">## predict response rate per dose</span></span>
-<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a>  prd <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, <span class="at">summaryFct =</span> median, <span class="at">doseSeq =</span> doses)</span>
-<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a>  </span>
-<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a>  <span class="do">## convert to scale of probability</span></span>
-<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a>  prd_rate <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>prd))</span>
-<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a></span>
-<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a>  <span class="do">## go/no-go rule: MCP test p-value &lt; 0.05 and estimated effect &gt; 10%</span></span>
-<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">min</span>(<span class="fu">attr</span>(test<span class="sc">$</span>tStat, <span class="st">&#39;pVal&#39;</span>)) <span class="sc">&lt;</span> .<span class="dv">05</span> <span class="sc">&amp;</span></span>
-<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a>           <span class="fu">max</span>(prd_rate <span class="sc">-</span> prd_rate[<span class="dv">1</span>]) <span class="sc">&gt;</span> .<span class="dv">1</span>, <span class="st">&#39;go&#39;</span>, <span class="st">&#39;no-go&#39;</span>)</span>
-<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a></span>
-<span id="cb12-36"><a href="#cb12-36" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>go_nogo <span class="ot">&lt;-</span> <span class="cf">function</span>(data){</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="do">## candidate models for MCPMod</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  doses <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span>, <span class="fl">2.5</span>, <span class="dv">4</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  candidates <span class="ot">&lt;-</span> <span class="fu">Mods</span>(<span class="at">emax =</span> <span class="fu">c</span>(.<span class="dv">25</span>, <span class="dv">1</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>                     <span class="at">sigEmax =</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="fu">c</span>(<span class="fl">2.5</span>, <span class="dv">4</span>)),</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>                     <span class="at">betaMod =</span> <span class="fu">c</span>(<span class="fl">1.1</span>, <span class="fl">1.1</span>),</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>                     <span class="at">placEff =</span> <span class="fu">log</span>(.<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">1</span>)),</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>                     <span class="at">maxEff =</span> <span class="fu">log</span>(.<span class="dv">25</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">25</span>)) <span class="sc">-</span> <span class="fu">log</span>(.<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">1</span>)),</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>                     <span class="at">doses =</span> doses)</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(ep <span class="sc">~</span> <span class="fu">factor</span>(arm) <span class="sc">+</span> <span class="dv">0</span>, <span class="at">data =</span> data, <span class="at">family =</span> binomial)</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>  mu_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit)</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>  S_hat <span class="ot">&lt;-</span> <span class="fu">vcov</span>(fit)</span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>  <span class="do">## multiple contrast test</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>  test <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">MCTtest</span>(<span class="at">dose =</span> doses,</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>                               mu_hat, <span class="at">S =</span> S_hat,</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>                               <span class="at">models =</span> candidates, <span class="at">type =</span> <span class="st">&quot;general&quot;</span>)</span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>  <span class="do">## model averaging</span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a>  model <span class="ot">&lt;-</span> DoseFinding<span class="sc">::</span><span class="fu">maFitMod</span>(<span class="at">dose =</span> doses,</span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a>                                 mu_hat, <span class="at">S =</span> S_hat,</span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a>                                 <span class="at">models =</span> <span class="fu">c</span>(<span class="st">&quot;emax&quot;</span>, <span class="st">&quot;sigEmax&quot;</span>, <span class="st">&quot;betaMod&quot;</span>))</span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a>  </span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a>  <span class="do">## predict response rate per dose</span></span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a>  prd <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, <span class="at">summaryFct =</span> median, <span class="at">doseSeq =</span> doses)</span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a>  </span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1"></a>  <span class="do">## convert to scale of probability</span></span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1"></a>  prd_rate <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>prd))</span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1"></a>  <span class="do">## go/no-go rule: MCP test p-value &lt; 0.05 and estimated effect &gt; 10%</span></span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="fu">min</span>(<span class="fu">attr</span>(test<span class="sc">$</span>tStat, <span class="st">&#39;pVal&#39;</span>)) <span class="sc">&lt;</span> .<span class="dv">05</span> <span class="sc">&amp;</span></span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1"></a>           <span class="fu">max</span>(prd_rate <span class="sc">-</span> prd_rate[<span class="dv">1</span>]) <span class="sc">&gt;</span> .<span class="dv">1</span>, <span class="st">&#39;go&#39;</span>, <span class="st">&#39;no-go&#39;</span>)</span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 
 

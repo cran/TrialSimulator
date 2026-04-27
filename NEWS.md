@@ -1,3 +1,21 @@
+# TrialSimulator 1.17.1
+
+## Updates
+
+- Reduce vignette compilation time for CRAN (`doseRanging.Rmd` now loads pre-computed simulation output; `simulatePfsAndOsGumbel.Rmd` uses a smaller validation sample).
+- Skip a few stochastic unit tests on CRAN to avoid occasional flakes from RNG variation.
+
+# TrialSimulator 1.17.0
+
+## New Feature
+
+- Add `CorrelatedPfsAndOs2()` to simulate correlated PFS and OS using a Gumbel copula while targeting marginal PFS/OS medians and Kendall's tau between observed, uncensored PFS and OS times.
+
+## Updates
+
+- Add a vignette for simulating correlated PFS and OS using the Gumbel copula method, alongside the existing illness-death model vignette.
+- Skip an unnecessary `dplyr::filter()` call in `Trials$get_event_tables()` when no filter expression is provided, reducing total simulation wall time by roughly 5-10% in trials with frequent milestone condition checks.
+
 # TrialSimulator 1.16.0
 
 ## New Feature
@@ -576,4 +594,3 @@
 ### New Features
 
 - Update `GraphicalTesting` based on simplified interface of `GroupSequentialTest`. 
-

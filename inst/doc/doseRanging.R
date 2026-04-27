@@ -206,15 +206,19 @@ output %>%
                 position = "left") %>%
   scroll_box(width = "100%")
 
-## ----message=FALSE------------------------------------------------------------
-## important: reset before calling run() again
-controller$reset()
-controller$run(n = 10, plot_event = FALSE, silent = TRUE)
-res <- controller$get_output()
+## ----eval=FALSE, message=FALSE------------------------------------------------
+# ## important: reset before calling run() again
+# controller$reset()
+# controller$run(n = 10, plot_event = FALSE, silent = TRUE)
+# res <- controller$get_output()
 
-res %>% 
-  kable(escape = FALSE) %>% 
-  kable_styling(bootstrap_options = "striped", 
+## ----echo=FALSE---------------------------------------------------------------
+res <- TrialSimulator:::getDoseRangingOutput()
+
+## -----------------------------------------------------------------------------
+res %>%
+  kable(escape = FALSE) %>%
+  kable_styling(bootstrap_options = "striped",
                 full_width = FALSE,
                 position = "left") %>%
   scroll_box(width = "100%")

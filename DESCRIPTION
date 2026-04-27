@@ -1,12 +1,13 @@
 Package: TrialSimulator
 Type: Package
 Title: Clinical Trial Simulator
-Version: 1.16.0
+Version: 1.17.1
 Description: Simulate phase II and/or phase III clinical trials. It supports various types of endpoints and adaptive strategies. Tools for carrying out graphical testing procedure and combination test under group sequential design are also provided. 
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: base64enc, dplyr, emmeans, ggplot2, gMCPLite, htmltools,
-        mvtnorm, R6, rlang, rpact, rstudioapi, survival, utils
+Imports: base64enc, copula, dplyr, emmeans, ggplot2, gMCPLite,
+        htmltools, mvtnorm, R6, rlang, rpact, rstudioapi, survival,
+        utils
 Authors@R: 
     person("Han", "Zhang", , "zhangh.ustc@gmail.com", role = c("cre", "aut"))
 RoxygenNote: 7.3.3
@@ -19,8 +20,8 @@ BugReports: https://github.com/zhangh12/TrialSimulator/issues
 Depends: R (>= 4.1.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2026-04-13 16:23:13 UTC; zhhan
+Packaged: 2026-04-26 05:00:47 UTC; zhhan
 Author: Han Zhang [cre, aut]
 Maintainer: Han Zhang <zhangh.ustc@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-04-13 19:10:16 UTC
+Date/Publication: 2026-04-27 08:00:11 UTC

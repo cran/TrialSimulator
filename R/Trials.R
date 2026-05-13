@@ -1253,29 +1253,61 @@ Trials <- R6::R6Class(
         arms <- self$get_arms_name()
       }
 
-      event_counts <- self$get_event_tables(arms, ...)
-
-      missing_endpoints <- setdiff(endpoints, names(event_counts))
-      if(length(missing_endpoints) > 0){
-        stop('Endpoints <',
-             paste0(missing_endpoints, collapse = ', '),
-             '> are missing in event_counts when determining data lock time. ')
-      }
-
-      milestone_times <- NULL
-      for(i in seq_along(endpoints)){
-        if(max(event_counts[[endpoints[i]]]$n_events) < target_n_events[i]){
-          warning('No enough events/samples for endpoint <', endpoints[i],
-               '> to reach the target number <', target_n_events[i], '>. ',
-               immediate. = TRUE)
-          milestone_times <- c(milestone_times, Inf)
-        }else{
-
-          milestone_times <-
-            c(milestone_times,
-              min(event_counts[[endpoints[i]]]$calendar_time[
-                event_counts[[endpoints[i]]]$n_events >= target_n_events[i]
-              ]))
+      ## Fast path: when no filter expressions are passed AND the C++ toggle
+      ## is enabled (the default), use C++ helpers that compute the lock time
+      ## directly without building intermediate event-count data.frames.
+      ## The R fallback is used when callers pass filter conditions via ...
+      ## (which require dplyr) OR when the user has set
+      ## options(trialsimulator.use_cpp = FALSE).
+      if(.use_cpp_lock_time() && length(rlang::enquos(...)) == 0L){
+        td <- self$get_trial_data()
+        td <- td[td$arm %in% arms, , drop = FALSE]
+        milestone_times <- vapply(seq_along(endpoints), function(i){
+          ep <- endpoints[i]
+          n  <- as.integer(target_n_events[i])
+          ec <- paste0(ep, '_event')
+          rc <- paste0(ep, '_readout')
+          if(ec %in% names(td)){
+            mt <- find_event_lock_time_cpp(
+              td$enroll_time, td[[ep]], as.integer(td[[ec]]), n)
+          }else if(rc %in% names(td)){
+            mt <- find_readout_lock_time_cpp(
+              td$enroll_time, td[[rc]], !is.na(td[[ep]]), n)
+          }else{
+            stop('Endpoint <', ep, '> is missing in trial data when ',
+                 'determining data lock time. ')
+          }
+          if(!private$silent && is.infinite(mt)){
+            warning('No enough events/samples for endpoint <', ep,
+                    '> to reach the target number <', n, '>. ',
+                    immediate. = TRUE)
+          }
+          mt
+        }, numeric(1))
+      }else{
+        event_counts <- self$get_event_tables(arms, ...)
+        missing_endpoints <- setdiff(endpoints, names(event_counts))
+        if(length(missing_endpoints) > 0){
+          stop('Endpoints <',
+               paste0(missing_endpoints, collapse = ', '),
+               '> are missing in event_counts when determining data lock time. ')
+        }
+        milestone_times <- NULL
+        for(i in seq_along(endpoints)){
+          if(max(event_counts[[endpoints[i]]]$n_events) < target_n_events[i]){
+            if(!private$silent){
+              warning('No enough events/samples for endpoint <', endpoints[i],
+                   '> to reach the target number <', target_n_events[i], '>. ',
+                   immediate. = TRUE)
+            }
+            milestone_times <- c(milestone_times, Inf)
+          }else{
+            milestone_times <-
+              c(milestone_times,
+                min(event_counts[[endpoints[i]]]$calendar_time[
+                  event_counts[[endpoints[i]]]$n_events >= target_n_events[i]
+                ]))
+          }
         }
       }
 
@@ -1285,11 +1317,6 @@ Trials <- R6::R6Class(
           type %in% 'any' ~ min(milestone_times),
           TRUE ~ -Inf
         )
-
-      if(is.infinite(lock_time)){
-        stop('None of the endpoints can reach target event number during the trial. \n',
-             'Consider reducing the target in milestone() and/or extending trial duration in trial(). ')
-      }
 
       lock_time
 
@@ -1329,24 +1356,37 @@ Trials <- R6::R6Class(
         arms <- self$get_arms_name()
       }
 
-      event_counts <- self$get_event_tables(arms, ...)
-
-      if(max(event_counts[['patient_id']]$n_events) < target_n_patients){
-        warning('No enough patients to reach the target number <', target_n_patients, '>. ',
-                immediate. = TRUE)
-        milestone_time <- Inf
+      ## Fast path: when no filter expressions are passed AND the C++ toggle
+      ## is enabled, use the C++ helper that computes the enrollment lock
+      ## time directly. Filter expressions or options(trialsimulator.use_cpp=FALSE)
+      ## route through the dplyr-backed R path.
+      if(.use_cpp_lock_time() && length(rlang::enquos(...)) == 0L){
+        td <- self$get_trial_data()
+        et <- td$enroll_time[td$arm %in% arms]
+        milestone_time <- find_enrollment_lock_time_cpp(
+          et, as.integer(target_n_patients))
+        if(!private$silent && is.infinite(milestone_time)){
+          warning('No enough patients to reach the target number <',
+                  target_n_patients, '>. ', immediate. = TRUE)
+        }else{
+          milestone_time <- milestone_time + min_treatment_duration
+        }
       }else{
-        milestone_time <- min(event_counts[['patient_id']]$calendar_time[
-              event_counts[['patient_id']]$n_events >= target_n_patients
-            ]) + min_treatment_duration
+        event_counts <- self$get_event_tables(arms, ...)
+        if(max(event_counts[['patient_id']]$n_events) < target_n_patients){
+          if(!private$silent){
+            warning('No enough patients to reach the target number <', target_n_patients, '>. ',
+                    immediate. = TRUE)
+          }
+          milestone_time <- Inf
+        }else{
+          milestone_time <- min(event_counts[['patient_id']]$calendar_time[
+                event_counts[['patient_id']]$n_events >= target_n_patients
+              ]) + min_treatment_duration
+        }
       }
 
       lock_time <- milestone_time
-
-      if(is.infinite(lock_time)){
-        stop('None of the endpoints can reach target event number during the trial. \n',
-             'Consider reducing the target in milestone() and/or extending trial duration in trial(). ')
-      }
 
       lock_time
 
@@ -1480,6 +1520,15 @@ Trials <- R6::R6Class(
     #' @param milestone_name assign milestone name as the name of locked data for
     #' future reference.
     lock_data = function(at_calendar_time, milestone_name){
+
+      if(is.infinite(at_calendar_time)){
+        stop('Trial data can only be locked at a finite calendar time. \n',
+             'Check your triggering condition for the milestone <',
+             milestone_name, '>. If it is composite, ',
+             'make sure that at least one condition can be reached in a realistic time window. ',
+             'If not, you may consider reducing the target number in milestone(), ',
+             'and/or extending trial duration in trial(). ')
+      }
 
       trial_data <- self$get_trial_data()
 

@@ -13,9 +13,6 @@ library(knitr)
 library(ggplot2)
 library(TrialSimulator)
 
-if (!requireNamespace('copula', quietly = TRUE)) {
-  knitr::opts_chunk$set(eval = FALSE)
-}
 
 ## ----example-endpoint, results = 'asis'---------------------------------------
 pfs_and_os <- endpoint(name = c('pfs', 'os'),

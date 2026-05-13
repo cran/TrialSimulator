@@ -1,3 +1,21 @@
+# TrialSimulator 1.18.4
+
+## Bug Fix
+
+- Re-export `Surv()` and `strata()` from the `survival` package so that user-supplied formulas in action functions (e.g. `Surv(os, os_event) ~ arm`) work after `library(TrialSimulator)` alone, without requiring `library(survival)` or the `survival::` prefix. This fixes errors in parallel runs (`n_workers > 1`) where each worker only attaches `TrialSimulator` (reported in #14).
+
+# TrialSimulator 1.18.1
+
+## Bug Fix
+
+- Fix a bug where a composite milestone triggering condition combined with `'or'` would error out when not all of its branches could be reached, instead of resolving to the reachable branch.
+
+# TrialSimulator 1.18.0
+
+## New Feature
+
+- Accelerate milestone trigger evaluation via C++ helpers (Rcpp) for `eventNumber()` and `enrollment()` conditions. Wall-time reduction ranges from a few percent to ~20% depending on how condition-evaluation-heavy the design is, with no change to results. Set `options(trialsimulator.use_cpp = FALSE)` to fall back to the original R implementation.
+
 # TrialSimulator 1.17.1
 
 ## Updates

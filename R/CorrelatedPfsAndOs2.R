@@ -18,7 +18,7 @@
 #' @param median_pfs numeric. Median of PFS.
 #' @param median_os numeric. Median of OS.
 #' @param kendall numeric. Kendall's tau between observed, uncensored PFS and OS.
-#' Must be positive and usually away from zero. Note that
+#' Must be non-negative and usually away from zero. Note that
 #' this argument is not the Kendall's tau between TTP and OS.
 #' @param pfs_name column name of PFS in returned data frame. It must be
 #' consistent with name in the function \code{endpoint()}.
@@ -64,6 +64,10 @@ CorrelatedPfsAndOs2 <- function(n, median_pfs, median_os, kendall, pfs_name = 'p
     stop('Median of PFS must be positive. ')
   }
 
+  if(median_pfs >= median_os){
+    stop('Median of PFS must be strictly less than median of OS. ')
+  }
+
   f <- function(tau, kendall, median_pfs, median_os){
     kendall - 1 + (1 - tau) * (1 - (median_pfs / median_os)^(1/(1-tau)))
   }
@@ -74,7 +78,7 @@ CorrelatedPfsAndOs2 <- function(n, median_pfs, median_os, kendall, pfs_name = 'p
                      median_os = median_os),
              silent = TRUE)
 
-  if('try-error' %in% class(fit)){
+  if(inherits(fit, 'try-error')){
     stop("Kendall's tau (", kendall, ') between OS and PFS is too small given the two medians ',
          median_pfs, ' and ', median_os, '. ')
   }
@@ -83,29 +87,35 @@ CorrelatedPfsAndOs2 <- function(n, median_pfs, median_os, kendall, pfs_name = 'p
   tau <- fit$root
   theta <- 1 / (1 - tau)
 
-  dsgn <- copula::gumbelCopula(param = theta, dim = 2)
-  u <- copula::rCopula(n, dsgn)
+  ## Sample (TTP, OS) from a Gumbel-survival-copula structure via the
+  ## frailty / Marshall-Olkin construction:
+  ##   V is positive alpha-stable with alpha = 1/theta, drawn by the
+  ##   Chambers-Mallows-Stuck algorithm; given V, -log(U_i) = (E_i / V)^alpha
+  ##   for E_i ~ Exp(1), so we skip materialising U.
+  alpha <- 1 / theta
+  W <- runif(n, -pi/2, pi/2)
+  Estab <- rexp(n)
+  V <- (sin(alpha * (W + pi/2)) / cos(W)^(1/alpha)) *
+       (cos(W - alpha * (W + pi/2)) / Estab)^((1 - alpha)/alpha)
 
   rate_pfs <- log(2) / median_pfs
   rate_os <- log(2) / median_os
 
   rate_ttp <- (rate_pfs^theta - rate_os^theta)^(1/theta)
 
-  ttp <- -log(u[, 1]) / rate_ttp
-  os <- -log(u[, 2]) / rate_os
+  ttp <- (rexp(n) / V)^(1/theta) / rate_ttp
+  os <- (rexp(n) / V)^(1/theta) / rate_os
 
-  pfs <- ifelse(ttp > os, os, ttp)
+  pfs <- pmin(ttp, os)
 
   ## Kendall's tau between OS and PFS (i.e. min(TTP, OS))
   tau_ <- 1 - 1/theta * (1 - (median_pfs / median_os)^theta)
 
-  data.frame(pfs, os) %>%
-    mutate(pfs_event = 1) %>%
-    mutate(os_event = 1) %>%
-    rename(!!paste0(pfs_name, '_event') := .data$pfs_event) %>%
-    rename(!!pfs_name := .data$pfs) %>%
-    rename(!!paste0(os_name, '_event') := .data$os_event) %>%
-    rename(!!os_name := .data$os)
+  out <- data.frame(pfs, os, pfs_event = 1, os_event = 1)
+  names(out) <- c(pfs_name, os_name,
+                  paste0(pfs_name, '_event'),
+                  paste0(os_name, '_event'))
+  out
 
 }
 

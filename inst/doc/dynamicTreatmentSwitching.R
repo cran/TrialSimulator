@@ -10,7 +10,6 @@ knitr::opts_chunk$set(
 ## ----setup, echo = FALSE, message = FALSE-------------------------------------
 library(TrialSimulator)
 library(mvtnorm)
-library(dplyr)
 library(kableExtra)
 
 ## ----eval=FALSE---------------------------------------------------------------
@@ -50,16 +49,14 @@ msg <- tryCatch(
 #   # browser()
 #   switch_to <- sample(c('low', 'high', 'stay'), nrow(patient_data),
 #                         replace = TRUE, prob = c(.3, .4, .3))
+#   ## placebo patients who progressed before death (pfs < os) and were
+#   ## assigned a dose are the switchers; the rest are simply not returned
+#   is_switcher <- patient_data$arm == 'placebo' &
+#     patient_data$pfs < patient_data$os & switch_to != 'stay'
+#   sw <- patient_data[is_switcher, ]
 #   data.frame(
-#     patient_id = patient_data$patient_id,
-#     new_treatment =
-#       dplyr::case_when(
-#         # patient die before progression cannot switch
-#         patient_data$os == patient_data$pfs ~ NA_character_,
-#         patient_data$arm == 'placebo' & switch_to == 'low' ~ 'low dose',
-#         patient_data$arm == 'placebo' & switch_to == 'high' ~ 'high dose',
-#         TRUE ~ NA_character_
-#       )
+#     patient_id    = sw$patient_id,
+#     new_treatment = ifelse(switch_to[is_switcher] == 'low', 'low dose', 'high dose')
 #   )
 # 
 # }
@@ -109,13 +106,11 @@ msg <- tryCatch(
 # treatment_allocator <- function(patient_data){
 #   ## add break point to develop and debug
 #   # browser()
+#   ## low-dose non-responders switch to high dose
+#   sw <- patient_data[patient_data$arm == 'low dose' & patient_data$response == 0, ]
 #   data.frame(
-#     patient_id = patient_data$patient_id,
-#     new_treatment =
-#       dplyr::case_when(
-#         patient_data$arm == 'low dose' & patient_data$response == 0 ~ 'high dose',
-#         TRUE ~ NA_character_
-#       )
+#     patient_id    = sw$patient_id,
+#     new_treatment = 'high dose'
 #   )
 # 
 # }
@@ -137,13 +132,11 @@ msg <- tryCatch(
 treatment_allocator <- function(patient_data){
   ## add break point to develop and debug
   # browser()
+  ## all placebo patients switch
+  sw <- patient_data[patient_data$arm == 'placebo', ]
   data.frame(
-    patient_id = patient_data$patient_id,
-    new_treatment =
-      dplyr::case_when(
-        patient_data$arm == 'placebo' ~ 'new treatment',
-        TRUE ~ NA_character_
-      )
+    patient_id    = sw$patient_id,
+    new_treatment = 'new treatment'
   )
 
 }

@@ -38,6 +38,18 @@ orr_trt <- endpoint(name = 'orr', type = 'non-tte',
 trt <- arm(name = 'treatment')
 trt$add_endpoints(tumor_cfb_trt, orr_trt)
 
+## ----baseline-ep--------------------------------------------------------------
+## a baseline biomarker available at randomization
+biomarker <- endpoint(name = 'biomarker', type = 'baseline',
+                      generator = rbinom, size = 1, prob = .3)
+
+## ----baseline-equiv, eval = FALSE---------------------------------------------
+# ## these are equivalent
+# endpoint(name = 'biomarker', type = 'baseline',
+#          generator = rbinom, size = 1, prob = .3)
+# endpoint(name = 'biomarker', type = 'non-tte', readout = c(biomarker = 0),
+#          generator = rbinom, size = 1, prob = .3)
+
 ## ----oheahs-------------------------------------------------------------------
 dropout_pars <- weibullDropout(c(12, 18), c(.15, .30))
 dropout_pars

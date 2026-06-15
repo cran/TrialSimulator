@@ -18,11 +18,10 @@ Regimens <- R6::R6Class(
     #' @param what a function determining whether patients' data would be
     #' updated due to switching treatment. It takes \code{patient_data},
     #' a data frame as argument, and returns a data frame of two columns
-    #' \code{patient_id} and \code{new_treatment}. Patients with \code{NA} in
-    #' \code{new_treatment} will be skipped.
-    #' The number of rows in the returned data frame may be smaller than the
-    #' number of patients in the input data frame. This indicates that some
-    #' patients' data will not be modifier.
+    #' \code{patient_id} and \code{new_treatment}, with one row per switching
+    #' patient. The number of rows in the returned data frame may be smaller
+    #' than the number of patients in the input data frame; patients that are
+    #' left out are simply not switched.
     #' Note that the returned object will be passed into function `how()`, which
     #' is also provide by users. This argument can also be a
     #' list of functions that will be executed sequentially. No default value.
@@ -30,23 +29,33 @@ Regimens <- R6::R6Class(
     #' to another treatment regimen, measured from the time of enrollment.
     #' It takes \code{patient_data}, a data frame as
     #' argument, and returns a data frame of two columns \code{patient_id} and
-    #' \code{switch_time} (from \code{enroll_time}). No \code{NA} is allowed
-    #' in \code{switch_time} and the number of rows in the returned data frame
-    #' must equal the number of rows in \code{patient_data}, i.e., switching
-    #' time must be specified to every patients.
+    #' \code{switch_time} (from \code{enroll_time}). The number of rows in the
+    #' returned data frame must equal the number of rows in \code{patient_data},
+    #' i.e., a switching time must be specified for every patient (missing
+    #' values are not allowed).
     #' Note that the returned object will be passed into function `how()`, which
     #' is also provided by users. This argument can also be a
     #' list of functions that will be executed sequentially. No default value.
     #' @param how a function updating patients' data after treatment switching.
-    #' Only modified columns and \code{patient_id} are returned. A cell will
-    #' be omitted if \code{NA}, meaning no change to that patient for the endpoint
-    #' or other variables. Equivalently, users can also fill the cell with
-    #' its original value. This argument can also be a list of functions that
-    #' will be executed sequentially. No default value.
+    #' Only modified columns and \code{patient_id} are returned. For a cell that
+    #' should not change, return its original value. Only \emph{post-switch}
+    #' outcomes may be changed:
+    #' returning a value that differs from the original for an endpoint whose
+    #' readout/event is at or before \code{switch_time} raises an error. This
+    #' argument can also be a list of functions that will be executed
+    #' sequentially. No default value.
+    #' @param earliest_crossover_calendar_time numeric. The earliest calendar
+    #' time at which the triplet(s) may take effect. \code{0} (default) is the
+    #' classic enrollment-time regimen, applied from the first enrollment. A
+    #' positive value marks the triplet(s) as a milestone-triggered crossover
+    #' (eligibility filtering, switch-time validation and the post-switch data
+    #' mask). This is set internally by \code{trial$crossover()}; it is not a
+    #' user argument of \code{regimen()}.
     #' @param ... (optional) named arguments routed to one or more of
     #' \code{what}, \code{when}, and \code{how}.
     initialize =
-      function(what, when, how, ...){
+      function(what, when, how, ...,
+               earliest_crossover_calendar_time = 0){
 
         dots <- list(...)
         if(length(dots) && (is.null(names(dots)) || any(names(dots) == ''))){
@@ -69,6 +78,9 @@ Regimens <- R6::R6Class(
         private$what_args <- private$route_args(what, dots, 'what')
         private$when_args <- private$route_args(when, dots, 'when')
         private$how_args  <- private$route_args(how,  dots, 'how')
+
+        n_triplets <- length(private$treatment_allocator)
+        private$earliest_crossover_calendar_time <- rep(earliest_crossover_calendar_time, n_triplets)
 
         ## Every dot arg must match at least one parameter across all functions
         all_consumed <- unique(unlist(lapply(
@@ -178,6 +190,58 @@ Regimens <- R6::R6Class(
     #' @param index integer.
     get_data_modifier_args = function(index){
       private$how_args[[index]]
+    },
+
+    #' @description
+    #' return the earliest crossover calendar time of triplet(s)
+    #' @param index integer. Index of triplet. Return all if \code{NULL}.
+    get_earliest_crossover_calendar_time = function(index = NULL){
+      if(is.null(index)){
+        return(private$earliest_crossover_calendar_time)
+      }
+      private$earliest_crossover_calendar_time[[index]]
+    },
+
+    #' @description
+    #' append one more triplet to the regimen. Used by milestone-triggered
+    #' crossover to stack a new \code{what}/\code{when}/\code{how} (with its own
+    #' \code{earliest_crossover_calendar_time}) onto an existing regimen without
+    #' overwriting earlier triplets. Triplets are executed in append order.
+    #'
+    #' @param what,when,how see \code{regimen()}.
+    #' @param earliest_crossover_calendar_time numeric. Earliest calendar time
+    #' for the appended triplet. A positive value marks it as a crossover.
+    #' @param ... (optional) named arguments routed to \code{what}, \code{when},
+    #' and/or \code{how}.
+    append_triplet = function(what, when, how, ...,
+                              earliest_crossover_calendar_time = 0){
+
+      dots <- list(...)
+      if(length(dots) && (is.null(names(dots)) || any(names(dots) == ''))){
+        stop('All extra arguments to append_triplet(...) must be named; ',
+             'they are routed to `what`, `when`, and/or `how`.')
+      }
+
+      private$validate_arguments(what, when, how)
+
+      if(is.function(what)){
+        what <- list(what)
+        when <- list(when)
+        how  <- list(how)
+      }
+
+      private$treatment_allocator <- c(private$treatment_allocator, what)
+      private$time_selector       <- c(private$time_selector, when)
+      private$data_modifier        <- c(private$data_modifier, how)
+
+      private$what_args <- c(private$what_args, private$route_args(what, dots, 'what'))
+      private$when_args <- c(private$when_args, private$route_args(when, dots, 'when'))
+      private$how_args  <- c(private$how_args,  private$route_args(how,  dots, 'how'))
+
+      n_new <- length(what)
+      private$earliest_crossover_calendar_time <- c(private$earliest_crossover_calendar_time, rep(earliest_crossover_calendar_time, n_new))
+
+      invisible(self)
     }
   ),
 
@@ -188,6 +252,7 @@ Regimens <- R6::R6Class(
     what_args = NULL,
     when_args = NULL,
     how_args  = NULL,
+    earliest_crossover_calendar_time = NULL,
 
     validate_arguments = function(what, when, how){
 

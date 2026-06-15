@@ -424,11 +424,9 @@ consider include:</p>
 <li>switching destination depends on subgroup, biomarker, etc.</li>
 </ul>
 <p>The output of <code>what()</code> consists of two columns
-<code>patient_id</code> and <code>new_treatment</code>. Only switchers
-are returned. Any patients with <code>NA</code> as their
-<code>new_treatment</code> are omitted. Patients not selected for
-switching simply remain under their original treatment path and outcome
-trajectory.</p>
+<code>patient_id</code> and <code>new_treatment</code>, with one row per
+switcher. Patients not included simply remain under their original
+treatment path and outcome trajectory.</p>
 </div>
 <div id="the-role-of-when" class="section level2">
 <h2>The Role of <code>when()</code></h2>
@@ -482,13 +480,13 @@ testing or decision making, etc.</li>
 <p>This function returns a data frame of <code>patient_id</code> and
 columns of endpoints that are altered. We do not have to return an
 endpoint if it is not updated for any patient. For an endpoint that is
-updated for a subset of switchers, simply set the unchanged cells to
-<code>NA</code> and the package will ignore them. We can also fill those
-cells with their original values when being passed to
-<code>how()</code>. Note that we should never apply dropout or censoring
-manually in <code>how()</code> because <code>TrialSimulator</code> will
-handle that automatically when triggering milestones and prepare locked
-data in action functions.</p>
+updated for only a subset of switchers, return the unchanged cells at
+their original value – the natural
+<code>ifelse(condition, new_value, original)</code> pattern. Note that
+we should never apply dropout or censoring manually in
+<code>how()</code> because <code>TrialSimulator</code> will handle that
+automatically when triggering milestones and prepare locked data in
+action functions.</p>
 <p>The three-functions design in <code>regimen</code> provides a useful
 balance between structure and flexibility. The interface mirrors the way
 investigators naturally describe switching designs. It encourages
@@ -540,21 +538,19 @@ function like</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>treatment_allocator <span class="ot">&lt;-</span> <span class="cf">function</span>(patient_data){</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="do">## add break point to develop and debug</span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="co"># browser()</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  switch_to <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">&#39;low&#39;</span>, <span class="st">&#39;high&#39;</span>, <span class="st">&#39;stay&#39;</span>), <span class="fu">nrow</span>(patient_data), </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  switch_to <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">&#39;low&#39;</span>, <span class="st">&#39;high&#39;</span>, <span class="st">&#39;stay&#39;</span>), <span class="fu">nrow</span>(patient_data),</span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                        <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> <span class="fu">c</span>(.<span class="dv">3</span>, .<span class="dv">4</span>, .<span class="dv">3</span>))</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    <span class="at">patient_id =</span> patient_data<span class="sc">$</span>patient_id,</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>    <span class="at">new_treatment =</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>        <span class="co"># patient die before progression cannot switch</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>        patient_data<span class="sc">$</span>os <span class="sc">==</span> patient_data<span class="sc">$</span>pfs <span class="sc">~</span> <span class="cn">NA_character_</span>, </span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>        patient_data<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;placebo&#39;</span> <span class="sc">&amp;</span> switch_to <span class="sc">==</span> <span class="st">&#39;low&#39;</span> <span class="sc">~</span> <span class="st">&#39;low dose&#39;</span>,</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>        patient_data<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;placebo&#39;</span> <span class="sc">&amp;</span> switch_to <span class="sc">==</span> <span class="st">&#39;high&#39;</span> <span class="sc">~</span> <span class="st">&#39;high dose&#39;</span>,</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>        <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>      )</span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  )</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="do">## placebo patients who progressed before death (pfs &lt; os) and were</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="do">## assigned a dose are the switchers; the rest are simply not returned</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  is_switcher <span class="ot">&lt;-</span> patient_data<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;placebo&#39;</span> <span class="sc">&amp;</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>    patient_data<span class="sc">$</span>pfs <span class="sc">&lt;</span> patient_data<span class="sc">$</span>os <span class="sc">&amp;</span> switch_to <span class="sc">!=</span> <span class="st">&#39;stay&#39;</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  sw <span class="ot">&lt;-</span> patient_data[is_switcher, ]</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    <span class="at">patient_id    =</span> sw<span class="sc">$</span>patient_id,</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>    <span class="at">new_treatment =</span> <span class="fu">ifelse</span>(switch_to[is_switcher] <span class="sc">==</span> <span class="st">&#39;low&#39;</span>, <span class="st">&#39;low dose&#39;</span>, <span class="st">&#39;high dose&#39;</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  )</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>}</span></code></pre></div>
 <p>The <code>when()</code> function simply returned the progression
 time, i.e., switching does not relies on event after the switching
 time.</p>
@@ -610,16 +606,14 @@ respond are switched to a higher dose.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>treatment_allocator <span class="ot">&lt;-</span> <span class="cf">function</span>(patient_data){</span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="do">## add break point to develop and debug</span></span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="co"># browser()</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    <span class="at">patient_id =</span> patient_data<span class="sc">$</span>patient_id,</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    <span class="at">new_treatment =</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>        patient_data<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;low dose&#39;</span> <span class="sc">&amp;</span> patient_data<span class="sc">$</span>response <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&#39;high dose&#39;</span>,</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>        <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>      )</span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  )</span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="do">## low-dose non-responders switch to high dose</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  sw <span class="ot">&lt;-</span> patient_data[patient_data<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;low dose&#39;</span> <span class="sc">&amp;</span> patient_data<span class="sc">$</span>response <span class="sc">==</span> <span class="dv">0</span>, ]</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    <span class="at">patient_id    =</span> sw<span class="sc">$</span>patient_id,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>    <span class="at">new_treatment =</span> <span class="st">&#39;high dose&#39;</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  )</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>}</span></code></pre></div>
 <p>When implementing time selector for the function <code>when()</code>,
 the switching time is set to the readout time</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>time_selector <span class="ot">&lt;-</span> <span class="cf">function</span>(patient_data){</span>
@@ -644,16 +638,14 @@ shorter than a month, the switching time is set to
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>treatment_allocator <span class="ot">&lt;-</span> <span class="cf">function</span>(patient_data){</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="do">## add break point to develop and debug</span></span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="co"># browser()</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>    <span class="at">patient_id =</span> patient_data<span class="sc">$</span>patient_id,</span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>    <span class="at">new_treatment =</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>        patient_data<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;placebo&#39;</span> <span class="sc">~</span> <span class="st">&#39;new treatment&#39;</span>,</span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>        <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>      )</span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  )</span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="do">## all placebo patients switch</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  sw <span class="ot">&lt;-</span> patient_data[patient_data<span class="sc">$</span>arm <span class="sc">==</span> <span class="st">&#39;placebo&#39;</span>, ]</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>    <span class="at">patient_id    =</span> sw<span class="sc">$</span>patient_id,</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>    <span class="at">new_treatment =</span> <span class="st">&#39;new treatment&#39;</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  )</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>}</span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>time_selector <span class="ot">&lt;-</span> <span class="cf">function</span>(patient_data){</span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="do">## add break point to develop and debug</span></span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="co"># browser()</span></span>

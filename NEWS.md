@@ -1,3 +1,26 @@
+# TrialSimulator 1.20.0
+
+## New Feature
+
+- `endpoint()` now accepts `type = "baseline"` for a non-tte endpoint observed at randomization (e.g., a baseline covariate, biomarker, or subgroup indicator). Its readout is `0` by definition and must be omitted from `readout`. For forward compatibility, a non-tte endpoint observed at randomization can still be defined the existing way with `readout = 0`. `Endpoints$new()` continues to recognize only `"tte"` and `"non-tte"`; the conversion happens in `endpoint()`.
+
+# TrialSimulator 1.19.1
+
+## Documentation
+
+- Add the "Crossover at milestone" vignette demonstrating `crossover()`.
+- Update the `regimen()`/`crossover()` examples and help pages to use the natural `ifelse(condition, new_value, original)` idiom in `how()` and to return only the switching patients in `what()`, rather than relying on `NA` to mark unchanged cells or non-switchers. The engine still accepts `NA` for backward compatibility.
+
+# TrialSimulator 1.19.0
+
+## New Feature
+
+- Add `crossover()` for milestone-triggered treatment crossover. Called inside a milestone's action function, it lets patients still in the trial switch treatment at (or after) the milestone, altering only their post-switch endpoint values. Regimens are unified under one contract keyed off an earliest crossover time; the classic enrollment regimen added via `add_regimen()` is the `T = 0` case.
+
+## Updates
+
+- A regimen's `how()` may now only modify post-switch outcomes: returning a value that differs from the original for an endpoint whose readout/event is at or before `switch_time` (a pre-switch or already-observed outcome) raises an error. Guard such `how()` functions accordingly, e.g. `os = ifelse(os > switch_time, new_os, os)`.
+
 # TrialSimulator 1.18.4
 
 ## Bug Fix

@@ -5,18 +5,33 @@
 #'
 #' Public methods in this R6 class are used in developing
 #' this package. Thus, I have to export the whole R6 class which exposures all
-#' public methods. However, none of the public methods is useful to end users
-#' except for the one below.
+#' public methods. However, \strong{none of the public methods is useful to
+#' end users except for the one below}.
 #'
 #' \itemize{
-#' \item \code{$print()}
+#' \item \code{$print()} print a summary report of endpoint(s) based on
+#' example data from the generator.
 #' }
+#'
+#' In addition, \code{$test_generator()}, \code{$get_generator()} and
+#' \code{$get_name()} are for exploratory purpose only. They appear in
+#' examples and vignettes to help users understand how this class works,
+#' but they are not needed at all in formal simulation once users know how
+#' to use this package.
+#'
+#' \strong{Internal machinery.} The remaining public methods
+#' (\code{$get_uid()} and \code{$update_generator()}) are public only because
+#' they are invoked on an endpoint object by other components of the package
+#' (arms), which R6 cannot grant through private members. Users should not
+#' call them directly.
 #'
 #' @docType class
 #'
 #' @examples
 #' # Instead of using Endpoints$new(), please use endpoint(), a user-friendly
 #' # wrapper to define endpoints. See examples in ?endpoint.
+#'
+#' @return an \code{R6Class} generator object; use \code{endpoint()} to create endpoints.
 #'
 #' @export
 Endpoints <- R6::R6Class(
@@ -85,7 +100,9 @@ Endpoints <- R6::R6Class(
 
       private$validate_arguments(name, type, readout, generator, ...)
       private$name <- name
-      private$uid <- paste0(name, collapse = '/')
+      ## sort with radix (locale-independent) so that the uid is canonical:
+      ## lookups elsewhere can match a name set regardless of its order.
+      private$uid <- paste0(sort(name, method = 'radix'), collapse = '/')
 
       if(length(type) == 1 && length(name) > 1){
         type <- rep(type, length(name))
@@ -97,8 +114,8 @@ Endpoints <- R6::R6Class(
       private$generator <- DynamicRNGFunction(
         generator, rng = deparse(substitute(generator)),
         var_name = self$get_name(),
-        type = self$get_type(),
-        readout = self$get_readout(), ...)
+        type = private$get_type(),
+        readout = private$get_readout(), ...)
       ## ignore all other arguments in ... if generator is provided
     },
 
@@ -125,6 +142,8 @@ Endpoints <- R6::R6Class(
     },
 
     #' @description
+    #' \strong{INTERNAL MACHINERY: DO NOT CALL THIS METHOD DIRECTLY.}
+    #'
     #' update endpoint generator
     #'
     #' @param generator a random number generation (RNG) function.
@@ -136,17 +155,13 @@ Endpoints <- R6::R6Class(
       private$generator <- DynamicRNGFunction(
         generator, rng = deparse(substitute(generator)),
         var_name = self$get_name(),
-        type = self$get_type(),
-        readout = self$get_readout(), ...)
+        type = private$get_type(),
+        readout = private$get_readout(), ...)
     },
 
     #' @description
-    #' return readout function
-    get_readout = function(){
-      private$readout
-    },
-
-    #' @description
+    #' \strong{INTERNAL MACHINERY: DO NOT CALL THIS METHOD DIRECTLY.}
+    #'
     #' return uid
     get_uid = function(){
       private$uid
@@ -156,12 +171,6 @@ Endpoints <- R6::R6Class(
     #' return endpoints' name
     get_name = function(){
       private$name
-    },
-
-    #' @description
-    #' return endpoints' type
-    get_type = function(){
-      private$type
     },
 
     #' @description
@@ -266,6 +275,18 @@ Endpoints <- R6::R6Class(
     generator = NULL,
     readout = NULL,
 
+    ## @description
+    ## return readout function
+    get_readout = function(){
+      private$readout
+    },
+
+    ## @description
+    ## return endpoints' type
+    get_type = function(){
+      private$type
+    },
+
     validate_arguments = function(
       name,
       type,
@@ -333,7 +354,7 @@ Endpoints <- R6::R6Class(
 
       if(is.vector(example_data)){
         example_data <- data.frame(v1 = example_data) %>%
-          rename(!!name := .data$v1)
+          rename(!!name := 'v1')
       }
 
       if(!all(name %in% colnames(example_data))){

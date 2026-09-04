@@ -296,28 +296,20 @@ test_that('endpoint event counts work as expected when duration is adapted', {
                        when = eventNumber(endpoint = 'os', n = 150),
                        action = action_at_interim)
 
-  listener <- listener(silent = TRUE)
-  listener$add_milestones(interim)
-
-  controller <- controller(trial, listener)
-  controller$run(plot_event = FALSE, silent = TRUE)
-
-  dat1_ <- trial$get_locked_data('interim')
-
-  expect_equal(sum(dat1_$os_event %in% 1), 150)
-
   final <- milestone(name = 'final',
                      when = eventNumber(endpoint = 'os', n = 400) |
                        calendarTime(time = 40))
 
+  listener <- listener(silent = TRUE)
+  listener$add_milestones(interim, final)
 
-  listener$add_milestones(final)
+  controller <- controller(trial, listener)
   controller$run(plot_event = FALSE, silent = TRUE)
 
   dat1 <- trial$get_locked_data('interim')
   dat2 <- trial$get_locked_data('final')
 
-  expect_identical(dat1_, dat1)
+  expect_equal(sum(dat1$os_event %in% 1), 150)
 
   expect_true(sum(dat2$os_event %in% 1) == 400 ||
                 all((dat2$enroll_time + dat2$os_event)[dat2$os_event %in% 1] <= 40))
@@ -581,4 +573,45 @@ test_that('trial data can be replicated', {
 
   expect_identical(op10, ops)
 
+})
+
+
+test_that('no private field appears mid-run that make_snapshot() does not cover', {
+
+  # make_snapshot() copies every private data field at construction; a field
+  # first assigned mid-run would be missing from the snapshot and silently
+  # leak across replicates through reset(). Guard by reflection: after a run
+  # exercising the adaptation methods, the set of private names must not
+  # exceed snapshot names + private methods.
+  pfs <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2)/10)
+  pbo <- arm(name = 'pbo'); pbo$add_endpoints(pfs)
+  pfs <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2)/12)
+  trt <- arm(name = 'trt'); trt$add_endpoints(pfs)
+
+  tr <- trial(name = 't', n_patients = 200, duration = 30, seed = 7,
+              enroller = StaggeredRecruiter,
+              accrual_rate = data.frame(end_time = Inf, piecewise_rate = 30),
+              dropout = rweibull, shape = 1, scale = 1e6, silent = TRUE)
+  tr$add_arms(sample_ratio = c(1, 1), pbo, trt)
+
+  adapt <- milestone(name = 'adapt',
+                     when = calendarTime(time = 5),
+                     action = function(trial){
+                       resize(trial, 250)
+                       stop_followup(trial, arm == 'pbo')
+                       update_accrual_rate(
+                         trial,
+                         data.frame(end_time = Inf, piecewise_rate = 40))
+                     })
+  final <- milestone(name = 'final', when = calendarTime(time = 30))
+  lst <- listener(silent = TRUE)
+  lst$add_milestones(adapt, final)
+  controller(tr, lst)$run(n = 2, silent = TRUE, plot_event = FALSE)
+
+  pr <- tr$.__enclos_env__$private
+  ## R6 locks method bindings but not field bindings, so the locked names are
+  ## exactly the private methods, which make_snapshot() skips by the same rule
+  locked <- names(pr)[vapply(names(pr), bindingIsLocked, logical(1), env = pr)]
+  uncovered <- setdiff(names(pr), c(names(pr$.snapshot), locked, '.snapshot'))
+  expect_length(uncovered, 0)
 })

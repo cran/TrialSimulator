@@ -7,36 +7,102 @@
 StaggeredRecruiter(n, accrual_rate)
 }
 \arguments{
-\item{n}{integer. Number of random numbers.}
+\item{n}{integer. Number of enrollment times to generate.}
 
 \item{accrual_rate}{a data frame of columns
 \describe{
       \item{\code{end_time}}{
           End time for a constant rate in a time window. The start time of
-          the first time window is 0.}
+          the first time window is 0. Values must be positive and strictly
+          increasing; the last one must be \code{Inf}.}
       \item{\code{piecewise_rate}}{
           A constant rate in a time window. So the number of patients
           being recruited in that window is window length x
-          \code{piecewise_rate}. }
+          \code{piecewise_rate}. A rate of 0 pauses enrollment for that
+          window. Rates must be non-negative and finite; the last must be
+          positive.}
 }}
+}
+\value{
+a sorted numeric vector of \code{n} enrollment times.
 }
 \description{
 It assumes a uniform enrollment with constant rate in each of the time
 windows. This function can be used as the \code{enroller} when calling
 \code{trial()} to define a trial.
 }
+\details{
+\code{StaggeredRecruiter} is the only enroller accepted by \code{trial()}:
+a piecewise constant accrual rate is flexible enough to approximate
+realistic recruitment in practice, e.g., site ramp-up, steady accrual,
+and temporary pauses.
+
+The returned enrollment times are deterministic, not random. Within a
+window of positive rate, patients enroll one by one with spacing
+\code{1/piecewise_rate}; under a constant rate \code{r}, the \code{k}-th
+patient enrolls exactly at \code{k / r}. In particular, the first patient
+enrolls at \code{1/piecewise_rate} rather than at time 0, and a
+milestone triggered by \code{enrollment(n = n)} occurs exactly at the time
+the planned cumulative accrual reaches \code{n}.
+
+A window with \code{piecewise_rate = 0} models a recruitment pause (a hold
+for safety review, a site not yet activated, a seasonal gap, etc.): no
+patient is enrolled in that window, and enrollment resumes after its
+\code{end_time}. Pauses may occur in the first window or span several
+consecutive windows; a leading pause defers the first enrollment
+accordingly.
+
+A valid \code{accrual_rate} must satisfy all of the following:
+\itemize{
+\item it is a data frame with columns \code{end_time} and
+\code{piecewise_rate};
+\item \code{end_time} is positive and strictly increasing, and the last
+entry is \code{Inf} with a positive rate, so that the schedule can supply
+any number of patients (\code{TrialSimulator} may internally request more
+than the planned sample size, e.g., for adaptive resizing via
+\code{resize()});
+\item rates are non-negative and finite;
+\item a finite window with a positive rate must expect at least one
+patient, i.e., window length x \code{piecewise_rate} >= 1. A tiny positive
+rate meant as a pause is rejected with an error; use
+\code{piecewise_rate = 0} for a true pause.
+}
+}
 \examples{
+## constant accrual of 25 patients/month: patient k enrolls at k / 25
+accrual_rate <- data.frame(end_time = Inf, piecewise_rate = 25)
+
+StaggeredRecruiter(30, accrual_rate)
+
+## recruitment pause: 30/mo through month 12, paused during months 12-18,
+## then 30/mo again. Monthly counts show months 13-17 are empty and
+## enrollment resumes at the end of the pause (month 18).
 accrual_rate <- data.frame(
-  end_time = c(12, 13:17, Inf),
-  piecewise_rate = c(15, 15 + 6 * (1:5), 45)
+  end_time = c(12, 18, Inf),
+  piecewise_rate = c(30, 0, 30)
+)
+
+enroll_time <- StaggeredRecruiter(400, accrual_rate)
+table(ceiling(enroll_time))
+
+## leading pause (first rate is 0): enrollment opens 3 months after study
+## start, e.g., the first site is activated with a delay, then 30/mo
+accrual_rate <- data.frame(
+  end_time = c(3, Inf),
+  piecewise_rate = c(0, 30)
 )
 
 StaggeredRecruiter(30, accrual_rate)
 
+## approximate a linear ramp-up by monthly steps: accrual grows by 5/mo
+## each month, from 5/mo up to 30/mo, then stays steady at 30/mo
 accrual_rate <- data.frame(
-  end_time = c(3, 4, 5, 8, Inf),
-  piecewise_rate = c(1, 2, 2, 3, 4)
+  end_time = c(1:6, Inf),
+  piecewise_rate = c(seq(5, 30, by = 5), 30)
 )
 
-StaggeredRecruiter(30, accrual_rate)
+enroll_time <- StaggeredRecruiter(200, accrual_rate)
+
+## monthly enrolled counts show the ramp (5, 10, ..., 30) and the plateau (30)
+table(ceiling(enroll_time))
 }

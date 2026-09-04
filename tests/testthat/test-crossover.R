@@ -33,7 +33,7 @@ baseline_os <- function(milestone_time = 20, duration = 60, seed = 42, n = 200){
               accrual_rate = data.frame(end_time = Inf, piecewise_rate = 10),
               silent = TRUE)
   tr$add_arms(sample_ratio = c(1, 1), ctrl, trt)
-  tr$get_trial_data()
+  tr$.__enclos_env__$private$get_trial_data()
 }
 
 test_that('crossover() preserves observed OS and alters only post-switch OS', {
@@ -59,7 +59,7 @@ test_that('crossover() preserves observed OS and alters only post-switch OS', {
   enr       <- setNames(td0$enroll_time, td0$patient_id)
 
   tr1      <- run_os_crossover(action, milestone_time)
-  td1      <- tr1$get_trial_data()
+  td1      <- tr1$.__enclos_env__$private$get_trial_data()
   os_after <- setNames(td1$os, td1$patient_id)
 
   ctrl_ids   <- as.character(td0$patient_id[td0$arm == 'control'])
@@ -94,7 +94,7 @@ test_that('crossover() only offers still-open patients to what()', {
   }
 
   tr <- run_os_crossover(action, milestone_time)
-  td <- tr$get_trial_data()   # unchanged (nobody switched)
+  td <- tr$.__enclos_env__$private$get_trial_data()   # unchanged (nobody switched)
 
   open_at_T <- td$patient_id[(td$enroll_time + pmin(td$os, td$dropout_time)) > milestone_time]
   expect_setequal(seen, open_at_T)
@@ -174,6 +174,15 @@ test_that('crossover() records the switch in regimen_trajectory', {
   expect_true(all(d$regimen_trajectory[d$arm == 'trt'] == 'trt@0'))
   expect_true(all(d$n_switches[d$arm == 'trt'] == 0L))
 
+  ## n_switches is computed on the switcher subset only; it must equal the
+  ## full-vector definition (number of '@' minus 1) for every patient, with
+  ## switchers whose switch falls after the lock time counted as 0
+  expect_identical(
+    d$n_switches,
+    lengths(gregexpr('@', d$regimen_trajectory, fixed = TRUE)) - 1L)
+  expect_true(any(d$n_switches > 0L))
+  expect_true(all(d$n_switches[!grepl(';', d$regimen_trajectory, fixed = TRUE)] == 0L))
+
   long     <- expandRegimen(d)
   switched <- long[long$regimen == 'trt' & long$switch_time_from_enrollment > 0, ]
   expect_true(nrow(switched) > 0)
@@ -240,7 +249,7 @@ test_that('crossover() does not accumulate triplets across replicates', {
   expect_no_error(controller(tr, lst)$run(n = 3, silent = TRUE, plot_event = FALSE))
 
   # exactly one crossover triplet should remain (the last replicate's), not 3
-  expect_equal(tr$get_regimen()$get_number_treatment_allocator(), 1L)
+  expect_equal(tr$.__enclos_env__$private$get_regimen()$get_number_treatment_allocator(), 1L)
 })
 
 test_that('crossover() also covers patients enrolled after the milestone', {

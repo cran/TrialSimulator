@@ -4,6 +4,9 @@
 \name{Controllers}
 \alias{Controllers}
 \title{Class of Controller}
+\value{
+an \code{R6Class} generator object; use \code{controller()} to create a controller.
+}
 \description{
 Create a class of controller to run a trial.
 
@@ -13,9 +16,13 @@ public methods. However, only the public methods in the list below are
 useful to end users.
 
 \itemize{
-\item \code{$run()}
-\item \code{$get_output()}
-\item \code{$reset()}
+\item \code{$run()} run trial simulation, sequentially or in parallel.
+It cannot be called twice on a controller unless \code{$reset()} is
+called in between.
+\item \code{$get_output()} return a data frame of all outputs saved
+during simulation.
+\item \code{$reset()} reset the trial and listener registered to the
+controller before starting a new simulation with \code{$run()}.
 }
 }
 \examples{
@@ -25,9 +32,6 @@ useful to end users.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-Controllers-new}{\code{Controllers$new()}}
-\item \href{#method-Controllers-get_listener}{\code{Controllers$get_listener()}}
-\item \href{#method-Controllers-get_trial}{\code{Controllers$get_trial()}}
-\item \href{#method-Controllers-mute}{\code{Controllers$mute()}}
 \item \href{#method-Controllers-reset}{\code{Controllers$reset()}}
 \item \href{#method-Controllers-get_output}{\code{Controllers$get_output()}}
 \item \href{#method-Controllers-run}{\code{Controllers$run()}}
@@ -54,49 +58,12 @@ initialize a controller of the trial
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Controllers-get_listener"></a>}}
-\if{latex}{\out{\hypertarget{method-Controllers-get_listener}{}}}
-\subsection{Method \code{get_listener()}}{
-return listener in a controller.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Controllers$get_listener()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Controllers-get_trial"></a>}}
-\if{latex}{\out{\hypertarget{method-Controllers-get_trial}{}}}
-\subsection{Method \code{get_trial()}}{
-return trial in a controller.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Controllers$get_trial()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Controllers-mute"></a>}}
-\if{latex}{\out{\hypertarget{method-Controllers-mute}{}}}
-\subsection{Method \code{mute()}}{
-mute all messages (not including warnings).
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Controllers$mute()}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{silent}}{logical.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Controllers-reset"></a>}}
 \if{latex}{\out{\hypertarget{method-Controllers-reset}{}}}
 \subsection{Method \code{reset()}}{
-reset the trial and listener registered to the controller before running
-additional replicate of simulation. This is usually done between two
-calls of \code{controller$run()}.
+reset the trial and listener registered to the controller so that a
+new simulation can be started with \code{controller$run()}. The trial
+and the milestones are restored to their as-designed version.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Controllers$reset()}\if{html}{\out{</div>}}
 }
@@ -143,14 +110,15 @@ custom outputs in \code{save()}. Default \code{FALSE}.}
 \if{html}{\out{<a id="method-Controllers-run"></a>}}
 \if{latex}{\out{\hypertarget{method-Controllers-run}{}}}
 \subsection{Method \code{run()}}{
-run trial simulation.
+run trial simulation. It cannot be called again on the same
+controller unless \code{reset()} is called first.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Controllers$run(
   n = 1,
   n_workers = 1,
   plot_event = TRUE,
   silent = FALSE,
-  dry_run = FALSE
+  tidy = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -182,23 +150,20 @@ the best performance.}
 \code{FALSE} when \code{n > 1} or \code{n_workers > 1}.}
 
 \item{\code{silent}}{logical. \code{TRUE} if muting all messages during a
-trial. Note that warning messages are still displayed.}
+trial. Note that warning messages are still displayed. When
+\code{silent = TRUE} and replicates are run sequentially
+(\code{n_workers = 1}), a progress bar is displayed automatically
+if the simulation is expected to take more than 1 minute.}
 
-\item{\code{dry_run}}{logical. We are considering retire this argument.
-\code{TRUE} if action function provided by users is
-ignored and an internal default action \code{.default_action} is called
-instead. This default function only locks data when the milestone is
-triggered. Milestone time and number of endpoints' events or sample sizes
-are saved. It is suggested to set \code{dry_run = TRUE} to estimate
-distributions of triggering time and number of events before formally
-using custom action functions if a fixed design is in use.
-This helps determining planned maximum
-information for group sequential design and reasonable time of milestone
-of interest when planning a trial. Set it to \code{FALSE} for formal
-simulations. However, for an adaptive design where arm(s) could
-possibly be added or removed, setting \code{dry_run} to \code{TRUE}
-is usually not helpful because adaption should be executed
-before estimating the milestone time.}
+\item{\code{tidy}}{logical. If \code{TRUE}, the per-arm event count table
+(output column \code{n_events_<milestone>_<arms>}) is not saved at
+milestones; the per-endpoint totals and milestone times are still
+saved. Saving that table is the most expensive part of the standard
+outputs, so \code{tidy = TRUE} is recommended for a large number of
+replicates unless the per-arm counts are needed in the summary. This
+differs from \code{tidy} in \code{$get_output()}, which removes all
+standard columns from the returned data frame after the fact.
+Default \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }

@@ -131,6 +131,9 @@ solveThreeStateModel <- function(median_pfs, median_os, corr,
 #' @param x an object returned by \code{solveThreeStateModel()}.
 #' @param ... currently not supported.
 #'
+#' @return no return value, called to print the calibration table and
+#' display the corresponding plot.
+#'
 #' @export
 plot.three_state_model <- function(x, ...){
 
@@ -162,7 +165,12 @@ plot.three_state_model <- function(x, ...){
                 aes(x = .data$corr, y = .data$h12, label = .data$label),
               vjust = 2, hjust = -.2, inherit.aes = FALSE) +
 
-    xlim(min(data_points$corr)*.9, max(data_points$corr)*1.1) +
+    ## coord_cartesian() zooms without dropping data: with xlim(), the dashed
+    ## guide segments anchored at x = 0 fall outside the limits and are
+    ## removed entirely (with a warning); here they are clipped at the panel
+    ## edge instead and actually rendered.
+    coord_cartesian(xlim = c(min(data_points$corr)*.9,
+                             max(data_points$corr)*1.1)) +
     xlab("Pearson Correlation") +
     ylab(expression(h[12]))
   )

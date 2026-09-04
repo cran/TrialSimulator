@@ -11,17 +11,26 @@
 
 run_setup_form <- function(setup_file, n) {
   e <- new.env(parent = globalenv())
-  source(setup_file, local = e)
-  sink(tempfile()); on.exit(sink())
-  e$controller$run(n = n, silent = TRUE, plot_event = FALSE)
+  ## fixtures mirror vignette code: some plot at source time (e.g.,
+  ## DoseFinding::plotMods in setup_doseRanging.R), which with no active
+  ## device would write Rplots.pdf into the package tree -- send it to a
+  ## null device; and muffle their messages, both at setup and during run
+  ## (per-replicate reset() re-adds arms); sink() only diverts stdout,
+  ## not message() or graphics
+  pdf(NULL); on.exit(dev.off(), add = TRUE)
+  suppressMessages(source(setup_file, local = e))
+  sink(tempfile()); on.exit(sink(), add = TRUE)
+  suppressMessages(
+    e$controller$run(n = n, silent = TRUE, plot_event = FALSE)
+  )
   e$controller$get_output()
 }
 
 run_doc_form <- function(setup_file, fn_name, n, seed) {
   e <- new.env(parent = globalenv())
-  source(setup_file, local = e)
+  suppressMessages(source(setup_file, local = e))
   sink(tempfile()); on.exit(sink())
-  do.call(e[[fn_name]], list(n = n, seed = seed))
+  suppressMessages(do.call(e[[fn_name]], list(n = n, seed = seed)))
 }
 
 with_toggle <- function(value, expr) {
@@ -67,6 +76,27 @@ test_that('responseAdaptive: R-fallback and C++ produce identical output', {
   skip_on_cran()
   check_identical_paths('responseAdaptive', run_setup_form,
     list(setup_file = test_path('fixtures', 'setup_responseAdaptive.R'), n = 10))
+})
+
+test_that('stopFollowupAccrual: R-fallback and C++ produce identical output', {
+  skip_on_cran()
+  check_identical_paths('stopFollowupAccrual', run_setup_form,
+    list(setup_file = test_path('fixtures', 'setup_stopFollowupAccrual.R'), n = 10))
+})
+
+test_that('updateMilestone: R-fallback and C++ produce identical output', {
+  skip_on_cran()
+  check_identical_paths('updateMilestone', run_setup_form,
+    list(setup_file = test_path('fixtures', 'setup_updateMilestone.R'), n = 10))
+})
+
+test_that('filteredConditions: R-fallback and C++ produce identical output', {
+  ## milestone conditions with subset conditions in ... (cohort, subgroup,
+  ## .data pronoun, NA-producing covariate) take the C++ fast path via
+  ## filter_mask(); the dplyr-backed R path is the reference
+  skip_on_cran()
+  check_identical_paths('filteredConditions', run_setup_form,
+    list(setup_file = test_path('fixtures', 'setup_filteredConditions.R'), n = 10))
 })
 
 ## ---- TrialSimulatorDocuments examples (function-form) -----------------

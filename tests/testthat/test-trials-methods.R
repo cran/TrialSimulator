@@ -22,15 +22,15 @@ test_that("Trials accessors and print reflect the constructed trial", {
               silent = TRUE)
   tr$add_arms(sample_ratio = c(1, 1), pbo, trt)
 
-  expect_equal(tr$get_seed(), 42L)
+  expect_equal(tr$.__enclos_env__$private$get_seed(), 42L)
   expect_equal(sort(tr$get_arms_name()), sort(c("pbo", "trt")))
-  expect_equal(tr$get_number_arms(), 2)
+  expect_equal(tr$.__enclos_env__$private$get_number_arms(), 2)
   expect_true(tr$has_arm())
 
   ratio <- tr$get_sample_ratio()
   expect_true(is.numeric(ratio) || is.list(ratio))
 
-  desc <- tr$get_description()
+  desc <- tr$.__enclos_env__$private$get_description()
   expect_true(is.character(desc) || is.null(desc))
 
   out <- capture.output(print(tr))
@@ -75,7 +75,9 @@ test_that("Listeners reject duplicate milestones and list their names", {
   expect_equal(sort(lstn$get_milestone_names()),
                sort(c("m1", "m2")))
 
-  expect_warning(lstn$add_milestones(dup), regexp = "over-write|already")
+  expect_error(lstn$add_milestones(dup), regexp = "cannot be over-written")
+  expect_equal(sort(lstn$get_milestone_names()),
+               sort(c("m1", "m2")))
 
   out <- capture.output(print(lstn))
   expect_true(length(out) > 0)
@@ -90,7 +92,9 @@ test_that("plot.three_state_model runs to completion", {
                               corr = c(.5, .6),
                               h12 = seq(.08, .2, length.out = 8))
   pdf(NULL); on.exit(dev.off())
-  expect_no_error(plot(ret))
+  ## plot.three_state_model also prints the calibration table; capture it
+  ## to keep test output clean
+  expect_no_error(capture.output(plot(ret)))
 })
 
 test_that("Endpoints print handles tte and non-tte with readout", {

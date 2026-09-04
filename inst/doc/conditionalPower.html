@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Conditional Power and Event-Number Reassessment</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>$(document).ready(function(){
+    if (typeof $('[data-toggle="tooltip"]').tooltip === 'function') {
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+    if ($('[data-toggle="popover"]').popover === 'function') {
+        $('[data-toggle="popover"]').popover();
+    }
+});
+</script>
+<style type="text/css">
+.lightable-minimal {
+border-collapse: separate;
+border-spacing: 16px 1px;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-minimal td {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal th {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal thead tr:last-child th {
+border-bottom: 2px solid #00000050;
+empty-cells: hide;
+}
+.lightable-minimal tbody tr:first-child td {
+padding-top: 0.5em;
+}
+.lightable-minimal.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-minimal.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic {
+border-top: 0.16em solid #111111;
+border-bottom: 0.16em solid #111111;
+width: 100%;
+margin-bottom: 10px;
+margin: 10px 5px;
+}
+.lightable-classic tfoot tr td {
+border: 0;
+}
+.lightable-classic tfoot tr:first-child td {
+border-top: 0.14em solid #111111;
+}
+.lightable-classic caption {
+color: #222222;
+}
+.lightable-classic td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic thead tr:last-child th {
+border-bottom: 0.10em solid #111111;
+}
+.lightable-classic.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic-2 {
+border-top: 3px double #111111;
+border-bottom: 3px double #111111;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-classic-2 tfoot tr td {
+border: 0;
+}
+.lightable-classic-2 tfoot tr:first-child td {
+border-top: 3px double #111111;
+}
+.lightable-classic-2 caption {
+color: #222222;
+}
+.lightable-classic-2 td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic-2 th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic-2 tbody tr:last-child td {
+border-bottom: 3px double #111111;
+}
+.lightable-classic-2 thead tr:last-child th {
+border-bottom: 1px solid #111111;
+}
+.lightable-classic-2.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic-2.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #EEE;
+border-collapse: collapse;
+margin-bottom: 10px;
+}
+.lightable-material tfoot tr td {
+border: 0;
+}
+.lightable-material tfoot tr:first-child td {
+border-top: 1px solid #EEE;
+}
+.lightable-material th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+}
+.lightable-material td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+border-top: 1px solid #eeeeee;
+}
+.lightable-material.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #ddd;
+}
+.lightable-material-dark {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #FFFFFF12;
+border-collapse: collapse;
+margin-bottom: 10px;
+background-color: #363640;
+}
+.lightable-material-dark tfoot tr td {
+border: 0;
+}
+.lightable-material-dark tfoot tr:first-child td {
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF60;
+}
+.lightable-material-dark td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF;
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark.lightable-hover tbody tr:hover {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody tr:nth-child(even) {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material-dark.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #FFFFFF12;
+}
+.lightable-paper {
+width: 100%;
+margin-bottom: 10px;
+color: #444;
+}
+.lightable-paper tfoot tr td {
+border: 0;
+}
+.lightable-paper tfoot tr:first-child td {
+border-top: 1px solid #00000020;
+}
+.lightable-paper thead tr:last-child th {
+color: #666;
+vertical-align: bottom;
+border-bottom: 1px solid #00000020;
+line-height: 1.15em;
+padding: 10px 5px;
+}
+.lightable-paper td {
+vertical-align: middle;
+border-bottom: 1px solid #00000010;
+line-height: 1.15em;
+padding: 7px 5px;
+}
+.lightable-paper.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-paper.lightable-striped tbody tr:nth-child(even) {
+background-color: #00000008;
+}
+.lightable-paper.lightable-striped tbody td {
+border: 0;
+}
+</style>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Conditional Power and Event-Number
+Reassessment</h1>
+
+
+
+<p>This vignette explains the statistical model and implementation
+behind <code>Trials$conditionalPower()</code> and
+<code>Trials$eventNumberReestimationFromConditionalPower()</code> in
+detail, including the canonical distribution, alternative-direction
+mapping, effect assumptions, nonmonotone root search, and integer
+algorithm. Both methods apply to a time-to-event comparison with one
+interim analysis and one final analysis. They use the interim logrank
+statistic and event count stored in a triggered milestone.</p>
+<p>The mathematical and diagnostic examples first isolate particular
+features of the two methods. The later sections then <a href="#implementing-the-policy-in-an-action-function">implement the
+promising-zone policy in a milestone action</a> and use it in a <a href="#a-complete-promising-zone-simulation">complete
+<code>TrialSimulator</code> simulation program</a>, following the same
+action-based pattern used for other adaptive and enrichment designs.</p>
+<p>Conditional power is a design calculation, not an automatic
+adaptation rule. In particular, changing a final event target after an
+unblinded interim can affect type I error. A promising-zone design must
+be pre-specified and its complete decision rule must be justified and
+evaluated, usually by simulation.</p>
+<div id="statistical-setting" class="section level2">
+<h2>Statistical setting</h2>
+<p>Consider one treatment arm compared with placebo. Let</p>
+<ul>
+<li><span class="math inline">\(d\)</span> be the number of events
+observed on the two arms at interim;</li>
+<li><span class="math inline">\(D&gt;d\)</span> be the total number of
+events at a future final analysis;</li>
+<li><span class="math inline">\(z\)</span> be the interim logrank z
+statistic;</li>
+<li><span class="math inline">\(r\)</span> be the treatment-to-placebo
+allocation ratio; and</li>
+<li><span class="math inline">\(\omega=r/(1+r)^2\)</span> be the
+Schoenfeld information per event.</li>
+</ul>
+<p>The package uses the sign convention of <code>fitLogrank()</code>:
+<span class="math inline">\(z&gt;0\)</span> corresponds to an estimated
+treatment-to-placebo hazard ratio greater than one. Therefore, when a
+hazard ratio below one is beneficial, use
+<code>alternative = &quot;less&quot;</code>.</p>
+<p>It is convenient to map both alternatives to a lower-tail problem.
+Define</p>
+<p><span class="math display">\[
+z_* = \begin{cases}
+z, &amp; \text{alternative = &quot;less&quot;},\\
+-z, &amp; \text{alternative = &quot;greater&quot;},
+\end{cases}
+\qquad
+\theta_* = \begin{cases}
+\log(h), &amp; \text{alternative = &quot;less&quot;},\\
+-\log(h), &amp; \text{alternative = &quot;greater&quot;},
+\end{cases}
+\]</span></p>
+<p>where <span class="math inline">\(h\)</span> is an assumed
+treatment-to-placebo hazard ratio. On this common scale, a negative
+<span class="math inline">\(z_*\)</span> or <span class="math inline">\(\theta_*\)</span> favors treatment. The final
+rejection region is</p>
+<p><span class="math display">\[
+Z_D^* \leq c_\alpha, \qquad c_\alpha=\Phi^{-1}(\alpha).
+\]</span></p>
+<p>For <code>alternative = &quot;greater&quot;</code>, this is equivalent to
+comparing the original statistic with the upper boundary <span class="math inline">\(\Phi^{-1}(1-\alpha)\)</span>.</p>
+<div id="what-alpha-means" class="section level3">
+<h3>What <code>alpha</code> means</h3>
+<p>The argument <code>alpha</code> is the <strong>one-sided nominal
+level corresponding to the planned final critical boundary</strong>. It
+is not necessarily the total design alpha, the cumulative alpha spent by
+the final look, or the incremental alpha spent at that look. For
+example, if an upper-tail group-sequential design has final critical
+value <span class="math inline">\(c\)</span>, pass
+<code>alpha = 1 - pnorm(c)</code>.</p>
+</div>
+</div>
+<div id="conditional-power" class="section level2">
+<h2>Conditional power</h2>
+<p>The member method has the following signature:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">conditionalPower</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  milestone, formula, placebo, alternative, alpha, D, effect, ...</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>)</span></code></pre></div>
+<p>Write <span class="math inline">\(t=d/D\)</span> for the interim
+information fraction. Under the canonical independent-increments model,
+conditional on the observed interim statistic,</p>
+<p><span class="math display">\[
+Z_D^* \mid Z_d^*=z_*
+\sim N\left\{
+\sqrt{t}\,z_* + \theta_*\sqrt{\omega D}(1-t),\;1-t
+\right\}.
+\]</span></p>
+<p>It follows that the lower-tail conditional power is</p>
+<p><span class="math display">\[
+CP(D)=\Phi\left[
+\frac{
+c_\alpha-\sqrt{d/D}\,z_*
+-\theta_*\sqrt{\omega D}(1-d/D)
+}{\sqrt{1-d/D}}
+\right].
+\]</span></p>
+<p>The implementation provides three choices for the future effect.</p>
+<div id="a-specified-hazard-ratio" class="section level3">
+<h3>A specified hazard ratio</h3>
+<p>For a positive numeric <code>effect = h</code>, the method uses <span class="math inline">\(\theta_* = \log(h)\)</span> for
+<code>&quot;less&quot;</code> and <span class="math inline">\(-\log(h)\)</span>
+for <code>&quot;greater&quot;</code>. This separates the assumed future effect
+from random variation in the interim estimate. It also requires the
+allocation ratio recorded at the milestone so that <span class="math inline">\(\omega\)</span> can be computed.</p>
+</div>
+<div id="the-interim-trend" class="section level3">
+<h3>The interim trend</h3>
+<p>For <code>effect = &quot;trend&quot;</code>, the interim estimate is
+extrapolated:</p>
+<p><span class="math display">\[
+\widehat\theta_* = \frac{z_*}{\sqrt{\omega d}}.
+\]</span></p>
+<p>Substitution cancels <span class="math inline">\(\omega\)</span> and
+gives</p>
+<p><span class="math display">\[
+CP_{\text{trend}}(D)=\Phi\left[
+\frac{c_\alpha-z_*\sqrt{D/d}}{\sqrt{1-d/D}}
+\right].
+\]</span></p>
+<p>This calculation is often useful as a sensitivity analysis, but it
+can be optimistic after a favorable interim because it treats the noisy
+interim estimate as the true future effect.</p>
+</div>
+<div id="the-null-effect" class="section level3">
+<h3>The null effect</h3>
+<p>For <code>effect = &quot;null&quot;</code>, the remaining increment has zero
+drift:</p>
+<p><span class="math display">\[
+CP_{0}(D)=\Phi\left[
+\frac{c_\alpha-\sqrt{d/D}\,z_*}{\sqrt{1-d/D}}
+\right].
+\]</span></p>
+<p>This is the conditional type I error at the specified final event
+number, not power under a beneficial alternative. The event-number
+reassessment method does not accept <code>effect = &quot;null&quot;</code>; use
+<code>conditionalPower()</code> directly when this quantity is
+wanted.</p>
+</div>
+<div id="what-happens-near-the-interim" class="section level3">
+<h3>What happens near the interim</h3>
+<p><code>conditionalPower()</code> requires <span class="math inline">\(D&gt;d\)</span>. If the interim statistic has
+crossed the final boundary, <span class="math inline">\(CP(D)\)</span>
+tends to one as <span class="math inline">\(D\)</span> approaches <span class="math inline">\(d\)</span> from above, but it need not remain high
+as more events accrue. Future independent increments can dilute the
+interim result. Reaching the <em>final</em> boundary at interim is also
+not the same as reaching a pre-specified interim efficacy boundary and
+does not by itself authorize stopping a real trial.</p>
+</div>
+</div>
+<div id="inverting-conditional-power-to-obtain-an-event-number" class="section level2">
+<h2>Inverting conditional power to obtain an event number</h2>
+<p>The member method has the following signature:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">eventNumberReestimationFromConditionalPower</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  milestone, formula, placebo, alternative, alpha, target_cp,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  effect, ..., <span class="at">D_cap =</span> <span class="cn">NULL</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>)</span></code></pre></div>
+<p>For target conditional power <span class="math inline">\(\gamma\)</span>, the reassessment method searches
+for</p>
+<p><span class="math display">\[
+D_{\text{new}}=
+\min\left\{D\in\mathbb{Z}:d&lt;D\leq
+D_{\text{cap}},\;CP(D)\geq\gamma\right\}.
+\]</span></p>
+<p>The strict requirement <span class="math inline">\(D&gt;d\)</span>
+represents a genuine future final analysis. It also applies when the
+interim z statistic already reaches the final boundary.</p>
+<p>The cap has the following semantics:</p>
+<ul>
+<li><code>D_cap = NULL</code>, the default, is converted to
+<code>Inf</code> for every comparison and requests an unbounded
+search;</li>
+<li>if a finite solution exists in the requested range, the smallest
+solution is returned in <code>D</code>, its conditional power is
+returned in <code>achieved_cp</code>, and
+<code>target_reached = TRUE</code>;</li>
+<li>if no finite solution exists in the requested range, <code>D</code>
+and <code>achieved_cp</code> are <code>NA</code>, and
+<code>target_reached = FALSE</code>. <code>D_cap</code> continues to
+report the requested cap.</li>
+</ul>
+<p>Thus, a false <code>target_reached</code> does not mean the algorithm
+failed. It means that the requested conditional power cannot be attained
+within the permitted event budget, or at any finite event number when
+the search is unbounded.</p>
+</div>
+<div id="why-ordinary-bisection-is-insufficient" class="section level2">
+<h2>Why ordinary bisection is insufficient</h2>
+<p>Conditional power need not be monotone in <span class="math inline">\(D\)</span>. This matters particularly when a
+specified effect differs from the observed interim trend. A test based
+only on <span class="math inline">\(CP(D_{\text{cap}})\)</span> can miss
+an earlier target crossing, and bisection over the whole range can
+converge to a later crossing.</p>
+<p>To expose the shape analytically, put</p>
+<p><span class="math display">\[
+y=\sqrt{D/d}&gt;1,
+\]</span></p>
+<p>and define the lower-scale accumulated drift</p>
+<p><span class="math display">\[
+\eta=\begin{cases}
+z_*, &amp; \text{effect = &quot;trend&quot;},\\
+\theta_*\sqrt{\omega d}, &amp; \text{numeric effect}.
+\end{cases}
+\]</span></p>
+<p>Because <span class="math inline">\(\Phi\)</span> is monotone, it is
+enough to study its probit argument</p>
+<p><span class="math display">\[
+g(y)=\frac{c_\alpha y-\eta y^2+\eta-z_*}{\sqrt{y^2-1}}.
+\]</span></p>
+<p>Its derivative has the sign of</p>
+<p><span class="math display">\[
+-\eta y^3+(z_*+\eta)y-c_\alpha.
+\]</span></p>
+<p>Consequently, every stationary point is obtained from a <strong>cubic
+equation</strong>, for both <code>effect = &quot;trend&quot;</code> and a numeric
+effect. There is no need to solve a quartic equation for the target
+crossings themselves.</p>
+<div id="integer-search-algorithm" class="section level3">
+<h3>Integer search algorithm</h3>
+<p>For each treatment-placebo comparison, the implementation:</p>
+<ol style="list-style-type: decimal">
+<li>maps <code>&quot;greater&quot;</code> to the common lower-tail scale;</li>
+<li>starts at the first admissible integer, <span class="math inline">\(D=d+1\)</span>;</li>
+<li>solves the stationary cubic with <code>polyroot()</code> and keeps
+real roots <span class="math inline">\(y&gt;1\)</span>;</li>
+<li>maps each retained root to <span class="math inline">\(D=dy^2\)</span> and includes both its floor and
+ceiling as integer knots;</li>
+<li>searches the resulting monotone integer intervals from left to
+right;</li>
+<li>uses integer bisection within the first interval whose upper
+endpoint reaches the target.</li>
+</ol>
+<p>For an infinite cap, all bounded stationary intervals are searched
+first. On the final branch,</p>
+<p><span class="math display">\[
+\lim_{D\to\infty}CP(D)=
+\begin{cases}
+1, &amp; \eta&lt;0,\\
+\alpha, &amp; \eta=0,\\
+0, &amp; \eta&gt;0.
+\end{cases}
+\]</span></p>
+<p>This limit determines whether a later finite crossing can exist. When
+it can, the implementation expands an upper bracket geometrically and
+finishes with integer bisection. Since a cubic has at most three real
+roots, only a few intervals are inspected; the event-number range is not
+scanned integer by integer.</p>
+</div>
+<div id="an-example-with-three-target-crossings" class="section level3">
+<h3>An example with three target crossings</h3>
+<p>The following hypothetical lower-tail example has a weak beneficial
+assumed effect that differs substantially from the favorable interim
+result.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>cp_formula <span class="ot">&lt;-</span> <span class="cf">function</span>(D, z, d, alpha, hazard_ratio, <span class="at">omega =</span> <span class="fl">0.25</span>){</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  t <span class="ot">&lt;-</span> d <span class="sc">/</span> D</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  theta <span class="ot">&lt;-</span> <span class="fu">log</span>(hazard_ratio)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">pnorm</span>((<span class="fu">qnorm</span>(alpha) <span class="sc">-</span> <span class="fu">sqrt</span>(t) <span class="sc">*</span> z <span class="sc">-</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>           theta <span class="sc">*</span> <span class="fu">sqrt</span>(omega <span class="sc">*</span> D) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> t)) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> t))</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>}</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>z_example <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.8</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>d_example <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>target_example <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>D_grid <span class="ot">&lt;-</span> <span class="dv">101</span><span class="sc">:</span><span class="dv">10000</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>cp_grid <span class="ot">&lt;-</span> <span class="fu">cp_formula</span>(D_grid, <span class="at">z =</span> z_example, <span class="at">d =</span> d_example,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                      <span class="at">alpha =</span> <span class="fl">0.025</span>, <span class="at">hazard_ratio =</span> <span class="fl">0.98</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>crossing_index <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">diff</span>(cp_grid <span class="sc">&gt;=</span> target_example) <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>D_grid[crossing_index]</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; [1]  107  183 8675</span></span></code></pre></div>
+<p>The target is crossed near 107, crossed downward near 183, and
+crossed upward again near 8675. The requested answer is 107, including
+when a finite cap such as 5000 has conditional power below the
+target.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>selected_D <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">106</span>, <span class="dv">107</span>, <span class="dv">182</span>, <span class="dv">183</span>, <span class="dv">5000</span>, <span class="dv">8674</span>, <span class="dv">8675</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">D =</span> selected_D,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">conditional_power =</span> <span class="fu">round</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="fu">cp_formula</span>(selected_D, <span class="at">z =</span> z_example, <span class="at">d =</span> d_example,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>               <span class="at">alpha =</span> <span class="fl">0.025</span>, <span class="at">hazard_ratio =</span> <span class="fl">0.98</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="dv">4</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  ),</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">reaches_target =</span> <span class="fu">cp_formula</span>(selected_D, <span class="at">z =</span> z_example, <span class="at">d =</span> d_example,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>                              <span class="at">alpha =</span> <span class="fl">0.025</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>                              <span class="at">hazard_ratio =</span> <span class="fl">0.98</span>) <span class="sc">&gt;=</span> target_example</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>)</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;      D conditional_power reaches_target</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 1  106            0.1936          FALSE</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 2  107            0.2025           TRUE</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; 3  182            0.2003           TRUE</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; 4  183            0.1998          FALSE</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; 5 5000            0.1549          FALSE</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; 6 8674            0.2000          FALSE</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; 7 8675            0.2000           TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">plot</span>(D_grid, cp_grid, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">log =</span> <span class="st">&#39;x&#39;</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&#39;Final event number D (log scale)&#39;</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&#39;Conditional power&#39;</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.3</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> target_example, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&#39;firebrick&#39;</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">c</span>(<span class="dv">107</span>, <span class="dv">183</span>, <span class="dv">8675</span>), <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">&#39;grey40&#39;</span>)</span></code></pre></div>
+<p><img role="img" aria-label src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA0gAAAIcCAYAAADMj46OAAAEDmlDQ1BrQ0dDb2xvclNwYWNlR2VuZXJpY1JHQgAAOI2NVV1oHFUUPpu5syskzoPUpqaSDv41lLRsUtGE2uj+ZbNt3CyTbLRBkMns3Z1pJjPj/KRpKT4UQRDBqOCT4P9bwSchaqvtiy2itFCiBIMo+ND6R6HSFwnruTOzu5O4a73L3PnmnO9+595z7t4LkLgsW5beJQIsGq4t5dPis8fmxMQ6dMF90A190C0rjpUqlSYBG+PCv9rt7yDG3tf2t/f/Z+uuUEcBiN2F2Kw4yiLiZQD+FcWyXYAEQfvICddi+AnEO2ycIOISw7UAVxieD/Cyz5mRMohfRSwoqoz+xNuIB+cj9loEB3Pw2448NaitKSLLRck2q5pOI9O9g/t/tkXda8Tbg0+PszB9FN8DuPaXKnKW4YcQn1Xk3HSIry5ps8UQ/2W5aQnxIwBdu7yFcgrxPsRjVXu8HOh0qao30cArp9SZZxDfg3h1wTzKxu5E/LUxX5wKdX5SnAzmDx4A4OIqLbB69yMesE1pKojLjVdoNsfyiPi45hZmAn3uLWdpOtfQOaVmikEs7ovj8hFWpz7EV6mel0L9Xy23FMYlPYZenAx0yDB1/PX6dledmQjikjkXCxqMJS9WtfFCyH9XtSekEF+2dH+P4tzITduTygGfv58a5VCTH5PtXD7EFZiNyUDBhHnsFTBgE0SQIA9pfFtgo6cKGuhooeilaKH41eDs38Ip+f4At1Rq/sjr6NEwQqb/I/DQqsLvaFUjvAx+eWirddAJZnAj1DFJL0mSg/gcIpPkMBkhoyCSJ8lTZIxk0TpKDjXHliJzZPO50dR5ASNSnzeLvIvod0HG/mdkmOC0z8VKnzcQ2M/Yz2vKldduXjp9bleLu0ZWn7vWc+l0JGcaai10yNrUnXLP/8Jf59ewX+c3Wgz+B34Df+vbVrc16zTMVgp9um9bxEfzPU5kPqUtVWxhs6OiWTVW+gIfywB9uXi7CGcGW/zk98k/kmvJ95IfJn/j3uQ+4c5zn3Kfcd+AyF3gLnJfcl9xH3OfR2rUee80a+6vo7EK5mmXUdyfQlrYLTwoZIU9wsPCZEtP6BWGhAlhL3p2N6sTjRdduwbHsG9kq32sgBepc+xurLPW4T9URpYGJ3ym4+8zA05u44QjST8ZIoVtu3qE7fWmdn5LPdqvgcZz8Ww8BWJ8X3w0PhQ/wnCDGd+LvlHs8dRy6bLLDuKMaZ20tZrqisPJ5ONiCq8yKhYM5cCgKOu66Lsc0aYOtZdo5QCwezI4wm9J/v0X23mlZXOfBjj8Jzv3WrY5D+CsA9D7aMs2gGfjve8ArD6mePZSeCfEYt8CONWDw8FXTxrPqx/r9Vt4biXeANh8vV7/+/16ffMD1N8AuKD/A/8leAvFY9bLAAAAOGVYSWZNTQAqAAAACAABh2kABAAAAAEAAAAaAAAAAAACoAIABAAAAAEAAANIoAMABAAAAAEAAAIcAAAAANkkcbcAAEAASURBVHgB7N0JvE3l/sfxn8xkFplKhtBAhpIpQylFIZWiklIaCY1I3W4abiWVpDRqIK6rSzdRknlKpJIiRckUyizh7/v8z9ZxnLOHYw9rr/15Xq/lnLP32ms9672Wc9ZvPc/ze3IcOFiMggACCCCAAAIIIIAAAgggYMdggAACCCCAAAIIIIAAAggg8P8CBEhcCQgggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJoAARKXAgIIIIAAAggggAACCCCQJkCAxKWAAAIIIIAAAggggAACCKQJECBxKSCAAAIIIIAAAggggAACaQIESFwKCCCAAAIIIIAAAggggECaAAESlwICCCCAAAIIIIAAAgggkCZAgMSlgAACCCCAAAIIIIAAAgikCRAgcSkggAACCCCAAAIIIIAAAmkCBEhcCggggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJoAARKXAgIIIIAAAggggAACCCCQJkCAxKWAAAIIIIAAAggggAACCKQJECBxKSCAAAIIIIAAAggggAACaQIESFwKCCCAAAIIIIAAAggggECaAAESlwICCCCAAAIIIIAAAgggkCZAgMSlgAACCCCAAAIIIIAAAgikCRAgcSkggAACCCCAAAIIIIAAAmkCBEhcCggggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJoAARKXAgIIIIAAAggggAACCCCQJkCAxKWAAAIIIIAAAggggAACCKQJECBxKSCAAAIIIIAAAggggAACaQIESFwKCCCAAAIIIIAAAggggECaAAESlwICCCCAAAIIIIAAAgggkCZAgMSlgAACCCCAAAIIIIAAAgikCRAgcSkggAACCCCAAAIIIIAAAmkCBEhcCggggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJoAARKXAgIIIIAAAggggAACCCCQJkCAxKWAAAIIIIAAAggggAACCKQJECBxKSCAAAIIIIAAAggggAACaQIESFwKCCCAAAIIIIAAAggggECaAAESlwICCCCAAAIIIIAAAgggkCZAgMSlgAACCCCAAAIIIIAAAgikCRAgcSkggAACCCCAAAIIIIAAAmkCBEhcCggggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJoAARKXAgIIIIAAAggggAACCCCQJkCAxKWAAAIIIIAAAggggAACCKQJECBxKSCAAAIIIIAAAggggAACaQIESFwKCCCAAAIIIIAAAggggECaAAESlwICCCCAAAIIIIAAAgggkCZAgMSlgAACCCCAAAIIIIAAAgikCRAgcSkggAACCCCAAAIIIIAAAmkCBEhcCggggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJoAARKXAgIIIIAAAggggAACCCCQJkCAxKWAAAIIIIAAAggggAACCKQJECBxKSCAAAIIIIAAAggggAACaQIESFwKCCCAAAIIIIAAAggggECaAAESlwICCCCAAAIIIIAAAgggkCZAgMSlgAACCCCAAAIIIIAAAgikCRAgcSkggAACCCCAAAIIIIAAAmkCBEhcCggggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJoAARKXAgIIIIAAAggggAACCCCQJkCAxKWAAAIIIIAAAggggAACCKQJECBxKSCAAAIIIIAAAggggAACaQIESFwKCCCAAAIIIIAAAggggECaAAESlwICCCCAAAIIIIAAAgggkCZAgMSlgAACCCCAAAIIIIAAAgikCRAgcSkggAACCCCAAAIIIIAAAmkCBEhcCggggAACCCCAAAIIIIBAmgABEpcCAggggAACCCCAAAIIIJAmQIDEpYAAAggggAACCCCAAAIIpAkQIHEpIIAAAggggAACCCCAAAJpAgRIXAoIIIAAAggggAACCCCAQJpArlST2LJli/3xxx+2Z88eO/bYY61o0aJWsGDBVGPgeBFAAAEEEEAAAQQQQCATgZRoQVq0aJF169bNSpUqZcWLF7eTTjrJqlevbuXLl3dBUuXKla179+62cePGTIh4CQEEEEAAAQQQQAABBFJFIMeBg8XPB/vwww/bgw8+6A7xhBNOsHLlyrkgSa1HaknavHmzrV692tatW2clSpSw5557zjp16uRnEo4NAQQQQAABBBBAAAEEshDwdYA0ZswYu+KKK6xVq1Y2cOBAq1OnTqYMihFnzJhhffr0sc8//9xmzZplDRs2zHRdXkQAAQQQQAABBBBAAAH/Cvg6QOrcubPNnTvXli5dannz5g15FjU+6cQTT3QtSMOGDQu5PisggAACCCCAAAIIIICAvwR8PQZpyZIl1qBBg7CCI53WYsWKWc2aNW3NmjX+OsscDQIIIIAAAggggAACCIQl4OssdmXKlLGFCxfa3r17LXfu3CFB1IKkoEoJG+Jd1LVP9aQggAACCCCAAAIIIJBsAnny5LG6desmW7Uzra+vA6QuXbrY1VdfbR06dLB+/fpZ/fr1M0XQGKSZM2faXXfdZTt37rR27dplul6sXlRwdOaZZ8Zq82wXAQQQQAABBBBAAIGYC+ie1g9Bkq8DJGWj27Bhg/Xv398mTJjgMtgptbey1RUuXNi2bt3qstitWrXK1q5da7ly5bKnn37aGjVqFPMLKP0OAi1H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V155JWRwpA9r25deeqmNGjXK1q5d6wKst99+20488UQXeP/888+H9pEM35QsWdK1iCVDXakjAggggAACCCSPgHrclChRInkq7MOahh0g5cmTxwoVKmQ7d+40zfBLSU0BtRhpzJH6xp577rnZQihatKj17NnTvvvuO1OQNGfOHKtSpYrdfvvttm7dumxtkw8hgAACCCCAAAIIIBANgbADpBw5criB+NrpJZdc4rpL/fDDD25Avgblp1/U2kTxn8Dzzz/vsqqoq1y1atWO+gCPOeYYNwDxiy++cF3vNKZJgdKDDz5o6pJHQQABBBBAAAEEEEAg3gJhB0iq2F133eVakNTNrlWrVu5mVpm8Mi6PPfZYvI+D/UVBQN3fhg8fnumW1Nqj8//CCy9YrVq1Ml3naF5s27atS/ag7b/22msu+92IESM821rZr18/1/J1NMfMZxFAAAEEEEAAgYwC6qUzYMCAjC/zcxwFIkrSUL16dTe4PlT9otG6EGofvB99AbUCKs13ZkUJOpo3b+6SMmT2fjReU4tSly5d7IorrrAnn3zSJXB48cUXXVDmtcGK27ZtMy0UBBBAAAEEEEAgmgLcY0RTM3vbiihA0oB8in8FypUrl2nXtvHjx5vm/fnmm2/icvD58+d3T0403klpxM8880wXLA0cONAzmeMqVqyYlNn34nIC2QkCCCCAAAIIZFugdOnSpvsMSuIEchxMuJCtjAu7du0yzfSrpA3169d3N9bKVEaJXODll192Ka/1xODYY4+NfAMx/oQClHr16placxJRlC1PCRzkM3jwYFOacAoCCCCAAAIIIICANwQ0/2XevHldIq8GDRp4o1JHUYuIxiBpP6tXr3ZdoBQM1axZ041L0eua/LN///5GggZp+Kd89NFH9uWXX9p9992XsIM6//zz7auvvrKbbrrJrr32WjfJ7KpVqxJWH3aMAAIIIIAAAggg4F+BiAIkzV+jsSCaGFTjkTSHTaCoIUpdoOrWrWu7d+8OvMzXJBdQ0gSNCUp/rhNxSHoq8Y9//MMlclBL0qmnnmrPPvus7d+/PxHVYZ8IIIAAAggggAACPhWIKEDq0aOHqWudxqMsXbr0sFl+x44da8rspXEqmlCWknwCGzZssDVr1hyquL6fOHGi3XjjjYdeS/Q3NWrUMKUDf+qpp9w4pUaNGtm3334b92otX7480/Fa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IIAAAggggAAC4QuULl3adJ9BSZxARAHSAw884OZCevnll10WO6XJzqyoC5cXisZKXXrppa4rlOZCuv7668OqVrVq1cJaLxlXChYgtW7dOhkPKSF17t27d0L2y04RQAABBBBAwN8CderUIc13gk9x2AGSWhY0s2/37t2tU6dOCa52eLtXQgll2lOLloKlBx980GrXrh3eh49irb1799rYsWNNX8Mpc+fODWe1qKwTLECKyg7YCAIIIIAAAggggAACSSwQdoCkiUU1f1CyzZWTN29ee/XVV10kfscdd5gGvsW6/Prrr9a/f39TMBJOiee4HwKkcM4I6yCAAAIIIIAAAgikqkDYfeHUbU4tMSNHjrT9+/cnldepp55qjz76qEvY8NVXX8W87poTasWKFbZ69eqwlscffzzmdQrsIFiAtGHDBjfZb2BdvmYtoNZUxmtl7cM7CCCAAAIIIJA9ASVp0H0kJXECYQdIqqKywhUoUMAuu+wymz59urv537Rpk2VcAnPtJO6wjtxznz59bMmSJXb66acf+WYKvRIsQBo/frwpEQcltMCQIUNs9uzZoVdkDQQQQAABBBBAIAKBWbNmmRKNURInEFGAdMkll7j03uPGjXOtSWop0RxIGZcnnngicUfEnoMKBAuQ1DKYWdr2oBtM0TflhFWKnnwOGwEEEEAAgRgKcI8RQ9wwNx32GCRtTwkOypYtG3LTNWrUCLkOKyRGIFiA1KRJE9M8SZTQAu3btzeu89BOrIEAAggggAACkQnUqlXLNPafkjiBiAKkF198MXE1jcOedXzDhg2zW265xW6++eY47DH+uwgWIHHDH/75aN68efgrsyYCCCCAAAIIIBCmgBojwmmQCHNzrJYNgYgCpPTbX7VqlS1btsw2b95sxx13nMsSV7x48fSrJN3369evd+OU9NWvJViA5Ndj5rgQQAABBBBAAAEEEAhXIOIAaenSpa6FRUka0pfcuXO71wcPHmw5cuRI/1bSfK+WI00sqxmM/VoIkPx6ZjkuBBBAAAEEEEAAgWgIRBQg/fzzz9agQQOXLrtVq1ZuTFLRokVNr3/44Yf23HPPmeb0UbY7pQVPtqLAyM/Bkc5HsABp/vz5pgyESudOCS4wZswYq1u3rlWqVCn4iryLAAIIIIAAAghEIKAU319++aV16NAhgk+xajQFIgqQevbsabt377ZPPvnEzj333MPqMWjQIOvVq5e98MIL1rVrV2vcuPFh73vlhy1bttgff/zhkhEce+yxpgAv2Sa/PRrLYAHS4sWLXYBLgBRaeMaMGVakSBECpNBUrIEAAggggAACEQhorsWZM2cSIEVgFu1VI2rmmTZtmnXv3v2I4EiVUhc7da/TeKTPPvss2vU8qu0tWrTIunXrZqVKlTKNkzrppJOsevXqVr58eVOQVLlyZXdcGzduPKr9JMOHgwVIuXLlMi2U0AJyypkzZ+gVWQMBBBBAAAEEEIhAgPuxCLBitGrYd8NqdVFChtNOOy3LquiEVqtWzb744oss14n3Gw8//LA9+OCDbrcnnHCC6yKoIEmBUeCYVq9ebS+//LKNHTvWdRPs1KlTvKsZt/0FC5A6duxo+/bti1tdknlHffv2dS1IyXwM1B0BBBBAAAEEvCfQrFkzl/zMezVLnRqFHSCpO5EWdcPKqujm+9tvv7Wzzjorq1Xi+rrGiSg40nipgQMHZnmxaUIudZnq06ePde7c2SpWrGgNGzaMa13jtTOdo6y6FGb1erzqlkz70eTIFAQQQAABBBBAINoC6pVVokSJaG+W7UUgEFEXOwUaSsDwwQcfHLELjU1SFrhNmzaZV+aIef/9990YEX2tU6fOEXUOvKCse+ecc45NnjzZChUqZCNGjAi85buvwVqQfHewHBACCCCAAAIIIIAAAhEKhN2CpO0+8cQTNmnSJLv44otdEobatWtbsWLFXBa7jz/+2H755Re77LLLrE2bNhFWIzarL1myxHWpy5s3b1g70LHUrFnT1qxZE9b6ybgSAVIynjXqjAACCCCAAAIIIBAvgYhakE488UT7+uuvXZc1Zdd4/vnnTWN8Xn/9dTc+Sd+/9dZb8ap7yP2UKVPGFi5caHv37g25rlZQhjsFVUrg4NcSLEAaNWqUayH067FH87j69etnc+bMieYm2RYCCCCAAAIIIOAy2A0YMACJBApEFCCpnuXKlbOJEyfatm3bbMGCBa673TfffOMCpAceeMDy5cuXwMM5fNddunSxZcuWuTSJ8+bNO/zNdD8FxiCpC+HOnTutXbt26d7117fBAqStW7e68+qvI47N0ej610JBAAEEEEAAAQSiKcA9RjQ1s7etiLrYpd+FssDVq1cv/Uue+17Z6DZs2GD9+/e3CRMmuOBOqb018K1w4cJuwltl5lu1apWtXbvWpbh++umnrVGjRp47lmhVKFiApOB3x44d0dqVr7ejRB5KG09BAAEEEEAAAQSiKVC6dGmXMCya22RbkQmEHSBpVl/NcaRMdunLb7/9Zu+++65de+21btLV9O8l+nslX9DktW3btjV1iZo+fbplbEkqUKCAlS1b1mWw00S4FSpUSHS1Y7r/YAFS69atY7pvP228d+/efjocjgUBBBBAAAEEPCKgxGLBkot5pJq+rkbILnbqcqbU15rfaMqUKUdgaFJYBRYKMpThzoulUqVKNnLkSJd8QXMfad6j77//3n7//XfXYqIZi5966infB0c6N8ECJC+eO+qEAAIIIIAAAggggEA8BYIGSEpucP7557sWInUnyiwb3CmnnGLdunVzdb7ppptMXdS8XNS1Tq1EVatWPaI1zMv1jlbdCJCiJcl2EEAAAQQQQAABBPwoEDRAUna6WbNmuS5qK1eutMy6YClAUsuRJlpVn0ll3dB4Hoo3BYIFSBqv5ecU59E8I2p1ZLxWNEXZFgIIIIAAAghIQEkaNLSFkjiBoAHSsGHDTON4XnzxRcufP3/QWtatW9eefPJJlwXuzTffDLoubyZOIFiANH78eBs9enTiKpdEex4yZIjNnj07iWpMVRFAAAEEEEAgGQTUODF06NBkqKpv6xg0QNI4HQU+mk8onHL55ZfbMccc41Jrh7M+68RfIFiAtH//flPKc0poATlhFdqJNRBAAAEEEEAgMgHuMSLzisXaWWax0420uhCdfPLJYe9XcyBpjM/GjRvD/gwrxlcgWIDUpEkT27NnT3wrlKR7a9++vdWoUSNJa0+1EUAAAQQQQMCrArVq1QrZc8urdfdLvbIMkPLkyePmefn000/dk3J1tQtVvv76a5cZThntKN4UCBYgccMf/jlr3rx5+CuzJgIIIIAAAgggEKaA7qO5lw4TK0arBe1id84559i6dets0aJFYe1+4sSJbr3TTz89rPVZKf4CwQKk+NeGPSKAAAIIIIAAAggg4C2BoAFS9+7dXW27du0aclzRW2+95TLYKZnDNddc462jpDZOQGOM9u3bZ2odpCCAAAIIIIAAAggggMCRAkEDpPPOO880t9GSJUusXr16LkudMmts2bLF/vrrL/v222/t3//+t91444127bXX2u7du+3555+3YsWKHbknXkm4gFqPVLIKkObP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69attnv3bn+Tzx49eoTZeEQAAQQQQAABBBBAAIGECyQiQEo/xrq0jnn400V4jgACCCCAAAIIIIAAAqFArCdpCBvJIwIIIIAAAggggAACCCBQigABUilK5EEAAQQQQAABBBBAAIFECCTuErtEHNWsRmqyCs3Q16lTp6w1vKyVgOzxr5V24+1Hx75jx46NV7GE1IjPX/0PtN7/fAfW/zjUowbhd1/4WI86JH2ffPaivwPauXsABdE3Y4tmE3jppZdMk1UoWCLVXkD319qyZYufMbH2e2eP9RZYu3atHXrooZwg1ulA7Nu3z3QMjjzyyDrVgN2+/vrr1rNnT+vSpQsYCRRYs2aNDR06NIEtb4wmb9q0yVekV69ejVGhJqgFAVITHCSqiAACCCCAAAIIIIAAArURYAxSbZzZCwIIIIAAAggggAACCDSBAAFSExwkqogAAggggAACCCCAAAK1ESBAqo0ze0EAAQQQQAABBBBAAIEmECBAaoKDRBURQAABBBBAAAEEEECgNgIESLVxZi8IIIAAAggggAACCCDQBAIESE1wkKgiAggggAACCCCAAAII1EaAAKk2zuwFAQQQQAABBBBAAAEEmkCAAKkJDhJVRAABBBBAAAEEEEAAgdoIECDVxpm9IIAAAggggAACCCCAQBMIECA1wUGiiggggAACCCCAAAIIIFAbAQKk2jizFwQQQAABBBBAAAEEEGgCAQKkJjhIVBEBBBBAAAEEEEAAAQRqI0CAVBtn9oIAAggggAACCCCAAAJNIECA1AQHiSoigAACCCCAAAIIIIBAbQTaX+tSbXbFXiot8Morr9iDDz5oI0aMyFv0vn377JFHHrHHHnvMOnbsaL17965I3ryFJGDFrl277Le//a0tX77ctmzZYj169LADDjggb8v/+Mc/2uLFi23dunXWt29f69SpU0Xy5i2EFVUT2LZtm73xxhu2devWVn/vvPOOde3aNWPffP4yOMp6sXDhQpOnPkO5UrWso5Sbq17Nvuzll1+2FStW2LPPPmvt2rWzPn365G1Stb7ropSbt3KsiCTQSN91STv+9fqu0xskinWUvJHefI2SOSA1pYA7QQuGDx8edO/ePW/9X3zxxWDYsGGBe6+l/o455phg7dq1rbaJkrfVxglacPfddwfuBC3lKdsDDzww+Na3vpVTYdq0aUGHDh1S+du3bx/8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8xt797vfbccee2zG/pLwopzP4//+7//addddZ//yL/9iffv2TQIXbUQAgWyBgIQAAgg0icAPfvCDwH2HFf1btGiRb5E7EfV5//Zv/7bqLTz77LP9vnbt2lX1fdVyB7/73e+Ciy++uJa7rPi+Vq1a5Y+NCxwqXnbUAr/xjW8UfP+6ACm48847g71790Yq2gXngQuygvvuu89vt2LFCr+ff/7nf45UTlwyl/t5dD90BBdeeGFcOGgHAghEFGjbz1TZURavEUAAgRoKnHvuueZOXvLu8fjjj/frunfvbuedd569973vzZuXFYUFxo8fb7t37y6cibWRBVzQaWeddZbfbv/+/bZjxw7f+/Pd737XJkyYYGvWrLEbbrih5HL/4R/+wY488siCn4uSCyOj3Xjjjf574yc/+YmNGzcOEQQQSJgAAVLCDjjNRSAOArpM6tJLLy3alCOOOMIeeOCBovnIgECtBU466aSc72EF/joh//rXv24f+chH7JRTTilaNddDZvPmzbP58+cXzUuG0gSGDx/uL5fVZXa6bLZdu3albUguBBCIhQABUiwOI41AAIFcAlu2bDH9Ajxs2DD74Ac/6LNoXMbGjRvtE5/4hP32t7/14zQ0dki9Th//+Metc+fOrYp6+OGH7cknn/S/6vfq1cuP69BJ7AEHHNAqb6kLNBZF42I0ZmTw4ME2ZswYGzFiRGrzsO4K8rQuO7lLqOzFF1+0j370o6Y6Kb3zzjv24IMP+rru2bPHt0nru3TpktpcY1Puv/9+C8dp/fznP7fHH3/c+vXrZx/60IdSddi2bZv9+Mc/Nj26y73s7rvv9j0Up512Wqqs9Cellhtuo7Fh69ats0996lMZY7befvttmzt3rh1++OE2duxYn13H7E9/+pP91V/9la/rr371K99WrQ8DCDlqDI7GqX3gAx+wiy66KOdJrY79j370I5O/Am31Rh5yyCFhtVKPpVgqs46h2i7n//zP/zSNX9F7o629lvJdsGCB/eVf/qWpV0jv0WLpm9/8poW9pcXyav3vf/97+8UvfmGvvvpq6piGva7Z27/00kv2s5/9zNavX2+jRo3yXnr/dOzY0T/Pzp/9Wtv913/9l6kcjefReCj16uYaZ/XGG2/Y//zP/6TejzI95phjsou0cj6PpR5X7VTvoU9+8pP205/+1Ne5VUVYgAAC8RWIeEke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" alt width="100%" /></p>
+</div>
+</div>
+<div id="worked-trialsimulator-example" class="section level2">
+<h2>Worked <code>TrialSimulator</code> example</h2>
+<p>We now simulate one two-arm trial with an event-driven endpoint. A
+calendar milestone provides the locked interim data used by both
+methods.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>pfs_pbo <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">type =</span> <span class="st">&#39;tte&#39;</span>, <span class="at">generator =</span> rexp,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                    <span class="at">rate =</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">/</span> <span class="dv">10</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>pbo <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;pbo&#39;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>pbo<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_pbo)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>pfs_trt <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">type =</span> <span class="st">&#39;tte&#39;</span>, <span class="at">generator =</span> rexp,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                    <span class="at">rate =</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">/</span> <span class="dv">14</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;trt&#39;</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>trt<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_trt)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>accrual_rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">end_time =</span> <span class="cn">Inf</span>, <span class="at">piecewise_rate =</span> <span class="dv">30</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(<span class="at">name =</span> <span class="st">&#39;cp-example&#39;</span>, <span class="at">n_patients =</span> <span class="dv">400</span>, <span class="at">duration =</span> <span class="dv">40</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>               <span class="at">seed =</span> <span class="dv">31416</span>, <span class="at">enroller =</span> StaggeredRecruiter,</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>               <span class="at">accrual_rate =</span> accrual_rate, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), pbo, trt)</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>interim <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;interim&#39;</span>, <span class="at">when =</span> <span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">15</span>))</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">milestone</span>(<span class="at">name =</span> <span class="st">&#39;final&#39;</span>, <span class="at">when =</span> <span class="fu">calendarTime</span>(<span class="at">time =</span> <span class="dv">40</span>))</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>listener <span class="ot">&lt;-</span> <span class="fu">listener</span>(<span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>listener<span class="sc">$</span><span class="fu">add_milestones</span>(interim, final)</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>controller <span class="ot">&lt;-</span> <span class="fu">controller</span>(trial, listener)</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">silent =</span> <span class="cn">TRUE</span>, <span class="at">plot_event =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>The next subsections deliberately analyze this completed replicate
+directly, outside a milestone action function. This is diagnostic code:
+it makes the inputs and outputs easy to compare while demonstrating
+effect assumptions, alternative directions, caps, and return values one
+feature at a time. It is not the recommended structure for a simulation
+study. After these focused examples, see <a href="#implementing-the-policy-in-an-action-function">the implementation
+of <code>promising_zone_action()</code></a> and the <a href="#a-complete-promising-zone-simulation">complete event-driven
+simulation program</a> for the recommended <code>TrialSimulator</code>
+structure.</p>
+<p>When <code>&#39;interim&#39;</code> is supplied as <code>milestone</code>,
+each method retrieves the data locked at that milestone and calls
+<code>fitLogrank()</code> internally. The explicit fit below reproduces
+that internal step so that the resulting interim logrank statistic
+<code>z</code> and event count <code>info</code>—denoted by <span class="math inline">\(z\)</span> and <span class="math inline">\(d\)</span> in the formulas, and returned as
+<code>z</code> and <code>d</code> by the methods—are visible.
+<code>interim_fit</code> is not an input to either method and need not
+be fitted beforehand. Likewise, the direct method calls that follow are
+intentional teaching devices rather than actions that can adapt this
+already completed trial.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>interim_fit <span class="ot">&lt;-</span> <span class="fu">fitLogrank</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">data =</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(<span class="st">&#39;interim&#39;</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>, <span class="at">tidy =</span> <span class="cn">FALSE</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>interim_fit[, <span class="fu">c</span>(<span class="st">&#39;arm&#39;</span>, <span class="st">&#39;placebo&#39;</span>, <span class="st">&#39;z&#39;</span>, <span class="st">&#39;info&#39;</span>)]</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;   arm placebo         z info</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; 1 trt     pbo -1.092148  145</span></span></code></pre></div>
+<div id="conditional-power-under-different-assumptions" class="section level3">
+<h3>Conditional power under different assumptions</h3>
+<p>Suppose the planned final analysis has 300 events and its one-sided
+final boundary corresponds to nominal <code>alpha = 0.022</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>planned_D <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>final_alpha <span class="ot">&lt;-</span> <span class="fl">0.022</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>cp_at <span class="ot">&lt;-</span> <span class="cf">function</span>(effect){</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">conditionalPower</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>    <span class="at">alpha =</span> final_alpha, <span class="at">D =</span> planned_D, <span class="at">effect =</span> effect</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  )<span class="sc">$</span>cp</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>}</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="at">assumption =</span> <span class="fu">c</span>(<span class="st">&#39;interim trend&#39;</span>, <span class="st">&#39;null future drift&#39;</span>, <span class="st">&#39;hazard ratio 0.75&#39;</span>),</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="at">conditional_power =</span> <span class="fu">c</span>(<span class="fu">cp_at</span>(<span class="st">&#39;trend&#39;</span>), <span class="fu">cp_at</span>(<span class="st">&#39;null&#39;</span>), <span class="fu">cp_at</span>(<span class="fl">0.75</span>))</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>)</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt;          assumption conditional_power</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; 1     interim trend        0.26877360</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt; 2 null future drift        0.04043096</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt; 3 hazard ratio 0.75        0.51798610</span></span></code></pre></div>
+<p>The difference between the trend and specified-effect calculations is
+not a software discrepancy: they answer different conditional questions.
+A robust design should examine assumptions chosen before looking at the
+interim result.</p>
+<p>The direction transformation can also be checked directly by swapping
+the reference arm. The treatment-vs-placebo hazard ratio 0.75 becomes
+the placebo-vs-treatment hazard ratio <span class="math inline">\(1/0.75\)</span>, and <code>&quot;less&quot;</code> becomes
+<code>&quot;greater&quot;</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>cp_less <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">conditionalPower</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">alpha =</span> final_alpha, <span class="at">D =</span> planned_D, <span class="at">effect =</span> <span class="fl">0.75</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>cp_greater <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">conditionalPower</span>(</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;trt&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;greater&#39;</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="at">alpha =</span> final_alpha, <span class="at">D =</span> planned_D, <span class="at">effect =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fl">0.75</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>)</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  <span class="at">formulation =</span> <span class="fu">c</span>(<span class="st">&#39;trt vs pbo, less&#39;</span>, <span class="st">&#39;pbo vs trt, greater&#39;</span>),</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="at">z =</span> <span class="fu">c</span>(cp_less<span class="sc">$</span>z, cp_greater<span class="sc">$</span>z),</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  <span class="at">conditional_power =</span> <span class="fu">c</span>(cp_less<span class="sc">$</span>cp, cp_greater<span class="sc">$</span>cp)</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>)</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;           formulation         z conditional_power</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; 1    trt vs pbo, less -1.092148         0.5179861</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; 2 pbo vs trt, greater  1.092148         0.5179861</span></span></code></pre></div>
+</div>
+<div id="event-number-reassessment-and-the-cap" class="section level3">
+<h3>Event-number reassessment and the cap</h3>
+<p>Under the assumed hazard ratio 0.75, request 90% conditional power.
+Comparing two caps illustrates both possible values of
+<code>target_reached</code>; the smaller cap remains recorded in
+<code>D_cap</code>, while <code>D</code> and <code>achieved_cp</code>
+are <code>NA</code> because no solution exists through that cap.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>reassess_500 <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">eventNumberReestimationFromConditionalPower</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">alpha =</span> final_alpha, <span class="at">target_cp =</span> <span class="fl">0.9</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="at">effect =</span> <span class="fl">0.75</span>, <span class="at">D_cap =</span> <span class="dv">500</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>reassess_600 <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">eventNumberReestimationFromConditionalPower</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="at">alpha =</span> final_alpha, <span class="at">target_cp =</span> <span class="fl">0.9</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="at">effect =</span> <span class="fl">0.75</span>, <span class="at">D_cap =</span> <span class="dv">600</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>)</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">cap_500 =</span> reassess_500, <span class="at">cap_600 =</span> reassess_600)[,</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&#39;d&#39;</span>, <span class="st">&#39;D&#39;</span>, <span class="st">&#39;D_cap&#39;</span>, <span class="st">&#39;target_cp&#39;</span>, <span class="st">&#39;achieved_cp&#39;</span>, <span class="st">&#39;target_reached&#39;</span>)]</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt;           d   D D_cap target_cp achieved_cp target_reached</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; cap_500 145  NA   500       0.9          NA          FALSE</span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; cap_600 145 574   600       0.9   0.9005152           TRUE</span></span></code></pre></div>
+<p>Omitting <code>D_cap</code>, or passing <code>NULL</code>, requests
+the unbounded answer and is equivalent here to the solution under cap
+600.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">eventNumberReestimationFromConditionalPower</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">alpha =</span> final_alpha, <span class="at">target_cp =</span> <span class="fl">0.9</span>, <span class="at">effect =</span> <span class="fl">0.75</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>)[, <span class="fu">c</span>(<span class="st">&#39;d&#39;</span>, <span class="st">&#39;D&#39;</span>, <span class="st">&#39;D_cap&#39;</span>, <span class="st">&#39;achieved_cp&#39;</span>, <span class="st">&#39;target_reached&#39;</span>)]</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt;     d   D D_cap achieved_cp target_reached</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; 1 145 574   Inf   0.9005152           TRUE</span></span></code></pre></div>
+</div>
+</div>
+<div id="a-promising-zone-policy" class="section level2">
+<h2>A promising-zone policy</h2>
+<p>A common design pattern classifies conditional power at the
+originally planned final event number into zones. The following
+thresholds are purely illustrative:</p>
+<ul>
+<li><strong>unfavorable:</strong> <span class="math inline">\(CP(D_{\text{planned}})&lt;0.30\)</span>;</li>
+<li><strong>promising:</strong> <span class="math inline">\(0.30\leq
+CP(D_{\text{planned}})&lt;0.90\)</span>;</li>
+<li><strong>favorable:</strong> <span class="math inline">\(CP(D_{\text{planned}})\geq0.90\)</span>.</li>
+</ul>
+<p>For the specified hazard ratio 0.75, the worked example lies in the
+promising zone.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>lower_cp <span class="ot">&lt;-</span> <span class="fl">0.30</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>target_cp <span class="ot">&lt;-</span> <span class="fl">0.90</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>cp_planned <span class="ot">&lt;-</span> <span class="fu">cp_at</span>(<span class="fl">0.75</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>zone <span class="ot">&lt;-</span> <span class="cf">if</span>(cp_planned <span class="sc">&lt;</span> lower_cp){</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="st">&#39;unfavorable&#39;</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>}<span class="cf">else</span> <span class="cf">if</span>(cp_planned <span class="sc">&lt;</span> target_cp){</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>  <span class="st">&#39;promising&#39;</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>}<span class="cf">else</span>{</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="st">&#39;favorable&#39;</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>}</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="fu">data.frame</span>(planned_D, cp_planned, zone,</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>           <span class="at">reassessed_D =</span> reassess_600<span class="sc">$</span>D,</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>           <span class="at">target_reached =</span> reassess_600<span class="sc">$</span>target_reached)</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt;   planned_D cp_planned      zone reassessed_D target_reached</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; 1       300  0.5179861 promising          574           TRUE</span></span></code></pre></div>
+<p>One possible pre-specified policy is to retain the original design in
+the unfavorable and favorable zones, and increase the event target in
+the promising zone subject to a cap. A different design could stop for
+futility in the unfavorable zone. These choices are properties of the
+trial design, not of the calculator.</p>
+<div id="implementing-the-policy-in-an-action-function" class="section level3">
+<h3>Implementing the policy in an action function</h3>
+<p>The following function implements the increase-only rule at an
+interim milestone. The final milestone must already be registered and
+must not yet have triggered. The complete program near the end of this
+vignette registers this action and executes the simulation.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>promising_zone_action <span class="ot">&lt;-</span> <span class="cf">function</span>(trial){</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="do">## Pre-specified design parameters. The promising zone is defined using</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="do">## conditional power at the originally planned final analysis.</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  planned_D <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  lower_cp <span class="ot">&lt;-</span> <span class="fl">0.30</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  target_cp <span class="ot">&lt;-</span> <span class="fl">0.90</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  D_cap <span class="ot">&lt;-</span> <span class="dv">600</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="do">## conditionalPower() obtains the data locked at the interim milestone</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="do">## and fits the treatment-vs-placebo logrank comparison internally.</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>  cp <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">conditionalPower</span>(</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>    <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>    <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.022</span>, <span class="at">D =</span> planned_D, <span class="at">effect =</span> <span class="fl">0.75</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>  )<span class="sc">$</span>cp</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>  <span class="cf">if</span>(cp <span class="sc">&lt;</span> lower_cp){</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>    zone <span class="ot">&lt;-</span> <span class="st">&#39;unfavorable&#39;</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>    decision <span class="ot">&lt;-</span> <span class="st">&#39;unfavorable: retain planned event number&#39;</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a>    selected_D <span class="ot">&lt;-</span> planned_D</span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>  }<span class="cf">else</span> <span class="cf">if</span>(cp <span class="sc">&lt;</span> target_cp){</span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a>    zone <span class="ot">&lt;-</span> <span class="st">&#39;promising&#39;</span></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a>    <span class="do">## Only a promising result invokes event-number reassessment. The solver</span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a>    <span class="do">## searches for the earliest solution after the observed interim events.</span></span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a>    reassessment <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">eventNumberReestimationFromConditionalPower</span>(</span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a>      <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a>      <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.022</span>, <span class="at">target_cp =</span> target_cp,</span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1"></a>      <span class="at">effect =</span> <span class="fl">0.75</span>, <span class="at">D_cap =</span> D_cap</span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1"></a>    )</span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1"></a>    <span class="do">## This policy permits increases only. Use the exact solution when it is</span></span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1"></a>    <span class="do">## above planned_D; otherwise use the pre-specified cap as the fallback.</span></span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1"></a>    <span class="cf">if</span>(reassessment<span class="sc">$</span>target_reached <span class="sc">&amp;&amp;</span> reassessment<span class="sc">$</span>D <span class="sc">&gt;</span> planned_D){</span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1"></a>      selected_D <span class="ot">&lt;-</span> reassessment<span class="sc">$</span>D</span>
+<span id="cb13-37"><a href="#cb13-37" tabindex="-1"></a>      decision <span class="ot">&lt;-</span> <span class="st">&#39;promising: reassess to target conditional power&#39;</span></span>
+<span id="cb13-38"><a href="#cb13-38" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb13-39"><a href="#cb13-39" tabindex="-1"></a>      selected_D <span class="ot">&lt;-</span> reassessment<span class="sc">$</span>D_cap</span>
+<span id="cb13-40"><a href="#cb13-40" tabindex="-1"></a>      decision <span class="ot">&lt;-</span> <span class="cf">if</span>(reassessment<span class="sc">$</span>target_reached){</span>
+<span id="cb13-41"><a href="#cb13-41" tabindex="-1"></a>        <span class="st">&#39;promising: use cap because the earliest solution is not an increase&#39;</span></span>
+<span id="cb13-42"><a href="#cb13-42" tabindex="-1"></a>      }<span class="cf">else</span>{</span>
+<span id="cb13-43"><a href="#cb13-43" tabindex="-1"></a>        <span class="st">&#39;promising: use cap because no solution was found through the cap&#39;</span></span>
+<span id="cb13-44"><a href="#cb13-44" tabindex="-1"></a>      }</span>
+<span id="cb13-45"><a href="#cb13-45" tabindex="-1"></a>    }</span>
+<span id="cb13-46"><a href="#cb13-46" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
+<span id="cb13-48"><a href="#cb13-48" tabindex="-1"></a>    zone <span class="ot">&lt;-</span> <span class="st">&#39;favorable&#39;</span></span>
+<span id="cb13-49"><a href="#cb13-49" tabindex="-1"></a>    decision <span class="ot">&lt;-</span> <span class="st">&#39;favorable: retain the planned design&#39;</span></span>
+<span id="cb13-50"><a href="#cb13-50" tabindex="-1"></a>    selected_D <span class="ot">&lt;-</span> planned_D</span>
+<span id="cb13-51"><a href="#cb13-51" tabindex="-1"></a>  }</span>
+<span id="cb13-52"><a href="#cb13-52" tabindex="-1"></a></span>
+<span id="cb13-53"><a href="#cb13-53" tabindex="-1"></a>  <span class="do">## update_milestone() must be called from a milestone action. It queues a</span></span>
+<span id="cb13-54"><a href="#cb13-54" tabindex="-1"></a>  <span class="do">## replacement for the registered, not-yet-triggered final milestone. The</span></span>
+<span id="cb13-55"><a href="#cb13-55" tabindex="-1"></a>  <span class="do">## new event target takes effect after this action returns and applies only</span></span>
+<span id="cb13-56"><a href="#cb13-56" tabindex="-1"></a>  <span class="do">## to the current replicate; the original trigger is restored before the</span></span>
+<span id="cb13-57"><a href="#cb13-57" tabindex="-1"></a>  <span class="do">## next replicate. No update is needed when planned_D is retained.</span></span>
+<span id="cb13-58"><a href="#cb13-58" tabindex="-1"></a>  <span class="cf">if</span>(selected_D <span class="sc">&gt;</span> planned_D){</span>
+<span id="cb13-59"><a href="#cb13-59" tabindex="-1"></a>    trial<span class="sc">$</span><span class="fu">update_milestone</span>(</span>
+<span id="cb13-60"><a href="#cb13-60" tabindex="-1"></a>      <span class="st">&#39;final&#39;</span>,</span>
+<span id="cb13-61"><a href="#cb13-61" tabindex="-1"></a>      <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> selected_D,</span>
+<span id="cb13-62"><a href="#cb13-62" tabindex="-1"></a>                         <span class="at">arms =</span> <span class="fu">c</span>(<span class="st">&#39;pbo&#39;</span>, <span class="st">&#39;trt&#39;</span>))</span>
+<span id="cb13-63"><a href="#cb13-63" tabindex="-1"></a>    )</span>
+<span id="cb13-64"><a href="#cb13-64" tabindex="-1"></a>  }</span>
+<span id="cb13-65"><a href="#cb13-65" tabindex="-1"></a></span>
+<span id="cb13-66"><a href="#cb13-66" tabindex="-1"></a>  <span class="do">## Re-evaluate conditional power at the event number that will actually be</span></span>
+<span id="cb13-67"><a href="#cb13-67" tabindex="-1"></a>  <span class="do">## used as the final target, including a cap selected as a fallback.</span></span>
+<span id="cb13-68"><a href="#cb13-68" tabindex="-1"></a>  selected_cp <span class="ot">&lt;-</span> trial<span class="sc">$</span><span class="fu">conditionalPower</span>(</span>
+<span id="cb13-69"><a href="#cb13-69" tabindex="-1"></a>    <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb13-70"><a href="#cb13-70" tabindex="-1"></a>    <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb13-71"><a href="#cb13-71" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.022</span>, <span class="at">D =</span> selected_D, <span class="at">effect =</span> <span class="fl">0.75</span></span>
+<span id="cb13-72"><a href="#cb13-72" tabindex="-1"></a>  )<span class="sc">$</span>cp</span>
+<span id="cb13-73"><a href="#cb13-73" tabindex="-1"></a></span>
+<span id="cb13-74"><a href="#cb13-74" tabindex="-1"></a>  <span class="do">## Values saved in an action function become simulation-output columns.</span></span>
+<span id="cb13-75"><a href="#cb13-75" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(zone, <span class="st">&#39;promising_zone&#39;</span>)</span>
+<span id="cb13-76"><a href="#cb13-76" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(cp, <span class="st">&#39;conditional_power_at_planned_D&#39;</span>)</span>
+<span id="cb13-77"><a href="#cb13-77" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(selected_D, <span class="st">&#39;selected_final_event_number&#39;</span>)</span>
+<span id="cb13-78"><a href="#cb13-78" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(selected_cp, <span class="st">&#39;conditional_power_at_final_D&#39;</span>)</span>
+<span id="cb13-79"><a href="#cb13-79" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(selected_cp <span class="sc">&gt;=</span> target_cp, <span class="st">&#39;target_reached_at_selected_D&#39;</span>)</span>
+<span id="cb13-80"><a href="#cb13-80" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(decision, <span class="st">&#39;promising_zone_decision&#39;</span>)</span>
+<span id="cb13-81"><a href="#cb13-81" tabindex="-1"></a>}</span></code></pre></div>
+<p>The queued update replaces the complete trigger condition of the
+registered <code>final</code> milestone; it does not trigger the final
+analysis immediately. Here,
+<code>eventNumber(..., arms = c(&#39;pbo&#39;, &#39;trt&#39;))</code> makes the new
+condition count PFS events on the two comparison arms. After the action
+returns, the listener applies this condition before checking subsequent
+milestones. The automatic reset between replicates is important: each
+simulated trial starts from the same as-designed 300-event final
+milestone rather than inheriting the previous replicate’s
+reassessment.</p>
+<p>Many promising-zone designs permit an increase but not a decrease
+from the originally planned event number. The reassessment method itself
+searches from <span class="math inline">\(d+1\)</span>, not from
+<code>planned_D</code>. Therefore, an increase-only policy must verify
+that the returned <code>D</code> is at least <code>planned_D</code>. In
+a nonmonotone case, simply replacing a smaller result by
+<code>planned_D</code> is not guaranteed to preserve the target
+conditional power; the admissible search domain and action should be
+pre-specified explicitly. The action above uses <code>D_cap</code> as
+its pre-specified increase-only fallback and separately records whether
+conditional power at that selected event number reaches the target.</p>
+</div>
+</div>
+<div id="assumptions-and-design-checks" class="section level2">
+<h2>Assumptions and design checks</h2>
+<p>Before using these calculations in a design, check the following.</p>
+<ol style="list-style-type: decimal">
+<li>The final statistic and boundary must match the canonical
+calculation. The allocation ratio should remain constant, and the
+compared treatment and placebo arms should be concurrently
+enrolled.</li>
+<li><code>alpha</code> must represent the nominal final boundary, not an
+arbitrary overall alpha or final-stage alpha increment.</li>
+<li>The effect assumption should be pre-specified. Report sensitivity to
+the interim trend and clinically relevant fixed hazard ratios when
+useful.</li>
+<li><code>D_cap</code> should reflect a feasible event budget. Inspect
+<code>target_reached</code>; when it is <code>FALSE</code>, both
+<code>D</code> and <code>achieved_cp</code> are <code>NA</code>.</li>
+<li>The operational rule must distinguish a final boundary from a formal
+interim stopping boundary.</li>
+<li>Simulate the <strong>entire adaptive design</strong> under the null
+and relevant alternatives. Unblinded sample-size or event-number changes
+can inflate type I error unless the testing procedure or the restricted
+adaptation rule has been justified.</li>
+</ol>
+<p><code>TrialSimulator</code> computes the stated conditional
+quantities but cannot verify that a data-dependent adaptation is valid
+for a particular confirmatory trial. If adaptation changes the final
+statistic, information weights, allocation, or critical boundary, use an
+appropriate adaptive or combination-test analysis rather than treating
+the original final test as unchanged.</p>
+</div>
+<div id="a-complete-promising-zone-simulation" class="section level2">
+<h2>A complete promising-zone simulation</h2>
+<p>The earlier <code>trial</code> object was deliberately small and was
+used only to inspect a single locked dataset. We now redefine it with
+enough patients and follow-up to make every event target through
+<code>D_cap = 600</code> feasible. The interim and final analyses are
+event driven. The interim action is <code>promising_zone_action()</code>
+defined above; the final action performs the planned logrank test and
+saves the result.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>promising_zone_final_action <span class="ot">&lt;-</span> <span class="cf">function</span>(trial){</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">fitLogrank</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>    <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">data =</span> trial<span class="sc">$</span><span class="fu">get_locked_data</span>(<span class="st">&#39;final&#39;</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>, <span class="at">tidy =</span> <span class="cn">FALSE</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  )</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(fit<span class="sc">$</span>info, <span class="st">&#39;observed_final_event_number&#39;</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(fit<span class="sc">$</span>z, <span class="st">&#39;final_z&#39;</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(fit<span class="sc">$</span>p, <span class="st">&#39;final_p&#39;</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>  trial<span class="sc">$</span><span class="fu">save</span>(fit<span class="sc">$</span>p <span class="sc">&lt;=</span> <span class="fl">0.022</span>, <span class="st">&#39;reject_final&#39;</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>}</span></code></pre></div>
+<p>The following is a complete simulation program: arms, trial,
+milestone actions, listener, and controller are all connected before
+execution. The initial final milestone requests 300 events. When the
+interim action selects a larger target, <code>update_milestone()</code>
+replaces that trigger for the current replicate only; the listener
+restores the original 300-event trigger before the next replicate.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>pfs_pbo <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">type =</span> <span class="st">&#39;tte&#39;</span>, <span class="at">generator =</span> rexp,</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>                    <span class="at">rate =</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">/</span> <span class="dv">10</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>pbo <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;pbo&#39;</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>pbo<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_pbo)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>pfs_trt <span class="ot">&lt;-</span> <span class="fu">endpoint</span>(<span class="at">name =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">type =</span> <span class="st">&#39;tte&#39;</span>, <span class="at">generator =</span> rexp,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                    <span class="at">rate =</span> <span class="fl">0.75</span> <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">/</span> <span class="dv">10</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">arm</span>(<span class="at">name =</span> <span class="st">&#39;trt&#39;</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>trt<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_trt)</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>accrual_rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">end_time =</span> <span class="cn">Inf</span>, <span class="at">piecewise_rate =</span> <span class="dv">30</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;promising-zone&#39;</span>, <span class="at">n_patients =</span> <span class="dv">700</span>, <span class="at">duration =</span> <span class="dv">120</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">20260831</span>, <span class="at">enroller =</span> StaggeredRecruiter,</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>  <span class="at">accrual_rate =</span> accrual_rate, <span class="at">silent =</span> <span class="cn">TRUE</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>)</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), pbo, trt)</span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a>interim <span class="ot">&lt;-</span> <span class="fu">milestone</span>(</span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;interim&#39;</span>, <span class="at">action =</span> promising_zone_action,</span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a>  <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">150</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a>                     <span class="at">arms =</span> <span class="fu">c</span>(<span class="st">&#39;pbo&#39;</span>, <span class="st">&#39;trt&#39;</span>))</span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a>)</span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a>final <span class="ot">&lt;-</span> <span class="fu">milestone</span>(</span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;final&#39;</span>, <span class="at">action =</span> promising_zone_final_action,</span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a>  <span class="at">when =</span> <span class="fu">eventNumber</span>(<span class="at">endpoint =</span> <span class="st">&#39;pfs&#39;</span>, <span class="at">n =</span> <span class="dv">300</span>,</span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a>                     <span class="at">arms =</span> <span class="fu">c</span>(<span class="st">&#39;pbo&#39;</span>, <span class="st">&#39;trt&#39;</span>))</span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a>)</span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a>listener <span class="ot">&lt;-</span> <span class="fu">listener</span>(<span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a>listener<span class="sc">$</span><span class="fu">add_milestones</span>(interim, final)</span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a>controller <span class="ot">&lt;-</span> <span class="fu">controller</span>(trial, listener)</span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">silent =</span> <span class="cn">TRUE</span>, <span class="at">plot_event =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>The saved columns show the complete path from the interim zone and
+selected event target to the final test for this replicate.</p>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; ">
+<table class="table table-striped" style="width: auto !important; ">
+<caption>
+Decision path and final analysis for one replicate
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Zone
+</th>
+<th style="text-align:right;">
+CP at planned D
+</th>
+<th style="text-align:right;">
+Selected final D
+</th>
+<th style="text-align:right;">
+CP at final D
+</th>
+<th style="text-align:center;">
+Target reached
+</th>
+<th style="text-align:right;">
+Observed final D
+</th>
+<th style="text-align:right;">
+Final p-value
+</th>
+<th style="text-align:center;">
+Reject
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+promising
+</td>
+<td style="text-align:right;">
+0.516
+</td>
+<td style="text-align:right;">
+572
+</td>
+<td style="text-align:right;">
+0.9
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+<td style="text-align:right;">
+572
+</td>
+<td style="text-align:right;">
+0.00159
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For operating characteristics, increase <code>n</code> after
+resetting the controller. The following code produces the 1000-replicate
+output summarized below.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">reset</span>()</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">silent =</span> <span class="cn">TRUE</span>, <span class="at">plot_event =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>conditional_power_output <span class="ot">&lt;-</span> controller<span class="sc">$</span><span class="fu">get_output</span>()</span></code></pre></div>
+<p>Here are the first five replicates, restricted to the main decision
+and final analysis columns.</p>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; ">
+<table class="table table-striped" style="width: auto !important; ">
+<caption>
+Decision and final-analysis results for the first five replicates
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Zone
+</th>
+<th style="text-align:right;">
+CP at planned D
+</th>
+<th style="text-align:right;">
+Selected final D
+</th>
+<th style="text-align:right;">
+CP at final D
+</th>
+<th style="text-align:center;">
+Target reached
+</th>
+<th style="text-align:right;">
+Observed final D
+</th>
+<th style="text-align:right;">
+Final p-value
+</th>
+<th style="text-align:center;">
+Reject
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+promising
+</td>
+<td style="text-align:right;">
+0.516
+</td>
+<td style="text-align:right;">
+572
+</td>
+<td style="text-align:right;">
+0.900
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+<td style="text-align:right;">
+572
+</td>
+<td style="text-align:right;">
+0.00159
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+favorable
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+300
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+<td style="text-align:right;">
+300
+</td>
+<td style="text-align:right;">
+&lt; 0.001
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+promising
+</td>
+<td style="text-align:right;">
+0.384
+</td>
+<td style="text-align:right;">
+600
+</td>
+<td style="text-align:right;">
+0.882
+</td>
+<td style="text-align:center;">
+FALSE
+</td>
+<td style="text-align:right;">
+600
+</td>
+<td style="text-align:right;">
+0.00133
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+favorable
+</td>
+<td style="text-align:right;">
+0.929
+</td>
+<td style="text-align:right;">
+300
+</td>
+<td style="text-align:right;">
+0.929
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+<td style="text-align:right;">
+300
+</td>
+<td style="text-align:right;">
+&lt; 0.001
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+promising
+</td>
+<td style="text-align:right;">
+0.340
+</td>
+<td style="text-align:right;">
+600
+</td>
+<td style="text-align:right;">
+0.867
+</td>
+<td style="text-align:center;">
+FALSE
+</td>
+<td style="text-align:right;">
+600
+</td>
+<td style="text-align:right;">
+0.00662
+</td>
+<td style="text-align:center;">
+TRUE
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The zone frequencies and mean selected event number summarize how
+often the rule adapts the final milestone when both the data-generating
+and conditional-power hazard ratios are 0.75.</p>
+<table class="table table-striped" style="width: auto !important; ">
+<caption>
+Promising-zone frequency and selected event number
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Zone
+</th>
+<th style="text-align:right;">
+Replicates
+</th>
+<th style="text-align:right;">
+Percent (%)
+</th>
+<th style="text-align:right;">
+Mean selected D
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+unfavorable
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+12.5
+</td>
+<td style="text-align:right;">
+300.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+promising
+</td>
+<td style="text-align:right;">
+627
+</td>
+<td style="text-align:right;">
+62.7
+</td>
+<td style="text-align:right;">
+516.9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+favorable
+</td>
+<td style="text-align:right;">
+248
+</td>
+<td style="text-align:right;">
+24.8
+</td>
+<td style="text-align:right;">
+300.0
+</td>
+</tr>
+</tbody>
+</table>
+<p>Finally, the overall summary connects adaptation frequency,
+attainment of the conditional-power target at the selected event number,
+and the final testing result. These values describe this illustrative
+data-generating scenario; they do not establish type I error control for
+the adaptation rule.</p>
+<table class="table table-striped" style="width: auto !important; ">
+<caption>
+Operating characteristics of the promising-zone design
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Operating characteristic
+</th>
+<th style="text-align:right;">
+Percent (%)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+final event target increased
+</td>
+<td style="text-align:right;">
+62.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+target CP reached at selected D
+</td>
+<td style="text-align:right;">
+77.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+final null hypothesis rejected
+</td>
+<td style="text-align:right;">
+82.9
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="multiple-treatment-arms" class="section level2">
+<h2>Multiple treatment arms</h2>
+<p>Both methods support several treatment-placebo comparisons.
+<code>D</code>, <code>alpha</code>, <code>target_cp</code>, and a
+non-scalar finite <code>D_cap</code> are named by treatment arm. Names,
+not vector positions, determine matching.</p>
+<p>The setup of the following three-arm toy trial is executed but not
+printed in the rendered vignette. Its complete code remains in the Rmd
+source. This section is intentionally limited to demonstrating the
+multi-comparison output format and name-based argument matching; the
+detailed design examples remain focused on a single treatment-placebo
+comparison. To isolate the example, it is the vignette’s last executable
+section, and its construction occurs inside <code>local()</code>: only
+the <code>trial</code> object needed by the two displayed calls leaves
+the setup scope.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">conditionalPower</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="at">D =</span> <span class="fu">c</span>(<span class="at">low =</span> <span class="dv">350</span>, <span class="at">high =</span> <span class="dv">400</span>),</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="at">alpha =</span> <span class="fu">c</span>(<span class="at">high =</span> <span class="fl">0.01</span>, <span class="at">low =</span> <span class="fl">0.015</span>),</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  <span class="at">effect =</span> <span class="fl">0.75</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co">#&gt;    arm placebo         z   d   D info_fraction alpha effect        cp</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co">#&gt; 1  low     pbo -1.918441 173 350     0.4942857 0.015   0.75 0.7759951</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#&gt; 2 high     pbo -3.208487 161 400     0.4025000 0.010   0.75 0.9676651</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">eventNumberReestimationFromConditionalPower</span>(</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>  <span class="st">&#39;interim&#39;</span>, <span class="fu">Surv</span>(pfs, pfs_event) <span class="sc">~</span> arm,</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>  <span class="at">placebo =</span> <span class="st">&#39;pbo&#39;</span>, <span class="at">alternative =</span> <span class="st">&#39;less&#39;</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>  <span class="at">alpha =</span> <span class="fu">c</span>(<span class="at">low =</span> <span class="fl">0.015</span>, <span class="at">high =</span> <span class="fl">0.01</span>),</span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a>  <span class="at">target_cp =</span> <span class="fu">c</span>(<span class="at">high =</span> <span class="fl">0.90</span>, <span class="at">low =</span> <span class="fl">0.85</span>),</span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a>  <span class="at">effect =</span> <span class="st">&#39;trend&#39;</span>,</span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a>  <span class="at">D_cap =</span> <span class="fu">c</span>(<span class="at">low =</span> <span class="dv">600</span>, <span class="at">high =</span> <span class="dv">700</span>)</span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a>)</span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a><span class="co">#&gt;    arm placebo         z   d   D D_cap alpha effect target_cp achieved_cp</span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a><span class="co">#&gt; 1  low     pbo -1.918441 173 412   600 0.015  trend      0.85   0.8503304</span></span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="co">#&gt; 2 high     pbo -3.208487 161 162   700 0.010  trend      0.90   1.0000000</span></span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="co">#&gt;   target_reached</span></span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co">#&gt; 1           TRUE</span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="co">#&gt; 2           TRUE</span></span></code></pre></div>
+<p>Event counts are pair-specific: each <code>d</code> and
+<code>D</code> counts events on placebo plus one treatment arm. With a
+shared placebo, event counts across comparisons need not sum to a
+trial-wide total.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Chen, Y. H. J., DeMets, D. L., and Lan, K. K. G. (2004). Increasing
+the sample size when the unblinded interim result is promising.
+<em>Statistics in Medicine</em>, 23, 1023–1038. <a href="https://doi.org/10.1002/sim.1688" class="uri">https://doi.org/10.1002/sim.1688</a></li>
+<li>Cui, L., Hung, H. M. J., and Wang, S.-J. (1999). Modification of
+sample size in group sequential clinical trials. <em>Biometrics</em>,
+55, 853–857. <a href="https://doi.org/10.1111/j.0006-341X.1999.00853.x" class="uri">https://doi.org/10.1111/j.0006-341X.1999.00853.x</a></li>
+<li>Mehta, C. R., and Pocock, S. J. (2011). Adaptive increase in sample
+size when interim results are promising: a practical guide with
+examples. <em>Statistics in Medicine</em>, 30, 3267–3284. <a href="https://doi.org/10.1002/sim.4102" class="uri">https://doi.org/10.1002/sim.4102</a></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

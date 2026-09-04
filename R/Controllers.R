@@ -8,14 +8,20 @@
 #' useful to end users.
 #'
 #' \itemize{
-#' \item \code{$run()}
-#' \item \code{$get_output()}
-#' \item \code{$reset()}
+#' \item \code{$run()} run trial simulation, sequentially or in parallel.
+#' It cannot be called twice on a controller unless \code{$reset()} is
+#' called in between.
+#' \item \code{$get_output()} return a data frame of all outputs saved
+#' during simulation.
+#' \item \code{$reset()} reset the trial and listener registered to the
+#' controller before starting a new simulation with \code{$run()}.
 #' }
 #'
 #' @docType class
 #' @examples
 #' ##
+#' @return an \code{R6Class} generator object; use \code{controller()} to create a controller.
+#'
 #' @export
 Controllers <- R6::R6Class(
   'Controllers',
@@ -24,47 +30,118 @@ Controllers <- R6::R6Class(
     trial = NULL,
     listener = NULL,
     silent = FALSE,
-    dry_run = FALSE,
+    tidy = FALSE,
     output = NULL,
 
-    run_ = function(plot_event = TRUE, silent = FALSE, dry_run = FALSE){
+    ## TRUE once run() has been called (successfully or not); cleared by
+    ## reset(). run() refuses to start when TRUE, because the trial is no
+    ## longer in its as-designed state.
+    has_run = FALSE,
+
+    ## @description
+    ## return listener in a controller.
+    get_listener = function(){
+      private$listener
+    },
+
+    ## @description
+    ## return trial in a controller.
+    get_trial = function(){
+      private$trial
+    },
+
+    ## @description
+    ## mute all messages (not including warnings).
+    mute = function(){
+      private$get_trial()$mute(private$silent)
+      private$get_listener()$mute(private$silent)
+    },
+
+    run_ = function(plot_event = TRUE, silent = FALSE){
 
       private$silent <- silent
-      private$dry_run <- dry_run
-      self$mute()
+      private$mute()
+      ## re-applied at every replicate, like mute(): trial$reset() restores
+      ## the snapshot value of the underlying field between replicates.
+      private$get_trial()$tidy_output(private$tidy)
 
-      self$get_listener()$monitor(self$get_trial(), private$dry_run)
+      private$get_listener()$monitor(private$get_trial())
       if(plot_event){
-        self$get_trial()$event_plot()
+        private$get_trial()$event_plot()
       }
 
     },
 
-    run_sequential_ = function(n, plot_event, silent, dry_run){
+    run_sequential_ = function(n, plot_event, silent){
+
+      ## A progress bar is displayed only when silent = TRUE, otherwise
+      ## milestone messages would break its display. It is activated on
+      ## the fly only when projected remaining time exceeds 1 minute,
+      ## so that a quick simulation never launches a bar. Replicate 1 is
+      ## excluded from the projection once later replicates are available
+      ## because it can be slowed down by lazy loading and byte-compilation.
+      ## Once activated, the bar stays until the last replicate even if
+      ## projected remaining time drops below the threshold later on.
+      eta_threshold <- 60 ## seconds
+      bar_id <- NULL
+      t0 <- Sys.time()
+      t1 <- NULL ## completion time of replicate 1
+
+      ## Per-replicate outputs are collected in a list and row-bound once
+      ## at the end (or on error). Calling bind_rows() after every
+      ## replicate costs a fixed ~1 ms per call, which is a sizable share of
+      ## a light replicate; binding once amortizes it.
+      outputs <- vector('list', n)
 
       for(idx in 1:n){
         tryCatch(
           expr = {
-            private$run_(plot_event, silent, dry_run)
+            private$run_(plot_event, silent)
           },
 
           error = function(e){
-            self$get_trial()$save(e$message, 'error_message', overwrite = TRUE)
-            private$output <- bind_rows(private$output, self$get_trial()$get_output())
+            private$get_trial()$save(e$message, 'error_message', overwrite = TRUE)
+            outputs[[idx]] <<- private$get_trial()$get_output()
+            private$output <- bind_rows(private$output, bind_rows(outputs))
             stop(e$message)
           }
         )
 
-        private$output <- bind_rows(private$output, self$get_trial()$get_output())
+        outputs[[idx]] <- private$get_trial()$get_output()
+
+        if(silent && is.null(bar_id) && idx < n){
+          now <- Sys.time()
+          seconds_per_replicate <-
+            if(idx == 1){
+              as.numeric(difftime(now, t0, units = 'secs'))
+            }else{
+              as.numeric(difftime(now, t1, units = 'secs')) / (idx - 1)
+            }
+          if(seconds_per_replicate * (n - idx) > eta_threshold){
+            bar_id <- cli_progress_bar('Running simulation', total = n)
+            cli_progress_update(set = idx, id = bar_id)
+          }
+          if(idx == 1){
+            t1 <- now
+          }
+        }else if(!is.null(bar_id)){
+          cli_progress_update(set = idx, id = bar_id)
+        }
 
         if(idx < n){
           self$reset()
         }
       }
 
+      private$output <- bind_rows(private$output, bind_rows(outputs))
+
+      if(!is.null(bar_id)){
+        cli_progress_done(id = bar_id)
+      }
+
     },
 
-    run_parallel_ = function(n, n_workers, silent, dry_run){
+    run_parallel_ = function(n, n_workers, silent){
 
       if(!requireNamespace("mirai", quietly = TRUE)){
         stop('Package "mirai" is required for parallel execution (n_workers > 1). ',
@@ -74,8 +151,8 @@ Controllers <- R6::R6Class(
       ## Serialize trial and listener once; workers will deserialize
       ## independent copies. make_arms_snapshot() has already been called
       ## in run(), so the snapshot is baked into the serialized bytes.
-      trial_raw <- serialize(self$get_trial()$clone(deep = TRUE), NULL)
-      listener_raw <- serialize(self$get_listener()$clone(deep = TRUE), NULL)
+      trial_raw <- serialize(private$get_trial()$clone(deep = TRUE), NULL)
+      listener_raw <- serialize(private$get_listener()$clone(deep = TRUE), NULL)
 
       ## Distribute replicates evenly across workers
       reps_per_worker <- rep(floor(n / n_workers), n_workers)
@@ -97,7 +174,7 @@ Controllers <- R6::R6Class(
                 trial <- unserialize(trial_raw)
                 listener <- unserialize(listener_raw)
 
-                output <- NULL
+                outputs <- vector('list', reps)
                 error_msg <- NULL
 
                 ## R uses Mersenne-Twister streams by default to generate
@@ -114,10 +191,11 @@ Controllers <- R6::R6Class(
 
                   trial$mute(silent)
                   listener$mute(silent)
+                  trial$tidy_output(tidy)
 
                   run_ok <- tryCatch(
                     {
-                      listener$monitor(trial, dry_run)
+                      listener$monitor(trial)
                       TRUE
                     },
                     error = function(e){
@@ -127,19 +205,19 @@ Controllers <- R6::R6Class(
                     }
                   )
 
-                  output <- dplyr::bind_rows(output, trial$get_output())
+                  outputs[[j]] <- trial$get_output()
 
                   if(!run_ok) break
                 }
 
-                list(output = output, error = error_msg)
+                list(output = dplyr::bind_rows(outputs), error = error_msg)
               },
               trial_raw = trial_raw,
               listener_raw = listener_raw,
               #worker_seed = worker_seeds[i],
               reps = reps_per_worker[i],
               silent = silent,
-              dry_run = dry_run
+              tidy = private$tidy
             )
           }
 
@@ -181,37 +259,17 @@ Controllers <- R6::R6Class(
       private$trial <- trial
       private$listener <- listener
       private$silent <- FALSE
-      private$dry_run <- FALSE
     },
 
     #' @description
-    #' return listener in a controller.
-    get_listener = function(){
-      private$listener
-    },
-
-    #' @description
-    #' return trial in a controller.
-    get_trial = function(){
-      private$trial
-    },
-
-    #' @description
-    #' mute all messages (not including warnings).
-    #' @param silent logical.
-    mute = function(){
-      self$get_trial()$mute(private$silent)
-      self$get_listener()$mute(private$silent)
-    },
-
-    #' @description
-    #' reset the trial and listener registered to the controller before running
-    #' additional replicate of simulation. This is usually done between two
-    #' calls of \code{controller$run()}.
+    #' reset the trial and listener registered to the controller so that a
+    #' new simulation can be started with \code{controller$run()}. The trial
+    #' and the milestones are restored to their as-designed version.
     #'
     reset = function(){
-      self$get_trial()$reset()
-      self$get_listener()$reset()
+      private$get_trial()$reset()
+      private$get_listener()$reset()
+      private$has_run <- FALSE
     },
 
     #' @description
@@ -261,7 +319,8 @@ Controllers <- R6::R6Class(
     },
 
     #' @description
-    #' run trial simulation.
+    #' run trial simulation. It cannot be called again on the same
+    #' controller unless \code{reset()} is called first.
     #' @param n integer. Number of replicates of simulation.
     #' \code{n = 1} by default. Simulation results can be accessed by
     #' \code{controller$get_output()}.
@@ -284,25 +343,43 @@ Controllers <- R6::R6Class(
     #' @param plot_event logical. Create event plot if \code{TRUE}. Forced to
     #' \code{FALSE} when \code{n > 1} or \code{n_workers > 1}.
     #' @param silent logical. \code{TRUE} if muting all messages during a
-    #' trial. Note that warning messages are still displayed.
-    #' @param dry_run logical. We are considering retire this argument.
-    #' \code{TRUE} if action function provided by users is
-    #' ignored and an internal default action \code{.default_action} is called
-    #' instead. This default function only locks data when the milestone is
-    #' triggered. Milestone time and number of endpoints' events or sample sizes
-    #' are saved. It is suggested to set \code{dry_run = TRUE} to estimate
-    #' distributions of triggering time and number of events before formally
-    #' using custom action functions if a fixed design is in use.
-    #' This helps determining planned maximum
-    #' information for group sequential design and reasonable time of milestone
-    #' of interest when planning a trial. Set it to \code{FALSE} for formal
-    #' simulations. However, for an adaptive design where arm(s) could
-    #' possibly be added or removed, setting \code{dry_run} to \code{TRUE}
-    #' is usually not helpful because adaption should be executed
-    #' before estimating the milestone time.
-    run = function(n = 1, n_workers = 1, plot_event = TRUE, silent = FALSE, dry_run = FALSE){
+    #' trial. Note that warning messages are still displayed. When
+    #' \code{silent = TRUE} and replicates are run sequentially
+    #' (\code{n_workers = 1}), a progress bar is displayed automatically
+    #' if the simulation is expected to take more than 1 minute.
+    #' @param tidy logical. If \code{TRUE}, the per-arm event count table
+    #' (output column \code{n_events_<milestone>_<arms>}) is not saved at
+    #' milestones; the per-endpoint totals and milestone times are still
+    #' saved. Saving that table is the most expensive part of the standard
+    #' outputs, so \code{tidy = TRUE} is recommended for a large number of
+    #' replicates unless the per-arm counts are needed in the summary. This
+    #' differs from \code{tidy} in \code{$get_output()}, which removes all
+    #' standard columns from the returned data frame after the fact.
+    #' Default \code{FALSE}.
+    run = function(n = 1, n_workers = 1, plot_event = TRUE, silent = FALSE,
+                   tidy = FALSE){
 
-      self$get_trial()$make_arms_snapshot()
+      if(private$has_run){
+        stop('run() has already been called on this controller. ',
+             'Call reset() before running a new simulation. ')
+      }
+
+      stopifnot(is.logical(tidy) && length(tidy) == 1 && !is.na(tidy))
+      private$tidy <- tidy
+
+      ## stamp on exit so that a failed run also counts: the trial is no
+      ## longer in its as-designed state and must be reset() before another
+      ## run(). on.exit is required because reset() between replicates in
+      ## run_sequential_() clears the flag while the run is still going.
+      on.exit(private$has_run <- TRUE, add = TRUE)
+
+      ## a listener may be reused from an earlier controller in the same
+      ## session; restore its milestones to the as-designed state (triggered
+      ## flag cleared, original condition/action) so stale state cannot
+      ## silently suppress milestones. A no-op for a fresh listener.
+      private$get_listener()$reset()
+
+      private$get_trial()$make_arms_snapshot()
       private$output <- NULL
 
       if(plot_event){
@@ -316,9 +393,9 @@ Controllers <- R6::R6Class(
       }
 
       if(n_workers == 1){
-        private$run_sequential_(n, plot_event, silent, dry_run)
+        private$run_sequential_(n, plot_event, silent)
       }else{
-        private$run_parallel_(n, n_workers, silent, dry_run)
+        private$run_parallel_(n, n_workers, silent)
       }
     }
   )

@@ -32,11 +32,13 @@ In `TrialSimulator`, we can define custom action functions that will be executed
 
 -   Dropping, adding or selecting treatment arms
 
+-   Stopping follow-up of a sub-population or an earlier cohort
+
 -   Resizing based on sample size reassessment
 
 -   extending trial duration
 
--   Adjusting enrollment rules
+-   Updating the accrual rate
 
 -   Logging or tracking intermediate results
 
@@ -94,7 +96,7 @@ Importantly, whenever a milestone is reached, `TrialSimulator` **automatically**
 
 : Automatically Saved Results At Triggered Milestones
 
-Note that these automatically saved columns can be eliminated from outputs by setting `tidy = TRUE` in `controller$get_output()`. Currently, we use regex `"^n_events_<.*?>_<.*?>$"` and `"^milestone_time_<.*?>$"` to match columns to be eliminated. If users plan to use `tidy = TRUE`, caution is needed when naming \#' custom outputs in `save()`.
+Note that these automatically saved columns can be eliminated from outputs by setting `tidy = TRUE` in `controller$get_output()`. Currently, we use regex `"^n_events_<.*?>_<.*?>$"` and `"^milestone_time_<.*?>$"` to match columns to be eliminated. If users plan to use `tidy = TRUE`, caution is needed when naming custom outputs in `save()`. Among these columns, the per-arm table `n_events_<...>_<arms>` is by far the most expensive one to save. If it is not needed in the summary, set `tidy = TRUE` in `controller$run()` instead, which skips saving that table at every milestone (the other standard columns are still saved) and noticeably reduces the time per replicate for light designs.
 
 We can define arbitrary number of milestones in a trial. For example, the final analysis might be triggered when both `PFS` and `OS` events reach their required numbers:
 
@@ -421,11 +423,22 @@ Adaptations that are currently supported are summarized below:
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
 | Update sample ratio      | `trial$update_sample_ratio()`                          | response-adaptive design                                |
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
-| Extend trial duration    | `trial$set_duration()` or add a event-driven milestone | actual patient or event accrual is slower than expected |
+| Extend trial duration    | `trial$set_duration()` or `trial$update_milestone()`   | actual patient or event accrual is slower than expected |
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
 | Increase sample size[^1] | `trial$resize()`                                       | sample size reassessment                                |
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
 | Eliminate sub-population | `trial$update_generator()`                             | enrichment design; data model changes over time         |
++--------------------------+--------------------------------------------------------+---------------------------------------------------------+
+| Stop follow-up           | `trial$stop_followup()`                                | treatment discontinuation; enrichment design;           |
+|                          |                                                        | stop following a sub-population after interim decision; |
+|                          |                                                        | independent cohorts for, e.g., combination test         |
++--------------------------+--------------------------------------------------------+---------------------------------------------------------+
+| Update accrual rate      | `trial$update_accrual_rate()`                          | revise accrual after dose selection or enrichment;      |
+|                          |                                                        | pause and resume enrollment at a milestone              |
++--------------------------+--------------------------------------------------------+---------------------------------------------------------+
+| Update a milestone       | `trial$update_milestone()`                             | postpone the final analysis by raising its target       |
+|                          |                                                        | event number, or switch its triggering condition,       |
+|                          |                                                        | when conditional power at an interim is low             |
 +--------------------------+--------------------------------------------------------+---------------------------------------------------------+
 
 [^1]: experimental
@@ -433,3 +446,7 @@ Adaptations that are currently supported are summarized below:
 Note that functions in the table above are member functions of `Trials` object. Users who are not familiar with the concept of classes may consider using their wrapper functions. The wrapper function of `trial$foo(...)` is `foo(trial, ...)`.
 
 These adaptive features allow users to simulate complex, data-driven designs where trial conduct is not static but evolves in response to accumulating evidence. At the time of writing, the vignette dedicated to trial adaptation is still under development. Detailed examples will be provided in that vignette.
+
+For a detailed treatment of conditional power, nonmonotone event-number
+reassessment, and a promising-zone action template, see
+[Conditional Power and Event-Number Reassessment](conditionalPower.html).

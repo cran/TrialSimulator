@@ -1,3 +1,251 @@
+# TrialSimulator 1.35.8
+
+## Performance
+
+- `fitLogrank()` is faster. It now computes the (stratified) log rank statistic directly from `survival::survdiff()` as observed-minus-expected events over its standard error, instead of fitting two Cox models per treatment arm (one for the sign of the effect and one with `ties = "exact"` for the score test). Its magnitude agrees with the previous exact-score statistic up to floating point rounding, while its sign now consistently follows the treatment log-rank score; with tied event times this can correct the previous sign when the Efron Cox coefficient pointed in the opposite direction. `info` and the `tidy = FALSE` columns are unchanged. When the statistic is undefined because its variance is zero (e.g., no event in the subset), a warning is issued and a simulation placeholder `z = 0` with the corresponding `p = 0.5` is returned instead of an error. On a three-arm dose-selection design with log rank tests at two milestones this removes roughly 40% of the per-replicate time, and roughly a third on an enrichment design driven by conditional power.
+
+# TrialSimulator 1.35.7
+
+## Performance
+
+- Data locking is faster for trials with a regimen. The truncation of `regimen_trajectory` to the switches that have happened by the lock time, and the `n_switches` count, are now computed for all switching patients at once (one `strsplit()` plus `tabulate()`), instead of a per-patient `mapply()` followed by a per-patient regular expression. Both columns are unchanged for names without the reserved characters below; on a 1000-patient three-arm design with crossover this removes roughly 14% of the per-replicate time.
+
+## Updates
+
+- `'@'` and `';'` are now reserved characters of the `regimen_trajectory` encoding: `arm()` rejects a name containing either, whether or not the trial uses a regimen (e.g., `arm(name = 'dose@5mg')` used to be accepted and now is an error), and `what()` of a regimen or of `crossover()` must not return a `new_treatment` containing either. Previously such names silently corrupted the trajectory and `n_switches`. Data locking also asserts that every trajectory with a switch parses cleanly and keeps its initial segment.
+
+# TrialSimulator 1.35.6
+
+## Performance
+
+- New argument `tidy` in `controller$run()` (default `FALSE`). With `tidy = TRUE`, the per-arm event count table (output column `n_events_<milestone>_<arms>`) is not saved at milestones; per-endpoint totals and milestone times are still saved, and the table remains available in the attributes of locked data, so `event_plot()` is unaffected. Saving that table is the most expensive part of the standard outputs: skipping it removes roughly 15% of the per-replicate time on a small two-arm design with trivial actions (on top of 1.35.5) and about 3% on a three-arm dose-selection design with log-rank tests at milestones. Unlike `tidy` in `get_output()`, which removes columns after the fact, this avoids the cost entirely.
+
+# TrialSimulator 1.35.5
+
+## Performance
+
+- `controller$run()` collects the output of each replicate in a list and row-binds once at the end, instead of calling `bind_rows()` after every replicate (a fixed cost of roughly 1 ms per call). The same applies to the parallel path. Outputs are unchanged, including the partial output kept when a replicate fails. Removes roughly 10% of the per-replicate time on a small two-arm design with trivial actions and 3-5% on heavier designs.
+
+# TrialSimulator 1.35.4
+
+## Performance
+
+- Patient enrollment is faster for trials without stratification factors (the common case). Internally, `enroll_patients()` now assembles the patient data of each arm directly from one generated pool, skipping the per-stratum bookkeeping (`table()`, `merge()`, `split()`, `bind_rows()`) that stratified randomization requires. Generator and dropout functions are called in exactly the same order and with the same sizes as before, so the random number stream and therefore all results are unchanged for a given seed (a regression test pins the patient data of a fixed-seed trial to reference values). On a small two-arm design with trivial actions this removes roughly 19% of the per-replicate time; the relative gain shrinks as the statistical work per milestone grows.
+
+# TrialSimulator 1.35.3
+
+## Performance
+
+- Patient generation is faster for arms with inclusion criteria (subset conditions in `arm(name, ...)`). The criteria are now applied as a logical row mask with the semantics of `dplyr::filter()` (conditions combined with `&`, rows with `NA` dropped, `.data`/`.env` pronouns supported), instead of calling `dplyr::filter()` in every round of the rejection-sampling loop. The mask evaluation is shared with the lock-time fast path of 1.35.2 (internal `filter_conditions_mask()`). The human-readable criteria string used in error messages is also built once, when the arm is created, instead of on every generator call (deparsing quosures is not free). Results are unchanged; on a 1000-patient three-arm design with `pfs <= os` as inclusion criterion this removes roughly 9% of the per-replicate time.
+
+# TrialSimulator 1.35.2
+
+## Performance
+
+- Milestone conditions with subset conditions, e.g., `eventNumber(endpoint = 'pfs', n = 40, patient_id <= 70)` or `enrollment(n = 100, biomarker == 1)`, now take the C++ lock-time fast path. The subset conditions are reduced to a logical row mask with the semantics of `dplyr::filter()` (conditions combined with `&`, rows with `NA` dropped, `.data`/`.env` pronouns supported) and the existing C++ helpers are applied to the subset, instead of building per-endpoint event tables with `dplyr` for every endpoint in the trial. Results are unchanged; the pure-R path remains available through `options(trialsimulator.use_cpp = FALSE)`. On an enrichment design whose milestones are all subgroup-filtered this removes roughly 11% of the per-replicate time.
+
+# TrialSimulator 1.35.1
+
+## Performance
+
+- Data locking is faster for trials with a regimen. The `n_switches` column of locked data is now computed on the subset of patients who switched treatment, instead of running a regular expression over the `regimen_trajectory` of every enrolled patient at every milestone. Results are unchanged; for a 1000-patient three-arm design with crossover this removes roughly 9% of the per-replicate time.
+
+# TrialSimulator 1.35.0
+
+## Updates
+
+- The trial now takes ownership of registered objects by capturing independent deep copies. `trial$add_arms()` deep-clones every arm it registers, and `trial$add_regimen()` deep-clones the regimen. Consequently, changes made to the caller's arm or regimen objects after registration no longer affect the trial, and adaptations within the trial (e.g., `trial$update_generator()`, `trial$crossover()`) no longer modify the caller's objects, so those objects can be safely reused, e.g., to build another trial. Complete the configuration of an arm before registering it; after registration, change it only through the trial's adaptation methods. The copy covers the arm, endpoint, and regimen objects themselves; a mutable environment or R6 object captured by a user-supplied function (generator, action, `what`/`when`/`how`) is shared by design of R closures and is not isolated.
+- `trial$add_arms()` registration is now transactional: all incoming arms are validated (including endpoint-set consistency and re-use of the name of a previously removed arm) before any of them is installed, so a failing batch no longer leaves the trial partially modified. Re-adding an arm under the name of a removed arm is rejected explicitly; previously it failed halfway with the trial left partially modified.
+- `controller$run()` now restores the listener's milestones to their as-designed state before the first replicate. Previously, reusing a listener from an earlier controller in the same session left its milestones in a triggered state, silently suppressing them in the new run.
+
+# TrialSimulator 1.34.1
+
+## Bug fixes
+
+- Generator updates no longer leak across simulation replicates. Previously, the arms snapshot taken at the beginning of `controller$run()` shared its endpoint objects with the live arms, so a `trial$update_generator()` call in one replicate silently altered the data-generating process of all later replicates, and a failing replicate could not be reproduced from the seed reported in its error message. The snapshot now deep-clones endpoints, and every replicate starts from freshly cloned, as-designed arms.
+
+## Updates
+
+- `trial$update_generator()` now accepts `endpoint_name` in any order. Endpoint names registered together in one `endpoint()` call are matched as a set, so, e.g., `c('pfs', 'biomarker')` and `c('biomarker', 'pfs')` are equivalent. Previously the names had to be given in registration order, and a reordered vector was rejected with a misleading error message. In addition, when `endpoint_name` covers only part of a registration, or mixes names from different registrations, the error message now spells out the exact `endpoint_name` vector(s) to use.
+
+# TrialSimulator 1.34.0
+
+## New features
+
+- New method `trial$eventNumberReestimationFromConditionalPower()` re-estimates the number of events at the final analysis for every treatment-vs-placebo comparison of a time-to-event endpoint: the smallest whole number of events, greater than the number observed at a triggered interim milestone, at which the conditional power of `trial$conditionalPower()` reaches a target. Conditional power can be evaluated at the interim trend or at a user-specified hazard ratio, and a practical cap can be imposed through `D_cap`. When no solution exists in the requested range, `D` and `achieved_cp` are `NA` and `target_reached` is `FALSE`. The search is exact even when conditional power is not monotone in the event number.
+
+## Updates
+
+- Executable examples are added to the documentation of `trial$conditionalPower()` and the new method.
+- A new vignette, "Conditional Power and Event-Number Reassessment", describes the canonical conditional-power calculation, effect assumptions, alternative directions, nonmonotone event-number search, practical caps, and promising-zone usage in detail, including a complete action-based simulation program and precomputed operating-characteristic summaries.
+
+# TrialSimulator 1.33.1
+
+## Updates
+
+- The `effect` argument of `trial$conditionalPower()` no longer has a default value; it must be specified explicitly as `'trend'`, `'null'`, or a hazard ratio.
+
+# TrialSimulator 1.33.0
+
+## New features
+
+- New method `trial$conditionalPower()` computes conditional power at a triggered interim milestone for every treatment-vs-placebo comparison of a time-to-event endpoint, under a group sequential design with one interim and one final analysis. It pulls the milestone's locked data automatically and calls `fitLogrank()` internally to obtain the observed z statistic and number of events of each comparison. Conditional power can be evaluated at the interim trend (default), under the null, or at a user-specified hazard ratio, which is converted internally using the allocation ratio in effect at the milestone. Its `alpha` argument is the one-sided nominal significance level corresponding to the planned final critical boundary, not the total design alpha or alpha spent at the final look. The calculation assumes the trial continues as designed (constant allocation ratio of the compared arms, planned final statistic and boundary); it is users' responsibility to call it only when legitimate, e.g., not after the allocation ratio of the compared arms was adapted, as `TrialSimulator` does not verify this. Results are validated against `rpact` and `gsDesign` in unit tests.
+
+# TrialSimulator 1.32.0
+
+## Updates
+
+- The `dry_run` argument of `controller$run()` is now defunct.
+
+# TrialSimulator 1.31.0
+
+## Updates
+
+- `controller$run()` can no longer be called twice without `reset()` in between. Previously, a second `run()` silently continued the already-executed trial (all milestones already triggered, snapshots partially overwritten) instead of starting a new simulation. To define a milestone whose triggering condition or action depends on interim results, register it upfront and revise it within an action function through `update_milestone()`.
+- A milestone that would lock data at a time earlier than the current trial time now raises an informative error before any trial state is modified, naming both milestones involved and the seed to debug with. Previously the violation was caught by `save_milestone_time()` only after the trial clock had been moved backwards and the locked snapshot stored; that check remains as an internal assertion, and `set_current_time()` gains a backstop against backward clock moves.
+- `listener$add_milestones()` now raises an error when a milestone with the same name is already registered. Previously it warned and silently over-wrote the registered milestone. To modify a not-yet-triggered milestone within an action function, use `update_milestone()`.
+
+# TrialSimulator 1.30.1
+
+## Updates
+
+- Continue minimizing the public API of R6 classes: `Arms$get_number_endpoints()`, `Endpoints$get_readout()` and `Endpoints$get_type()` are now private. The machinery methods of `Arms` (`get_name()`, `get_endpoints_name()`, `has_endpoint()` and `update_endpoint_generator()`) and of `Endpoints` (`get_uid()` and `update_generator()`), which stay public only because trials and arms invoke them, now carry a bold warning that users should not call them directly.
+- Polish class documentation: user-facing methods of `Controllers`, `Arms` and `Endpoints` now come with brief usage notes in the class description; exploratory methods (`test_generator()`, `get_generator()` and `get_name()` of `Endpoints`; `generate_data()` and `get_endpoints()` of `Arms`) are documented as helpful for understanding the classes but not needed in formal simulation.
+
+# TrialSimulator 1.30.0
+
+## Updates
+
+- Continue minimizing the public API of R6 classes: `Controllers$get_trial()`, `Controllers$get_listener()`, `Controllers$mute()`, `Milestones$execute_action()`, `Milestones$get_type()`, `Milestones$get_trigger_condition()`, `Milestones$get_action()`, `Regimens$get_number_time_selector()` and `Regimens$get_number_data_modifier()` are now private. They were used only internally by their own classes.
+- The remaining public methods of `Milestones` and all public methods of `Regimens` are invoked on their objects by other components of the package (listeners and trials) and stay public only for that reason; they now carry a bold warning that users should not call them directly, in the same style as the `Trials` and `Listeners` classes.
+
+# TrialSimulator 1.29.0
+
+## Updates
+
+- Minimize the public API of the `Listeners` class: `get_milestones()` is now private. The machinery methods `monitor()`, `mute()` and `reset()`, which stay public only because the controller invokes them, now carry a bold warning that users should not call them directly, in the same style as the `Trials` class.
+
+# TrialSimulator 1.28.1
+
+## Updates
+
+- `trial$set_duration()`, `trial$resize()`, `trial$remove_arms()`, `trial$update_sample_ratio()` and `trial$update_generator()` now raise an error when called before any milestone has been triggered, i.e., outside an action function.
+
+# TrialSimulator 1.28.0
+
+## New Feature
+
+- New adaptation method `trial$update_milestone()` (wrapper `update_milestone()`): update the triggering condition and/or the action of a not-yet-triggered milestone from within an action function. The update takes effect right after the current action function returns, and the as-designed milestone is restored between simulation replicates.
+
+## Updates
+
+- The `action` of a milestone must be a function; `NULL` is no longer accepted. Use `doNothing` if no action is intended.
+
+# TrialSimulator 1.27.0
+
+## Updates
+
+- Minimize the public API of the `Trials` class: 38 methods used only internally are now private (including `censor_trial_data()`, `roll_back()`, `enroll_patients()`, `get_trial_data()` and `independentIncrement()`), leaving 34 public members whose definitions and documentation are reorganized into sections: adaptation methods, methods callable within action functions (data access and manipulation, trial status queries, statistical testing), trial setup (`add_regimen()`, which must not be called within action functions), and internal machinery. Machinery methods that stay public only because other components of the package invoke them now carry a bold warning that users should not call them directly.
+- `make_snapshot()` distinguishes private methods from data fields via `bindingIsLocked()` (R6 locks the binding of every member defined as a function) instead of a hardcoded name list, so snapshot/reset stay correct as methods are added.
+
+# TrialSimulator 1.26.2
+
+## Updates
+
+- Replace deprecated `.data$` in tidyselect contexts (`rename()`/`select()` in the correlated PFS/OS generators, `PiecewiseConstantExponentialRNG()`, and endpoint naming) with string literals, eliminating the tidyselect deprecation warnings that flooded test output. `.data$` remains in data-masking contexts (`filter()`, `mutate()`, `aes()`), where it is still the recommended idiom; `R CMD check` stays clean.
+- `set_dropout()` documentation no longer claims adaptive use: dropout times are generated at enrollment, so updating the generator within an action function would not apply to enrolled patients.
+- Ignore the knitr vignette cache in `.gitignore` and exclude `.DS_Store` from the build via `.Rbuildignore`.
+- Fix the remaining test-time warnings: `event_plot()` now selects the endpoint column via `all_of()` (tidyselect external-vector deprecation), and `plot.three_state_model()` zooms with `coord_cartesian()` instead of `xlim()`, so the dashed guide segments anchored at the axes are clipped and rendered rather than dropped with a ggplot2 warning.
+- Fix the root cause of a stray `Rplots.pdf` appearing after test runs: `summarizeDataFrame()` restored `par()` settings via `on.exit()` after its `png()` device was already closed, which implicitly opened the default device. `par()` settings are local to the device and need no restore.
+
+# TrialSimulator 1.26.1
+
+## Bug Fix
+
+- `make_snapshot()` silently dropped `NULL`-valued private fields from the snapshot (assigning `NULL` with `[[<-` deletes a list entry); `reset()`'s explicit re-null list masked this for existing fields. The snapshot now preserves `NULL` fields, so any future field is restored across simulation replicates by construction.
+- Fix an error message in `dunnettTest()` that referenced an undefined variable.
+- Fix a summary line in the `doseRanging` vignette that compared a string literal instead of the `decision` column.
+
+## Updates
+
+- Regenerate the precomputed outputs of the `doseRanging` and `fixedDesign` vignettes under the 1.25.2 enrollment convention; the `fixedDesign` output now contains the 1,000 replicates its code states (previously 100).
+- Add an `R CMD check` GitHub Actions workflow (macOS/Windows/Ubuntu; R release/devel/oldrel).
+- Add `\value` sections to exported help topics, a grouped reference index for the pkgdown site, and mention the newest adaptations in the `actionFunctions` vignette introduction.
+- Remove the unused `graphicalMCP` entry from `Suggests`.
+
+# TrialSimulator 1.26.0
+
+## New Feature
+
+- New adaptation method `trial$update_accrual_rate()` (wrapper `update_accrual_rate()`): update the accrual rate of the recruitment curve at a milestone, e.g., to revise recruitment after dose selection or enrichment, or to pause it for a period after an interim decision. `end_time` of the new `accrual_rate` is measured from the milestone; patients not yet enrolled (and the enrollment reserves used by `resize()`) are re-planned and re-randomized under the new schedule, while enrolled patients are left unchanged. Like other adaptations, it must be called within an action function, after a milestone has been triggered.
+
+# TrialSimulator 1.25.2
+
+## Updates
+
+- `StaggeredRecruiter()` now enrolls patient `k` when the planned cumulative accrual reaches `k` (previously `k - 1`): under a constant rate `r` the `n`-th patient enrolls exactly at `n / r`, so a milestone triggered by `enrollment(n)` occurs exactly at the planned accrual time. The first patient enrolls at `1 / piecewise_rate` instead of time 0, and all enrollment times shift by one inter-arrival accordingly; simulation results under a fixed seed differ slightly from 1.25.1. The precomputed output of the `adaptiveDesign` vignette is regenerated under the new convention.
+
+# TrialSimulator 1.25.1
+
+## Bug Fix
+
+- Fix an infinite loop in patient enrollment when fractional sample ratios are combined with stratification factors: the pool labels now match the unstratified randomization queue in that case.
+
+## Updates
+
+- Warn when fractional sample ratios are used in a trial with stratification factors: stratified randomization is not supported in that case and unenrolled patients are randomized by `sample()` without stratification. The warning is suppressed when `silent = TRUE`.
+
+# TrialSimulator 1.25.0
+
+## New Feature
+
+- New adaptation method `trial$stop_followup()` (wrapper `stop_followup()`): stop follow-up of a subset of enrolled patients at a milestone, optionally after extra follow-up time (`additional_followup`). Patients are selected by conditions compatible with `dplyr::filter`; affected time-to-event endpoints are censored and non-time-to-event readouts are set to missing. This adaptation supports, e.g., treatment discontinuation and enrichment design. Like other adaptations, it must be called within an action function, after a milestone has been triggered.
+
+## Updates
+
+- `censor_trial_data()` gains `...` to further restrict the patients to be censored by conditions compatible with `dplyr::filter`, in addition to `selected_arms` and `enrolled_before`. Internal callers are unchanged and benchmark at parity with 1.24.0; simulation outputs are identical.
+
+# TrialSimulator 1.24.0
+
+## New Feature
+
+- `controller$run()` now displays a progress bar when `silent = TRUE` and `n_workers = 1` if the simulation is expected to take more than 1 minute. Package `cli` is added to `Imports` for this feature.
+
+# TrialSimulator 1.23.0
+
+## Updates
+
+- `trial()` now defaults `enroller` to `StaggeredRecruiter` and accepts no other enroller: any non-`StaggeredRecruiter` value is rejected with an informative error. The `enroller` argument is retained for backward compatibility, so existing code that passes `enroller = StaggeredRecruiter` explicitly is unaffected, and code that omits it now gets the default.
+
+## Unit Tests
+
+- Add `test-enroller.R` covering the default, explicit `StaggeredRecruiter`, rejection of other enrollers, and post-construction `set_enroller()` enforcement.
+
+# TrialSimulator 1.22.0
+
+## New Feature
+
+- `StaggeredRecruiter()` now supports recruitment pauses: a window with `piecewise_rate = 0` enrolls no one while calendar time still advances, so accrual resumes at the window's `end_time`. Pauses may occur in the first window or span several consecutive windows (e.g., a safety hold, a site not yet activated, or a seasonal gap).
+
+## Updates
+
+- `StaggeredRecruiter()` enrollment times are now the deterministic inverse of the cumulative accrual intensity: the cumulative accrual capacity increases by window length × `piecewise_rate` across each window (no per-window truncation), so an integer-capacity window holds exactly that many patients. Single open-ended schedules and integer-capacity windows are unchanged; schedules with fractional per-window capacity now yield slightly different (more accurate) times.
+- `StaggeredRecruiter()` input validation is stricter: the last `end_time` must be `Inf` with a positive rate (so the schedule can always supply the patients the engine requests, including the inflated count used for adaptive resizing); a positive rate too low to enroll even one patient (window length × `piecewise_rate` < 1) is now an error pointing to `piecewise_rate = 0`; and `n` must be a positive integer.
+
+## Unit Tests
+
+- Add `test-StaggeredRecruiter.R` covering pauses (leading, middle, and consecutive), the per-window count property, equidistant spacing, the low-rate and schedule-shape validation errors, and `n` validation.
+
+# TrialSimulator 1.21.0
+
+## Bug Fix
+
+- `GraphicalTesting$test()` no longer errors with `alpha_spent should be monotonically increasing` when a hypothesis is first tested only at a later (or final) look. This happens when a hypothesis holds zero or very small allocated alpha at early looks and inherits alpha after another hypothesis is rejected: those looks yield a degenerate (flat, near-zero) reconstructed cumulative alpha-spent sequence. Such entries are now truncated and floored to a strictly increasing sequence before being passed to the group sequential boundary computation.
+
+## Unit Tests
+
+- Add regression tests for the above fix (alpha inherited only at the final look; tiny-alpha early looks with degenerate spending boundaries), plus tests that re-including an already-rejected hypothesis at a later look is ignored safely and that `computeCumulativeAlphaSpent` treats `Inf` boundaries as zero increments.
+
 # TrialSimulator 1.20.0
 
 ## New Feature

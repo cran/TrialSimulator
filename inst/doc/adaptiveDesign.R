@@ -68,7 +68,7 @@ accrual_rate <- data.frame(end_time = c(10, Inf),
                            piecewise_rate = c(30, 50))
 trial <- trial(
   name = 'Trial-3415', n_patients = 1000,
-  seed = 1727811904, duration = 40,
+  seed = 1727811904,
   enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
   dropout = rweibull, shape = 2.139, scale = 38.343
 )
@@ -87,10 +87,10 @@ action1 <- function(trial){
   z_l <- fit$z[fit$arm == 'low dose']
   z_h <- fit$z[fit$arm == 'high dose']
   if(z_l > 1.28){
-    trial$remove_arms('high dose')
+    trial$remove_arms('high dose', additional_followup = 0)
     trial$save(value = 'low', name = 'kept_arm')
   }else if(z_h > 1.28){
-    trial$remove_arms('low dose')
+    trial$remove_arms('low dose', additional_followup = 0)
     trial$save(value = 'high', name = 'kept_arm')
   }else{
     trial$save(value = 'both', name = 'kept_arm')
@@ -110,8 +110,8 @@ action2 <- function(trial){
   if(max(fit$z) < .5){
     trial$save(value = 'negative', name = 'futility')
     
-    ## extend duration
-    ## trial$set_duration(45)
+    ## the trial could be extended here, e.g.,
+    ## trial$update_milestone('final', when = calendarTime(time = 45))
   }else{
     trial$save(value = 'positive', name = 'futility')
   }

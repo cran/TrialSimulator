@@ -11,11 +11,9 @@
 #'
 #' \strong{Adaptation methods.} The following methods adapt an ongoing trial
 #' and should be called within action functions of milestones. Each of them
-#' has a user-friendly wrapper of the same name, e.g., \code{set_duration(trial, ...)}
-#' for \code{trial$set_duration(...)}.
+#' has a user-friendly wrapper of the same name, e.g., \code{resize(trial, ...)}
+#' for \code{trial$resize(...)}.
 #' \itemize{
-#' \item \code{$set_duration()} set duration of a trial. This function can be
-#' used to extend duration under adaptive designs.
 #' \item \code{$resize()} set maximum sample size of a trial. This function can
 #' be used to increase sample size under adaptive designs (e.g., sample size
 #' reassessment).
@@ -73,10 +71,15 @@
 #' can be retrieved by calling \code{get()} anytime.
 #' \item \code{$save_custom_data()} save intermediate results of any format.
 #' The life cycle of the saved result is within a single replicate of simulation
-#' and is reset to NULL in next simulated trial. Saved results can be retrieved
+#' and is cleared before the next simulated trial. Saved results can be retrieved
 #' by calling \code{get()} anytime.
 #' \item \code{$get()} retrieve intermediate results saved by calling functions
 #' \code{save_custom_data()} or \code{bind()}.
+#' \item \code{$get_global_data()} retrieve read-only data registered through
+#' the \code{global_data} argument of \code{trial()}, e.g., design
+#' parameters or a template object of a testing procedure, which is
+#' available in every replicate of a simulation. R6 objects are returned as
+#' independent deep clones so the registered template is never changed.
 #' \item \code{$get_output()} retrieve intermediate results saved by calling
 #' function \code{save()}.
 #' }
@@ -92,7 +95,7 @@
 #' the time of calling, i.e., arms that have been added and not yet removed
 #' by \code{$remove_arms()}. Note that this can differ from the arms present
 #' in locked data, where data of removed arms remain available (censored at
-#' the time of removal).
+#' the time of removal, or later if \code{additional_followup} was granted).
 #' }
 #'
 #' Statistical testing:
@@ -123,7 +126,8 @@
 #' \code{$get_data_lock_time_by_event_number()},
 #' \code{$get_data_lock_time_by_enrollment()}, \code{$has_arm()},
 #' \code{$event_plot()}, \code{$mute()}, \code{$tidy_output()}, \code{$reset()},
-#' \code{$make_arms_snapshot()} and \code{$pop_milestone_updates()}) are
+#' \code{$make_arms_snapshot()}, \code{$has_been_run()} and
+#' \code{$pop_milestone_updates()}) are
 #' public only because they are invoked on
 #' a trial object by other components of the package (milestones, listeners,
 #' controllers and triggering conditions), which R6 cannot grant through
@@ -151,8 +155,6 @@ Trials <- R6::R6Class(
     #' @param n_patients integer. Maximum (and initial) number of patients
     #' could be enrolled when planning the trial. It can be altered adaptively
     #' during a trial.
-    #' @param duration Numeric. Trial duration. It can be altered adaptively
-    #' during a trial.
     #' @param description character. Optional for description of the trial. By
     #' default it is set to be trial's \code{name}. Usually useless.
     #' @param seed random seed. If \code{NULL}, seed is set for each simulated
@@ -179,6 +181,13 @@ Trials <- R6::R6Class(
     #' can have same or different distributions given baseline characteristics.
     #' \code{NULL} by default, i.e., unstratified permuted block randomization is
     #' executed.
+    #' @param global_data a list with named components, e.g., design
+    #' parameters or a template object of a testing procedure, to be shared
+    #' by all replicates of a simulation. It is read-only and can be
+    #' accessed in action functions by calling
+    #' \code{Trials$get_global_data()}. For temporary results passed
+    #' between action functions within a single replicate, use
+    #' \code{Trials$save_custom_data()} instead.
     #' @param silent logical. \code{TRUE} to mute messages. However, warning
     #' message is still displayed.
     #' @param ... (optional) arguments of \code{enroller} and \code{dropout}.
@@ -186,27 +195,28 @@ Trials <- R6::R6Class(
       function(
         name,
         n_patients,
-        duration,
         description = name,
         seed = NULL,
         enroller = StaggeredRecruiter,
         dropout = NULL,
         stratification_factors = NULL,
+        global_data = list(),
         silent = FALSE,
         ...
       ){
 
         # stratification_factors will be checked again when an arm is added
         private$validate_arguments(
-          name, n_patients, duration, description, seed,
-          enroller, dropout, stratification_factors, silent, ...)
+          name, n_patients, description, seed,
+          enroller, dropout, stratification_factors, global_data, silent,
+          ...)
 
         private$silent <- silent
 
         if(is.null(seed)){
           seed <- sample(.Machine$integer.max, 1)
           if(!private$silent){
-            message('Seed is not specified. TrialSimulator sets it to ', seed)
+            message('Seed is not specified. TrialSimulator sets it to <', seed, '>. ')
           }
         }
 
@@ -214,12 +224,20 @@ Trials <- R6::R6Class(
         private$name <- name
         private$description <- description
         private$n_patients <- n_patients
-        private$duration <- duration
         private$now <- 0
         private$trial_data <- NULL
         private$locked_data <- list()
         private$output <- data.frame(trial = private$get_name())
         private$custom_data <- list()
+
+        ## the trial owns independent copies of reference-semantics entries
+        ## (R6, data.table), so the caller's objects and the registered
+        ## templates never share mutable state. Set before make_snapshot(),
+        ## so that reset() restores the identical, never-mutated list.
+        if(is.null(global_data)){
+          global_data <- list()
+        }
+        private$global_data <- copy_reference_object(global_data)
 
         private$seed <- seed
         self$save(seed, 'seed')
@@ -257,50 +275,6 @@ Trials <- R6::R6Class(
     ## ---- adaptation methods (call within action functions) ------------------
 
     #' @description
-    #' set trial duration in an adaptive designed trial. All patients enrolled
-    #' before resetting the duration are truncated (non-tte endpoints) or
-    #' censored (tte endpoints) at the original duration. Remaining patients
-    #' are re-randomized. New duration must be longer than the old one.
-    #' @param duration new duration of a trial. It must be greater than the
-    #' current duration.
-    set_duration = function(duration){
-
-      if(length(self$get_milestone_time()) == 0){
-        stop('set_duration() can only be called within an action ',
-             'function of a milestone, i.e., after at least one milestone ',
-             'has been triggered. ')
-      }
-
-      if(duration <= private$get_duration()){
-        stop('Trial duration can only be set to be longer. <', duration,
-             '> is shorter than <', private$get_duration(), '>. ')
-      }
-
-      old_duration <- private$get_duration()
-
-      ## update the duration
-      private$duration <- duration
-
-      if(!private$silent){
-        message('Trial duration is updated <', old_duration,
-                '> -> <', private$get_duration(), '>. ')
-      }
-
-      ## all patients enrolled before current milestone should be censored
-      ## or truncated at old duration
-      private$censor_trial_data(censor_at = old_duration,
-                             enrolled_before = self$get_current_time())
-
-      ## with trial duration is extended, unenrolled patient at current time
-      ## should be randomized again.
-      private$roll_back()
-
-      ## update data for unrolled patients based on new trial duration
-      private$enroll_patients()
-
-    },
-
-    #' @description
     #' resize a trial with a greater sample size. This function is used to
     #' update the maximum sample size adaptively after sample size reassessment.
     #' Note that this function should be called within action functions.
@@ -318,8 +292,8 @@ Trials <- R6::R6Class(
 
       if(n_patients <= private$get_number_patients()){
         stop('TrialSimulator can only increase sample size of a trial. ',
-             'When calling Trials$resize(n_patients), use n_patients > ',
-             private$get_number_patients(), '. ')
+             'When calling Trials$resize(n_patients), use n_patients > <',
+             private$get_number_patients(), '>. ')
       }
 
       private$n_patients <- n_patients
@@ -341,10 +315,23 @@ Trials <- R6::R6Class(
     #' Note that this function should only be called within action functions.
     #' It is users' responsibility to ensure it and \code{TrialSimulator} has
     #' no way to track this.
-    #' In addition, data of the removed arms are censored or truncated by
-    #' the time of arm removal.
+    #' In addition, data of the removed arms are censored or truncated at
+    #' the time of arm removal, or \code{additional_followup} later, but
+    #' stay in the trial data and thus in the locked data of later
+    #' milestones. A removed arm is no longer in the set of arms of the
+    #' trial: \code{arms = NULL} in \code{eventNumber()} and
+    #' \code{enrollment()} excludes it, listing it in \code{arms} includes
+    #' it, and a subset that depends on which arm was removed requires
+    #' \code{$update_milestone()} in the same action function.
+    #' See \code{?remove_arms} for the three patterns and examples.
     #' @param arms_name character vector. Name of arms to be removed.
-    remove_arms = function(arms_name){
+    #' @param additional_followup numeric. Extra follow-up time granted to
+    #' the patients of the removed arms after the current milestone, shared
+    #' by all arms in \code{arms_name}. No default: 0 stops their follow-up
+    #' at the milestone itself. \code{Inf} keeps following them for
+    #' the rest of the trial. To grant different times to different arms,
+    #' call this function once per arm.
+    remove_arms = function(arms_name, additional_followup){
 
       if(length(self$get_milestone_time()) == 0){
         stop('remove_arms() can only be called within an action ',
@@ -354,6 +341,28 @@ Trials <- R6::R6Class(
 
       stopifnot(is.character(arms_name))
       stopifnot(all(arms_name %in% self$get_arms_name()))
+
+      if(missing(additional_followup)){
+        stop('additional_followup in remove_arms() must be specified: 0 to ',
+             'stop follow-up of the removed arm(s) at the current milestone, ',
+             'a positive value to grant extra follow-up time beyond it, or ',
+             'Inf to keep following them for the rest of the trial. ')
+      }
+
+      if(!is.numeric(additional_followup) ||
+         length(additional_followup) != 1 ||
+         is.na(additional_followup)){
+        stop('additional_followup in remove_arms() must be a single ',
+             'numeric value. ')
+      }
+
+      if(additional_followup < 0){
+        stop('additional_followup in remove_arms() cannot be negative. <',
+             additional_followup, '> is invalid. Use 0 to stop ',
+             'follow-up of the removed arm(s) at the current milestone, a ',
+             'positive value to grant extra follow-up time beyond it, or ',
+             'Inf to keep following them for the rest of the trial. ')
+      }
 
       private$sample_ratio <-
         private$sample_ratio[!(names(private$sample_ratio) %in% arms_name)]
@@ -385,16 +394,29 @@ Trials <- R6::R6Class(
                 '>. \n')
       }
 
-      ## data of removed arms should be censored at milestone time
-      ## so that number of events of those arms are fixed.
-      ## Otherwise, number of events can possibly increase later and affect
-      ## calculation of triggering condition based on event numbers.
-      ## Ideally, number of events in removed arms should be flatten afterward,
-      ## and can be seen through Trial$event_plot().
-      private$censor_trial_data(censor_at = self$get_current_time(),
+      ## data of removed arms are censored at the milestone time plus
+      ## additional_followup, so that their number of events is fixed from
+      ## then on: it can no longer grow and affect a triggering condition
+      ## that lists the removed arms explicitly (arms = NULL never counts
+      ## them). With the default 0 the count is frozen at removal and
+      ## flattens in Trial$event_plot(); with Inf, censor_trial_data() skips
+      ## administrative censoring and the arm is followed like the others.
+      ## Trial data are pre-generated, so censoring at a future calendar
+      ## time is applied right away.
+      private$censor_trial_data(censor_at = self$get_current_time() + additional_followup,
                              selected_arms = arms_name)
       ## with an arm is removed, unenrolled patient at current time should be
       ## randomized again.
+      ##
+      ## roll_back() is indispensable here, and must follow the censoring
+      ## above: censor_trial_data() is not restricted to enrolled patients,
+      ## so rows of the removed arms whose enroll_time is later than the
+      ## censoring time have just been administratively censored at a
+      ## calendar time before their enrollment. Their event time was clipped
+      ## to 0 and their event indicator set to 0, which is meaningless data.
+      ## roll_back() discards every row with enroll_time later than the
+      ## current time, so none of them survives; enroll_patients() below then
+      ## regenerates the unenrolled patients under the remaining arms.
       private$roll_back()
 
       ## update data for unrolled patients based on new arms and possibly
@@ -432,11 +454,11 @@ Trials <- R6::R6Class(
 
       for(arm_name in arm_names){
         if(is.null(private$arms[[arm_name]])){
-          stop('Arm ', arm_name, ' is not in the trial. ')
+          stop('Arm <', arm_name, '> is not in the trial. ')
         }
 
         if(!(arm_name %in% names(self$get_sample_ratio()))){
-          stop('Sample ratio of arm ', arm_name, ' is not in the trial.')
+          stop('Sample ratio of arm <', arm_name, '> is not in the trial. ')
         }
       }
 
@@ -725,7 +747,7 @@ Trials <- R6::R6Class(
     #' to all currently-eligible patients.
     #'
     #' Eligibility (the pool passed to \code{what()}) = patients with at least
-    #' one endpoint still "open" (unobserved, dropout-/duration-aware) at
+    #' one endpoint still "open" (unobserved, dropout-aware) at
     #' \code{T}; fully-observed patients are excluded. \code{when()} must return
     #' a switch time with \code{enroll_time + switch_time >= T} (a crossover
     #' cannot predate its opening), otherwise an error is raised. \code{how()}
@@ -791,12 +813,15 @@ Trials <- R6::R6Class(
       if(!is.null(td) && nrow(td) > 0){
         td <- private$apply_regimens(td, new_index)
         private$trial_data <- td
-        private$censor_trial_data()
+        ## what() may have rewritten endpoints past the dropout time; no
+        ## administrative censoring is needed here,
+        ## but need to re-apply dropout
+        private$censor_trial_data(censor_at = Inf)
       }
 
       if(!private$silent){
-        message('Crossover triplet registered with earliest crossover time = ',
-                Tx, ' (milestone ', tnow, ' + delay ', delay, '). ')
+        message('Crossover triplet registered with earliest crossover time = <',
+                Tx, '> (milestone ', tnow, ' + delay ', delay, '). ')
       }
 
       invisible(NULL)
@@ -834,9 +859,9 @@ Trials <- R6::R6Class(
     #' provided, follow-up is stopped for all patients enrolled by the time
     #' this function is called.
     #' @param additional_followup numeric. Extra follow-up time granted to the
-    #' selected patients after the current milestone. If 0 (default),
-    #' follow-up stops at the milestone itself.
-    stop_followup = function(..., additional_followup = 0){
+    #' selected patients after the current milestone. No default: 0 stops
+    #' follow-up at the milestone itself.
+    stop_followup = function(..., additional_followup){
 
       ## context check first: outside an action function there is no cohort
       ## to act on. lock_data() saves the milestone time right before an
@@ -849,6 +874,13 @@ Trials <- R6::R6Class(
              'triggered. ')
       }
 
+      if(missing(additional_followup)){
+        stop('additional_followup in stop_followup() must be specified: 0 to ',
+             'stop follow-up at milestone <',
+             names(milestone_time)[which.max(milestone_time)],
+             '>, or a positive value to grant extra follow-up time beyond it. ')
+      }
+
       if(!is.numeric(additional_followup) ||
          length(additional_followup) != 1 ||
          is.na(additional_followup)){
@@ -858,7 +890,7 @@ Trials <- R6::R6Class(
 
       if(additional_followup < 0){
         stop('additional_followup in stop_followup() cannot be negative. <',
-             additional_followup, '> is invalid. Use the default 0 to stop ',
+             additional_followup, '> is invalid. Use 0 to stop ',
              'follow-up at milestone <',
              names(milestone_time)[which.max(milestone_time)],
              '>, or a positive value to grant extra follow-up time beyond it. ')
@@ -883,7 +915,7 @@ Trials <- R6::R6Class(
       }
 
       ## no roll_back()/enroll_patients(): no design parameter (arms, sample
-      ## ratio, generator, duration) changes, so unenrolled patients are
+      ## ratio, generator) changes, so unenrolled patients are
       ## unaffected and the RNG stream must not advance.
 
       invisible(NULL)
@@ -973,7 +1005,7 @@ Trials <- R6::R6Class(
                   'the new accrual rate. ')
         }else{
           message('Accrual rate is updated at time <', current_time, '>. ',
-                  'Enrollment of ', n1, ' unenrolled patient(s) is ',
+                  'Enrollment of <', n1, '> unenrolled patient(s) is ',
                   're-planned under the new accrual rate. ')
         }
       }
@@ -981,10 +1013,9 @@ Trials <- R6::R6Class(
       ## discard data of unenrolled patients; roll_back() re-derives the old
       ## planned enroll times from trial data, which are overwritten right
       ## after. Regeneration in enroll_patients() (rather than shifting
-      ## existing rows in place) is required for correctness: rows in trial
-      ## data are already censored at trial duration, so moving a patient to
-      ## an earlier enroll time could not restore follow-up truncated under
-      ## the old, later time.
+      ## existing rows in place) keeps the generation contract simple: a
+      ## patient's data are generated when the patient is enrolled, under
+      ## the randomization plan in effect at that time.
       private$roll_back()
 
       private$enroll_time <- head(new_times, n1)
@@ -1176,11 +1207,11 @@ Trials <- R6::R6Class(
       for(cname in names(value)){
         if(cname %in% names(private$output)){
           if(!overwrite){
-            stop(cname, ' has been used to name something in the output. ',
+            stop('<', cname, '> has been used to name something in the output. ',
                  'Pick another name and try again. ')
           }else{
             if(cname != 'error_message'){
-              warning(cname, ' exists in the output and is overwritten. ',
+              warning('<', cname, '> exists in the output and is overwritten. ',
                       'Set overwrite = FALSE in save() if it is not intended. ',
                       immediate. = TRUE)
             }
@@ -1317,26 +1348,42 @@ Trials <- R6::R6Class(
     },
 
     #' @description
-    #' save arbitrary (number of) objects into a trial so that users can use
-    #' those to control the workflow. Most common use case is to store
-    #' simulation parameters to be used in action functions.
-    #' @param value value to be saved. Any type.
+    #' save temporary data into a trial to pass intermediate results between
+    #' action functions of milestones within a single simulated trial, e.g.,
+    #' a testing procedure object updated at every interim analysis. The
+    #' saved data live only within the current replicate: the storage is
+    #' cleared before every replicate, so nothing saved here can leak into
+    #' the next replicate or be used to summarize a simulation (use
+    #' \code{Trials$save()} for outputs, and the \code{global_data} argument
+    #' of \code{trial()} for read-only data that must be available in all
+    #' replicates). After \code{run()} returns, the storage still holds the
+    #' data of the last replicate, which can be inspected like the rest of
+    #' the trial's final state; the next \code{run()} clears it when it
+    #' starts.
+    #' @param value value to be saved. Any type except \code{NULL}.
     #' @param name character. Name of the value to be accessed later.
     #' @param overwrite logic. \code{TRUE} if overwriting existing entries
     #' with warning, otherwise, throwing an error and stop.
     save_custom_data = function(value, name, overwrite = FALSE){
 
-      if(name == ''){
-        stop('name in custom_data cannot be empty. ')
+      if(!(is.character(name) && length(name) == 1) || is.na(name) ||
+         name == ''){
+        stop('name in custom_data should be a non-empty character of length 1. ')
+      }
+
+      if(is.null(value)){
+        ## assigning NULL into a list silently removes the entry, so a NULL
+        ## would be unrecoverable by get_custom_data() anyway
+        stop('value saved in custom_data cannot be NULL. ')
       }
 
       if(name %in% names(private$custom_data)){
         if(!overwrite){
-          stop(name, ' has been used to name something in custom data ',
-               'Pick another name and try again. ')
+          stop('<', name, '> has been used to name something in custom data. ',
+               'Pick another name, or set overwrite = TRUE to update it. ')
         }else{
           if(!private$silent){
-            warning(name, ' exists in custom_data and is overwritten. ',
+            warning('<', name, '> exists in custom_data and is overwritten. ',
                     'Set overwrite = FALSE in save_custom_data() ',
                     'if it is not intended. ',
                     immediate. = TRUE)
@@ -1345,7 +1392,6 @@ Trials <- R6::R6Class(
       }
 
       private$custom_data[[name]] <- value
-      private$.snapshot[['custom_data']][[name]] <- value
 
       invisible(NULL)
     },
@@ -1356,10 +1402,13 @@ Trials <- R6::R6Class(
     #' @param name character. Name of custom data to be accessed.
     get_custom_data = function(name){
       if(!(name %in% names(private$custom_data))){
-        stop(name, ' cannot be found in custom_data. ',
+        stop('<', name, '> cannot be found in custom_data. ',
              'Check for bug or typo in data name. ',
-             'Did you really save ', name,
-             'by using Trial$save_custom_data(value, name) before? ')
+             'Did you really save <', name, '> ',
+             'by using trial$save_custom_data(value, name) ',
+             'in this replicate before? Note that custom data is cleared ',
+             'between replicates; for data that should be available in ',
+             'every replicate, use the global_data argument of trial(). ')
       }
 
       private$custom_data[[name]]
@@ -1370,6 +1419,27 @@ Trials <- R6::R6Class(
     #' @param name character. Name of custom data to be accessed.
     get = function(name){
       self$get_custom_data(name)
+    },
+
+    #' @description
+    #' return global data registered through the \code{global_data} argument
+    #' of \code{trial()} with its name. Global data is read-only and
+    #' available in every replicate of a simulation: an R6 object is
+    #' returned as an independent deep clone and a \code{data.table} as a
+    #' copy (also when nested inside plain lists), so updating the returned
+    #' object never changes the registered template. To carry an updated
+    #' object across milestones within a replicate, save the returned object
+    #' with \code{Trials$save_custom_data()}.
+    #' @param name character. Name of global data to be accessed.
+    get_global_data = function(name){
+      if(!(name %in% names(private$global_data))){
+        stop('<', name, '> cannot be found in global_data. ',
+             'Check for bug or typo in data name. ',
+             'Did you really define <', name, '> ',
+             'in the global_data argument of trial()? ')
+      }
+
+      copy_reference_object(private$global_data[[name]])
     },
 
     #' @description
@@ -1526,16 +1596,16 @@ Trials <- R6::R6Class(
         }
 
         if(ncol(planned_info) != length(treatments) + 1){
-          stop('length(planned_info) should be equal to length(treatments) + 1, i.e., ',
-               length(treatments) + 1, '. ')
+          stop('length(planned_info) should be equal to length(treatments) + 1, i.e., <',
+               length(treatments) + 1, '>. ')
         }
 
         if(!setequal(names(planned_info), c(placebo, treatments))){
           stop('planned_info should use placebo and treatments\' names, <',
                paste0(c(placebo, treatments), collapse = ', '),
-               '>, for its column names. ',
+               '>, for its column names. <',
                paste0(setdiff(names(planned_info), c(placebo, treatments)), collapse = ', '),
-               ' are not accepted. ')
+               '> are not accepted. ')
         }
 
         planned_info <- planned_info[, c(placebo, treatments), drop = FALSE]
@@ -2013,7 +2083,7 @@ Trials <- R6::R6Class(
     #'                            generator = rexp, rate = log(2) / 14))
     #'
     #' accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-    #' tr <- trial(name = 'ex', n_patients = 400, duration = 40,
+    #' tr <- trial(name = 'ex', n_patients = 400,
     #'             seed = 31416, enroller = StaggeredRecruiter,
     #'             accrual_rate = accrual, silent = TRUE)
     #' add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
@@ -2173,8 +2243,8 @@ Trials <- R6::R6Class(
         stop('Cannot compute conditional power at milestone <', milestone,
              '> vs placebo <', placebo, '>: ',
              paste0('arm <', selected_arms[exhausted],
-                    '> observed events d = ', d[exhausted],
-                    ' >= planned final events D = ', D[exhausted],
+                    '> observed events d = <', d[exhausted],
+                    '> >= planned final events D = <', D[exhausted], '>',
                     collapse = '; '),
              '. Check D, or whether this milestone is triggered too late. ')
       }
@@ -2349,7 +2419,7 @@ Trials <- R6::R6Class(
     #'                            generator = rexp, rate = log(2) / 14))
     #'
     #' accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-    #' tr <- trial(name = 'ex', n_patients = 400, duration = 40,
+    #' tr <- trial(name = 'ex', n_patients = 400,
     #'             seed = 31416, enroller = StaggeredRecruiter,
     #'             accrual_rate = accrual, silent = TRUE)
     #' add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
@@ -2585,8 +2655,8 @@ Trials <- R6::R6Class(
         stop('Cannot re-estimate the event number at milestone <',
              milestone, '> vs placebo <', placebo, '>: ',
              paste0('arm <', selected_arms[exhausted],
-                    '> observed events d = ', d[exhausted],
-                    ' >= D_cap = ', unname(D_cap)[exhausted],
+                    '> observed events d = <', d[exhausted],
+                    '> >= D_cap = <', unname(D_cap)[exhausted], '>',
                     collapse = '; '),
              '. Check D_cap, or whether this milestone is triggered too ',
              'late. ')
@@ -2707,7 +2777,7 @@ Trials <- R6::R6Class(
              milestone_name, '>. If it is composite, ',
              'make sure that at least one condition can be reached in a realistic time window. ',
              'If not, you may consider reducing the target number in milestone(), ',
-             'and/or extending trial duration in trial(). ')
+             'increasing the sample size, or lowering the dropout rate. ')
       }
 
       ## validate chronology before any state is touched: a milestone must
@@ -2716,9 +2786,9 @@ Trials <- R6::R6Class(
       ## invariant as an internal assertion after the lock.
       if(at_calendar_time < private$now){
         latest <- private$milestone_time[which.max(private$milestone_time)]
-        stop('Cannot lock data for milestone <', milestone_name, '> at time ',
-             round(at_calendar_time, 2), ': the trial clock is already at time ',
-             round(private$now, 2),
+        stop('Cannot lock data for milestone <', milestone_name, '> at time <',
+             round(at_calendar_time, 2), '>: the trial clock is already at time <',
+             round(private$now, 2), '>',
              if(length(latest) > 0){
                paste0(', set by milestone <', names(latest), '>')
              },
@@ -2785,7 +2855,7 @@ Trials <- R6::R6Class(
                 milestone_name, '>. Check: \n',
                 '(1) Is this milestone triggered too early?\n',
                 '(2) Is the dropout rate too high?\n',
-                '(3) Do you use the same unit for readout time, trial duration, and dropout time?')
+                '(3) Do you use the same unit for readout time, calendar time of milestones, and dropout time?')
       }
 
       ## Build per-arm event/readout counts without dplyr group_by+summarise.
@@ -2847,7 +2917,7 @@ Trials <- R6::R6Class(
                 name = paste0('n_events_<', milestone_name, '>'))
 
       if(!private$silent){
-        message('Data is locked at time = ', at_calendar_time, ' for milestone <',
+        message('Data is locked at time = <', at_calendar_time, '> for milestone <',
                 milestone_name, '>.\n',
                 'Locked data can be accessed in Trial$get_locked_data(\'',
                 milestone_name, '\'). \n',
@@ -2915,7 +2985,10 @@ Trials <- R6::R6Class(
     #' @param target_n_events target number of events for each of the
     #' \code{endpoints}.
     #' @param arms a vector of arms' name on which number of events will be
-    #' counted.
+    #' counted. If \code{NULL}, arms in the trial when this function is
+    #' called. Otherwise, every name must be an arm ever added to the trial
+    #' (an error otherwise), and arms removed before this call are counted
+    #' as specified, with a warning unless the trial is silent.
     #' @param type \code{all} if all target number of events are reached.
     #' \code{any} if the any target number of events is reached.
     #' @param ... subset conditions compatible with \code{dplyr::filter}. Number
@@ -2935,6 +3008,39 @@ Trials <- R6::R6Class(
 
       if(is.null(arms)){
         arms <- self$get_arms_name()
+      }else{
+        ## arms is checked here, at the shared entry of the C++ and R
+        ## paths, so that both behave the same. Names of arms that have
+        ## never been in the trial are an error: the C++ path used to drop
+        ## them silently, which only delayed the milestone. Arms removed
+        ## before this milestone are accepted, with a warning unless the
+        ## trial is silent, and their patients are counted as specified.
+        ## Listing removed arms is a legitimate design, e.g., enrollment()
+        ## on all arms for the total sample size, so the warning is muted
+        ## in batch runs. arm_time records every arm
+        ## ever added in the current replicate, including arms added and
+        ## removed within the trial, which neither the current arms nor
+        ## the run-start snapshot hold.
+        unknown_arms <- setdiff(arms, names(private$arm_time))
+        if(length(unknown_arms) > 0){
+          stop('Arm(s) <', paste0(unknown_arms, collapse = ', '),
+               '> in arms of the triggering condition have never been ',
+               'in the trial. Arm(s) ever added: <',
+               paste0(names(private$arm_time), collapse = ', '), '>. ')
+        }
+        removed_arms <- setdiff(arms, self$get_arms_name())
+        if(length(removed_arms) > 0 && !private$silent){
+          warning('Arm(s) <', paste0(removed_arms, collapse = ', '),
+                  '> in arms of the triggering condition <eventNumber()> were ',
+                  'removed from the trial at time <',
+                  paste0(vapply(removed_arms, private$get_arm_removal_time,
+                                numeric(1)), collapse = ', '),
+                  '>, before this milestone is evaluated. Their patients ',
+                  'are still counted as specified. ',
+                  'Ignore this warning if it is intended. \n',
+                  'Use arms = NULL to count on arms in the trial only. ',
+                  immediate. = TRUE)
+        }
       }
 
       ## Fast path (the default): C++ helpers compute the lock time directly
@@ -3019,8 +3125,11 @@ Trials <- R6::R6Class(
     #' the found data lock time). It is similar to get_data_lock_time_by_event_number
     #' but only focus on patient_id.
     #' @param target_n_patients target number of enrolled patients.
-    #' @param arms a vector of arms' name on which number of events will be
-    #' counted.
+    #' @param arms a vector of arms' name on which number of patients will be
+    #' counted. If \code{NULL}, arms in the trial when this function is
+    #' called. Otherwise, every name must be an arm ever added to the trial
+    #' (an error otherwise), and arms removed before this call are counted
+    #' as specified, with a warning unless the trial is silent.
     #' @param min_treatment_duration numeric. Zero or positive value.
     #' minimum treatment duration of enrolled patients.
     #' If 0, it looks for triggering time based on number of enrolled
@@ -3029,7 +3138,7 @@ Trials <- R6::R6Class(
     #' patients have received treatment for at least \code{min_treatment_duration}
     #' duration. It is users' responsibility to assure that the unit of
     #' \code{min_treatment_duration} are consistent with
-    #' readout of non-tte endpoints, dropout time, and trial duration.
+    #' readout of non-tte endpoints, dropout time, and calendar time of milestones.
     #' @param ... subset conditions compatible with \code{dplyr::filter}. Number
     #' Time of milestone is based on event counts on the subset of trial data.
     #' @return data lock time
@@ -3044,6 +3153,40 @@ Trials <- R6::R6Class(
 
       if(is.null(arms)){
         arms <- self$get_arms_name()
+      }else{
+        ## arms is checked here, at the shared entry of the C++ and R
+        ## paths, so that both behave the same. Names of arms that have
+        ## never been in the trial are an error: the C++ path used to drop
+        ## them silently, which only delayed the milestone. Arms removed
+        ## before this milestone are accepted, with a warning unless the
+        ## trial is silent, and their patients are counted as specified.
+        ## Listing removed arms is a legitimate design, e.g., enrollment()
+        ## on all arms for the total sample size, so the warning is muted
+        ## in batch runs. arm_time records every arm
+        ## ever added in the current replicate, including arms added and
+        ## removed within the trial, which neither the current arms nor
+        ## the run-start snapshot hold.
+        unknown_arms <- setdiff(arms, names(private$arm_time))
+        if(length(unknown_arms) > 0){
+          stop('Arm(s) <', paste0(unknown_arms, collapse = ', '),
+               '> in arms of the triggering condition have never been ',
+               'in the trial. Arm(s) ever added: <',
+               paste0(names(private$arm_time), collapse = ', '), '>. ')
+        }
+        removed_arms <- setdiff(arms, self$get_arms_name())
+        if(length(removed_arms) > 0 && !private$silent){
+          warning('Arm(s) <', paste0(removed_arms, collapse = ', '),
+                  '> in arms of the triggering condition <enrollment()> were ',
+                  'removed ',
+                  'from the trial at time <',
+                  paste0(vapply(removed_arms, private$get_arm_removal_time,
+                                numeric(1)), collapse = ', '),
+                  '>, before this milestone is evaluated. Their patients ',
+                  'are still counted as specified. ',
+                  'Ignore this warning if it is intended. \n',
+                  'Use arms = NULL to count on arms in the trial only. ',
+                  immediate. = TRUE)
+        }
       }
 
       ## Fast path (the default): the C++ helper computes the enrollment lock
@@ -3172,9 +3315,17 @@ Trials <- R6::R6Class(
       }
 
 
-      ## prepare stacked area chart
+      ## prepare stacked area chart. Trial data hold the full, generated
+      ## follow-up of every patient; the plot shows the trial as it was
+      ## observed, i.e., up to the time of the last triggered milestone.
+      t_end <- if(nrow(event_number) > 0){
+        max(event_number$lock_time)
+      }else{
+        max(all_data_list$calendar_time)
+      }
       all_data <- all_data_list %>%
-        dplyr::filter(!(arm %in% '0: overall'))
+        dplyr::filter(!(arm %in% '0: overall')) %>%
+        dplyr::filter(calendar_time <= t_end)
 
       endpoints <- sort(unique(all_data$endpoint))
       arms <- sort(unique(all_data$arm))
@@ -3235,7 +3386,7 @@ Trials <- R6::R6Class(
       }
 
       p <- ggplot(new_data, aes(x = calendar_time, y = n_events, fill = arm)) +
-        xlim(0, private$get_duration() * 1.05) +
+        xlim(0, t_end * 1.05) +
         labs(
           x = 'Calendar Time',
           y = 'Cumulative N'
@@ -3372,6 +3523,28 @@ Trials <- R6::R6Class(
       ## triplets left over from a previous run() on the same trial object).
       private$reset_regimen()
 
+      ## make_arms_snapshot() is the run-start hook on the trial: replicate 1
+      ## starts with an empty replicate-local storage, like every later
+      ## replicate (reset() restores it empty from the init-time snapshot).
+      ## This discards data saved between trial() and run(), which would
+      ## otherwise be seen by replicate 1 only (data every replicate needs
+      ## belongs in the global_data argument of trial()), as well as the
+      ## previous run()'s last-replicate data, which is deliberately kept
+      ## after a run for inspection.
+      private$custom_data <- list()
+
+    },
+
+    #' @description
+    #' \strong{INTERNAL MACHINERY: DO NOT CALL THIS METHOD DIRECTLY.}
+    #'
+    #' report whether the trial has left its as-designed state, i.e., at
+    #' least one replicate has been (partially) executed on it. The
+    #' controller refuses to start \code{run()} on such a trial: wrapping an
+    #' already-run trial in a new controller would otherwise bypass the
+    #' run-twice guard and simulate from a dirty state.
+    has_been_run = function(){
+      private$now > 0 || length(private$milestone_time) > 0
     },
 
     #' @description
@@ -3402,7 +3575,6 @@ Trials <- R6::R6Class(
       cat(white_text_blue_bg, logo, '      Sample Ratio: ',
           paste0(self$get_sample_ratio(), collapse = ', '), reset, '\n')
       cat(white_text_blue_bg, logo, 'Number of Patients: ', private$get_number_patients(), reset, '\n')
-      cat(white_text_blue_bg, logo, '  Planned Duration: ', private$get_duration(), reset, '\n')
       cat(white_text_blue_bg, logo, '           Regimen: ', ifelse(is.null(private$get_regimen()), 'not set', 'set'), reset, '\n')
       cat(white_text_blue_bg, logo, '       Random Seed: ', private$get_seed(), reset, '\n')
 
@@ -3417,7 +3589,6 @@ Trials <- R6::R6Class(
     name = NULL,
     description = NULL,
     n_patients = NULL,
-    duration = NULL,
     n_enrolled_patients = NULL,
     sample_ratio = NULL,
 
@@ -3470,10 +3641,22 @@ Trials <- R6::R6Class(
 
     output = NULL,
 
-    ## User can save whatever they want in an unstructured way (list)
-    ## This is useful for simulation to store some setting parameters
-    ## that could be used in action functions.
+    ## Replicate-local storage for intermediate results passed between
+    ## action functions (save_custom_data()/get_custom_data()/bind()).
+    ## Cleared at the start of every replicate: make_arms_snapshot() clears
+    ## it when run() starts, and the init-time snapshot holds it empty, so
+    ## reset() restores it empty between replicates. After run() it keeps
+    ## the last replicate's data, inspectable like the rest of the trial's
+    ## final state.
     custom_data = list(),
+
+    ## Read-only data available to every replicate (design parameters,
+    ## template objects of testing procedures). Set only by the global_data
+    ## argument of trial(); reference-semantics entries are copied at
+    ## registration and again by get_global_data() on every read, so the
+    ## registered templates are never mutated. Captured by make_snapshot()
+    ## like any other field; reset() restores the identical list.
+    global_data = list(),
 
     ## Apply the regimen triplet(s) `indices` to `patient_data` and return the
     ## modified data frame. Shared by enroll_patients() (whole fresh batch, all
@@ -3491,16 +3674,16 @@ Trials <- R6::R6Class(
 
       isValidOutput <- function(op, req_cols, func_name){
         if(!is.data.frame(op)){
-          stop('The user-defined function ', func_name,
-               ' must return a data frame. ',
-               'Please set a breakpoint in ', func_name, ' to debug it. ')
+          stop('The user-defined function <', func_name,
+               '> must return a data frame. ',
+               'Please set a breakpoint in <', func_name, '> to debug it. ')
         }
         miss_cols <- setdiff(req_cols, names(op))
         if(length(miss_cols) > 0){
           stop('Column(s) <', paste0(miss_cols, collapse = ', '),
-               '> are missing in data frame returned from the user-defined function ',
-               func_name, ' for regimen. ',
-               'Please set a breakpoint in ', func_name, ' to debug it. ')
+               '> are missing in data frame returned from the user-defined function <',
+               func_name, '> for regimen. ',
+               'Please set a breakpoint in <', func_name, '> to debug it. ')
         }
       }
 
@@ -3517,7 +3700,6 @@ Trials <- R6::R6Class(
       tte_cols     <- sub('_event$',   '', event_cols)
       readout_cols <- grep('_readout$', names(patient_data), value = TRUE)
       ep_cols      <- sub('_readout$', '', readout_cols)
-      duration     <- private$get_duration()
       tol          <- 1e-8
 
       for(i in indices){
@@ -3544,8 +3726,7 @@ Trials <- R6::R6Class(
           if(rt[1] == 0) next
           open_any <- open_any |
             ((cand$enroll_time + rt) > ref &
-               rt <= cand$dropout_time &
-               (cand$enroll_time + rt) <= duration)
+               rt <= cand$dropout_time)
         }
         cand <- cand[open_any, , drop = FALSE]
         if(nrow(cand) == 0) next
@@ -3663,8 +3844,7 @@ Trials <- R6::R6Class(
             }else{
               rt <- patient_data[[readout_cols[match(col, ep_cols)]]][upd_idx]
               post_switch <- (rt > sw_for_upd) &
-                rt <= patient_data$dropout_time[upd_idx] &
-                (patient_data$enroll_time[upd_idx] + rt) <= duration
+                rt <= patient_data$dropout_time[upd_idx]
             }
             post_switch[is.na(post_switch)] <- FALSE
             if(is.numeric(new_vals) && is.numeric(orig_val)){
@@ -3705,8 +3885,9 @@ Trials <- R6::R6Class(
     },
 
     validate_arguments =
-      function(name, n_patients, duration, description, seed,
-               enroller, dropout, stratification_factors, silent, ...){
+      function(name, n_patients, description, seed,
+               enroller, dropout, stratification_factors, global_data,
+               silent, ...){
 
       stopifnot(is.null(seed) || is.wholenumber(seed))
       stopifnot(is.character(name))
@@ -3718,14 +3899,62 @@ Trials <- R6::R6Class(
                   (length(n_patients) == 1) &&
                   is.wholenumber(n_patients))
 
-      stopifnot(is.numeric(duration) &&
-                  (length(duration) == 1) &&
-                  duration > 0)
-
       stopifnot(is.function(enroller))
       stopifnot(is.null(dropout) || is.function(dropout))
 
+      if(!is.null(global_data)){
+
+        if(!(is.list(global_data) && !is.object(global_data))){
+          stop('global_data in trial() should be a plain list ',
+               'with named components. ', call. = FALSE)
+        }
+
+        if(length(global_data) > 0){
+
+          nm <- names(global_data)
+          if(is.null(nm) || anyNA(nm) || any(nm == '')){
+            stop('every component of global_data in trial() should be ',
+                 'named. ', call. = FALSE)
+          }
+
+          if(anyDuplicated(nm) > 0){
+            stop('names of components of global_data in trial() should be ',
+                 'unique. Duplicated: <',
+                 paste0(unique(nm[duplicated(nm)]), collapse = ', '),
+                 '>. ', call. = FALSE)
+          }
+
+          is_null_entry <- vapply(global_data, is.null, logical(1))
+          if(any(is_null_entry)){
+            stop('component(s) <',
+                 paste0(nm[is_null_entry], collapse = ', '),
+                 '> of global_data in trial() cannot be NULL. ',
+                 call. = FALSE)
+          }
+
+          if(holds_plain_environment(global_data)){
+            stop('global_data in trial() cannot contain a plain ',
+                 'environment: it cannot be protected from modification ',
+                 'by reference. Use a list or an R6 object instead. ',
+                 call. = FALSE)
+          }
+
+        }
+
+      }
+
       stopifnot(is.logical(silent))
+
+      ## duration was a named argument of trial() until 1.36.0. Now it would
+      ## be swallowed by ... and forwarded to the enroller and dropout
+      ## generators, which ignore it, so an old script keeps running with
+      ## its follow-up no longer capped. Make it loud instead.
+      if('duration' %in% names(list(...))){
+        stop('duration is no longer an argument of trial() since ',
+             'TrialSimulator 1.36.0 and must be removed. A trial ends when ',
+             'its last milestone is triggered; the timing of each milestone ',
+             'is determined by its triggering condition. ', call. = FALSE)
+      }
 
     },
 
@@ -3782,9 +4011,9 @@ Trials <- R6::R6Class(
         private$stratum_queue <- rep('all', private$get_number_unenrolled_patients())
 
         if(!private$silent){
-          message('Randomization is done for ',
+          message('Randomization is done for <',
                   private$get_number_unenrolled_patients(),
-                  ' potential patients. \n')
+                  '> potential patients. \n')
         }
 
         return(invisible(NULL))
@@ -3839,8 +4068,8 @@ Trials <- R6::R6Class(
       stopifnot(length(private$stratum_queue) == length(private$randomization_queue))
 
       if(!private$silent){
-        message('Randomization is done for ', length(randomization_queue),
-                ' potential patients. \n')
+        message('Randomization is done for <', length(randomization_queue),
+                '> potential patients. \n')
       }
     },
 
@@ -3851,11 +4080,6 @@ Trials <- R6::R6Class(
       private$trial_data
     },
 
-    ## @description
-    ## return maximum duration of a trial
-    get_duration = function(){
-      private$duration
-    },
 
     ## @description
     ## set recruitment curve when initialize a trial.
@@ -3986,7 +4210,7 @@ Trials <- R6::R6Class(
       private$trial_data <- past_td[order(past_td$enroll_time), , drop = FALSE]
 
       if(!private$silent){
-        message('Trial data is rolling back to time = ', current_time, '. \n',
+        message('Trial data is rolling back to time = <', current_time, '>. \n',
                 'Randomization will be carried out again for unenrolled patients. \n')
       }
 
@@ -4033,7 +4257,7 @@ Trials <- R6::R6Class(
     ## @param arm_name character, name of arm to be extracted
     get_an_arm = function(arm_name){
       if(!(arm_name %in% self$get_arms_name())){
-        stop(arm_name, ' is not in the trial \'', private$get_name(), '\'')
+        stop('<', arm_name, '> is not in the trial <', private$get_name(), '>. ')
       }
 
       private$get_arms()[[arm_name]]
@@ -4153,8 +4377,8 @@ Trials <- R6::R6Class(
       }
 
       if(n_patients > private$get_number_unenrolled_patients()){
-        stop('Cannot enroll ', n_patients, ' patients for the trial. ',
-             'Only ', private$get_number_unenrolled_patients(), ' left. ')
+        stop('Cannot enroll <', n_patients, '> patients for the trial. ',
+             'Only <', private$get_number_unenrolled_patients(), '> left. ')
       }
 
       ## update randomization plan for unenrolled patients
@@ -4319,15 +4543,17 @@ Trials <- R6::R6Class(
       }
 
       private$trial_data <- bind_rows(private$get_trial_data(), patient_data)
-      ## newly updated trial data should be always censored at trial duration
-      ## also, non-tte endpoints would be NA if readout time is after dropout time,
-      ## and tte endpoints should be censored at dropout time.
-      private$censor_trial_data()
+      ## newly generated trial data are censored at dropout time only:
+      ## non-tte endpoints are NA if readout time is after dropout time,
+      ## and tte endpoints are censored at dropout time. No administrative
+      ## censoring here: it happens in lock_data() at the time of each
+      ## milestone, and through adaptations such as stop_followup().
+      private$censor_trial_data(censor_at = Inf)
 
       if(!private$silent){
-        message('Data of ', n_patients,
-                ' potential patients are generated for the trial with ',
-                private$get_number_arms(), ' arm(s) <',
+        message('Data of <', n_patients,
+                '> potential patients are generated for the trial with <',
+                private$get_number_arms(), '> arm(s) <',
                 paste0(self$get_arms_name(), collapse = ", "), '>. \n')#,
                 # 'Depending on the scenarios, ',
                 # 'some of those patients may be eventually enrolled \n',
@@ -4461,10 +4687,14 @@ Trials <- R6::R6Class(
         arms <- self$get_arms_name()
       }
 
-      if(!all(arms %in% c(self$get_arms_name(), names(private$.snapshot[['arms']])))){
+      ## arm_time holds every arm ever added in the current replicate, so
+      ## arms removed within the trial (including those added within the
+      ## trial, which the run-start snapshot does not hold) pass this check.
+      if(!all(arms %in% names(private$arm_time))){
         stop('Arm(s) <',
-             paste0(setdiff(arms, self$get_arms_name()), collapse = ', '),
-             '> cannot be found in the trial, debug Trial$get_event_tables. ')
+             paste0(setdiff(arms, names(private$arm_time)), collapse = ', '),
+             '> have never been in the trial, debug Trial$get_event_tables ',
+             'or report an issue. ')
       }
 
       trial_data <- private$get_trial_data()
@@ -4608,7 +4838,8 @@ Trials <- R6::R6Class(
     },
 
     ## @description
-    ## censor trial data at calendar time. Patients to be censored are
+    ## censor trial data at calendar time and dropout time. Patients to be
+    ## censored are
     ## selected by \code{selected_arms}, \code{enrolled_before} and conditions
     ## in \code{...}; all of them are combined with AND. Although
     ## \code{selected_arms} and \code{enrolled_before} can be equally
@@ -4617,7 +4848,7 @@ Trials <- R6::R6Class(
     ## arguments on purpose: they are evaluated in base R, while conditions in
     ## \code{...} go through \code{dplyr::filter}, which is measurably slower.
     ## Internal calls on simulation hot paths (\code{enroll_patients},
-    ## \code{set_duration}, \code{remove_arms}, \code{crossover},
+    ## \code{remove_arms}, \code{crossover},
     ## \code{stop_followup}) therefore use the two dedicated arguments only;
     ## \code{...} is reserved for user-specified conditions, e.g., those
     ## forwarded from \code{stop_followup}.
@@ -4626,8 +4857,15 @@ Trials <- R6::R6Class(
     ## \code{...} in the argument list, they must always be passed by name.
     ## This prevents unnamed filter conditions forwarded through \code{...}
     ## from being positionally matched to them.
-    ## @param censor_at time of censoring. It is set to trial duration if
-    ## \code{NULL}.
+    ## @param censor_at calendar time of administrative censoring. Events
+    ## after it are censored at it and non-tte readouts after it are set to
+    ## \code{NA}. No default: callers must state it. Two kinds of censoring
+    ## are applied by this function: dropout censoring, which is relative to
+    ## each patient's enrollment and is always applied, and administrative
+    ## censoring at the calendar time \code{censor_at}. Set
+    ## \code{censor_at = Inf} to apply dropout censoring only, i.e., no
+    ## administrative censoring (e.g., right after new patients are
+    ## generated); the administrative step is skipped entirely in that case.
     ## @param selected_arms censoring is applied to selected arms (e.g.,
     ## removed arms) only. If \code{NULL}, it will be set to all available arms
     ## in trial data. Otherwise, censoring is applied to user-specified arms only.
@@ -4635,12 +4873,14 @@ Trials <- R6::R6Class(
     ## should be fixed unchanged since corresponding milestone is triggered. In that
     ## case, one can update trial data by something like
     ## \code{censor_trial_data(censor_at = milestone_time, selected_arms = removed_arms)}.
-    ## @param enrolled_before censoring is applied to patients enrolled before
-    ## specific time. This argument would be used when trial duration is
-    ## updated by \code{set_duration}. Adaptation happens when \code{set_duration}
-    ## is called so we fix duration for patients enrolled before adaptation
-    ## to maintain independent increment. This should work when trial duration
-    ## is updated for multiple times.
+    ## @param enrolled_before censoring is applied to patients enrolled at or
+    ## before a specific calendar time, \code{Inf} (no cutoff) by default.
+    ## \code{stop_followup} uses it to freeze the cohort enrolled by the
+    ## current milestone, e.g., to keep their follow-up at the originally
+    ## planned end of the trial after the trial is extended at an unblinded
+    ## interim analysis, so that patients enrolled later are the only ones
+    ## affected by the adaptation. Censoring is monotone, so repeated calls
+    ## with later cutoffs are safe.
     ## @param ... subset conditions compatible with \code{dplyr::filter},
     ## further restricting the patients to be censored in addition to
     ## \code{selected_arms} and \code{enrolled_before}. When
@@ -4650,12 +4890,11 @@ Trials <- R6::R6Class(
     ## addition, no condition is provided in \code{...}, all patients in
     ## trial data are censored. When \code{...} is empty, \code{dplyr} is
     ## not invoked at all.
-    censor_trial_data = function(censor_at = NULL, ...,
+    censor_trial_data = function(censor_at, ...,
                                  selected_arms = NULL, enrolled_before = Inf){
 
-      if(is.null(censor_at)){
-        censor_at <- private$get_duration()
-      }
+      stopifnot(is.numeric(censor_at), length(censor_at) == 1, !is.na(censor_at))
+      calendar_censoring <- is.finite(censor_at)
 
       trial_data <- private$get_trial_data()
 
@@ -4693,14 +4932,16 @@ Trials <- R6::R6Class(
         drop_mask <- sel & (trial_data[[tte_col]] > trial_data$dropout_time)
         trial_data[[event_col]][drop_mask] <- 0L
         trial_data[[tte_col]][drop_mask]   <- trial_data$dropout_time[drop_mask]
-        ## calendar-time censoring: event falls after data lock
-        cal_time  <- trial_data$enroll_time + trial_data[[tte_col]]
-        late_mask <- sel & (cal_time > censor_at)
-        trial_data[[event_col]][late_mask] <- 0L
-        trial_data[[tte_col]][late_mask]   <- censor_at - trial_data$enroll_time[late_mask]
-        ## defensive clip (censor_at - enroll_time can be negative for patients not yet enrolled)
-        neg_mask <- trial_data[[tte_col]] < 0
-        trial_data[[tte_col]][neg_mask] <- 0
+        if(calendar_censoring){
+          ## administrative censoring: event falls after censor_at
+          cal_time  <- trial_data$enroll_time + trial_data[[tte_col]]
+          late_mask <- sel & (cal_time > censor_at)
+          trial_data[[event_col]][late_mask] <- 0L
+          trial_data[[tte_col]][late_mask]   <- censor_at - trial_data$enroll_time[late_mask]
+          ## defensive clip (censor_at - enroll_time can be negative for patients not yet enrolled)
+          neg_mask <- trial_data[[tte_col]] < 0
+          trial_data[[tte_col]][neg_mask] <- 0
+        }
       }
 
       for(readout_col in readout_cols){
@@ -4708,10 +4949,12 @@ Trials <- R6::R6Class(
         ## dropout censoring
         drop_mask <- sel & (trial_data[[readout_col]] > trial_data$dropout_time)
         trial_data[[ep_col]][drop_mask] <- NA
-        ## calendar-time censoring
-        cal_time  <- trial_data$enroll_time + trial_data[[readout_col]]
-        late_mask <- sel & (cal_time > censor_at)
-        trial_data[[ep_col]][late_mask] <- NA
+        if(calendar_censoring){
+          ## administrative censoring: readout falls after censor_at
+          cal_time  <- trial_data$enroll_time + trial_data[[readout_col]]
+          late_mask <- sel & (cal_time > censor_at)
+          trial_data[[ep_col]][late_mask] <- NA
+        }
       }
 
       ## sort once at the end (dplyr version re-sorted inside every loop iteration)

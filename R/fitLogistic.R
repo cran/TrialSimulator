@@ -61,7 +61,7 @@ fitLogistic <- function(formula, placebo, data, alternative, scale, ...) {
 
   valid_scales <- c('coefficient', 'log odds ratio', 'odds ratio', 'risk ratio', 'risk difference')
   if(!is.character(scale) || length(scale) != 1 || !(scale %in% valid_scales)){
-    stop('scale must be one of ', paste0(valid_scales, collapse = ', '))
+    stop('scale must be one of <', paste0(valid_scales, collapse = ', '), '>. ')
   }
 
   vars_in_formula <- all.vars(formula)
@@ -143,8 +143,13 @@ fitLogistic <- function(formula, placebo, data, alternative, scale, ...) {
                           'risk ratio' = 'ratio',
                           'risk difference' = 'estimate')[scale]
 
+      # Hand emmeans the raw data of the rows glm() used (fit$data minus
+      # fit$na.action), so it never re-evaluates the glm() call, where
+      # sub_data is not visible from the formula's environment.
+      # Row positions match because glm() gets no subset or weights.
+      emm_data <- fit$data[setdiff(seq_len(nrow(fit$data)), fit$na.action), , drop = FALSE]
       res <- fit %>%
-        emmeans(~ arm, type = type1) %>%
+        emmeans(~ arm, type = type1, data = emm_data) %>%
         regrid(type2) %>%
         contrast(method = list('trt_vs_pbo' = setNames(c(-1, 1), c(placebo, trt_arm)))) %>%
         summary()

@@ -124,7 +124,7 @@ pfs_e <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2) / 
 control <- arm(name = 'control', pfs <= os); control$add_endpoints(pfs_e, os_e)
 trt     <- arm(name = 'trt',     pfs <= os); trt$add_endpoints(pfs_e, os_e)
 
-trial <- trial(name = 'demo', n_patients = 200, seed = 123, duration = 36,
+trial <- trial(name = 'demo', n_patients = 200, seed = 123,
                enroller = StaggeredRecruiter,
                accrual_rate = data.frame(end_time = Inf, piecewise_rate = 15),
                silent = TRUE)

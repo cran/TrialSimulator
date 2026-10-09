@@ -95,7 +95,6 @@ accrual_rate <- data.frame(end_time = c(6, Inf),
 
 trial <- trial(name = 'crossover-trial', 
                n_patients = 60, 
-               duration = 28,
                enroller = StaggeredRecruiter, accrual_rate = accrual_rate, 
                silent = TRUE)
 

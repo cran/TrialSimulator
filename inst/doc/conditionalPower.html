@@ -882,7 +882,7 @@ methods.</p>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>trt<span class="sc">$</span><span class="fu">add_endpoints</span>(pfs_trt)</span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>accrual_rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">end_time =</span> <span class="cn">Inf</span>, <span class="at">piecewise_rate =</span> <span class="dv">30</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(<span class="at">name =</span> <span class="st">&#39;cp-example&#39;</span>, <span class="at">n_patients =</span> <span class="dv">400</span>, <span class="at">duration =</span> <span class="dv">40</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(<span class="at">name =</span> <span class="st">&#39;cp-example&#39;</span>, <span class="at">n_patients =</span> <span class="dv">400</span>,</span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>               <span class="at">seed =</span> <span class="dv">31416</span>, <span class="at">enroller =</span> StaggeredRecruiter,</span>
 <span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>               <span class="at">accrual_rate =</span> accrual_rate, <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), pbo, trt)</span>
@@ -1226,7 +1226,7 @@ restores the original 300-event trigger before the next replicate.</p>
 <span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a></span>
 <span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>accrual_rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">end_time =</span> <span class="cn">Inf</span>, <span class="at">piecewise_rate =</span> <span class="dv">30</span>)</span>
 <span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(</span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;promising-zone&#39;</span>, <span class="at">n_patients =</span> <span class="dv">700</span>, <span class="at">duration =</span> <span class="dv">120</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;promising-zone&#39;</span>, <span class="at">n_patients =</span> <span class="dv">700</span>,</span>
 <span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">20260831</span>, <span class="at">enroller =</span> StaggeredRecruiter,</span>
 <span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>  <span class="at">accrual_rate =</span> accrual_rate, <span class="at">silent =</span> <span class="cn">TRUE</span></span>
 <span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>)</span>

@@ -37,7 +37,7 @@ pbo <- make_arm('pbo', 6, .5, .20)
 trt <- make_arm('trt', 9, .5, .35)
 
 trial <- trial(
-  name = 'filteredConditions', n_patients = 240, duration = 40,
+  name = 'filteredConditions', n_patients = 240,
   seed = 20260903,
   enroller = StaggeredRecruiter,
   accrual_rate = data.frame(end_time = Inf, piecewise_rate = 15),
@@ -49,7 +49,7 @@ trial$add_arms(sample_ratio = c(1, 1), pbo, trt)
 cohort_action <- function(trial){
   locked <- trial$get_locked_data('cohort')
   trial$save(nrow(locked), 'n_locked_cohort')
-  stop_followup(trial, patient_id <= 80)
+  stop_followup(trial, patient_id <= 80, additional_followup = 0)
 }
 
 subgroup_action <- function(trial){

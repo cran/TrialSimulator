@@ -14,6 +14,7 @@ test_that('package behaves the same under single- and multi-process modes with s
   # parallel path is still exercised in ordinary (non-coverage) test runs.
   skip_if(Sys.getenv("R_COVR") == "true",
           "n_workers > 1 spawns R processes that covr cannot trace")
+  skip_if_not_installed('mirai')
 
   foo <- function(n, n_workers, seed = NULL){
     pfs <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2)/10)
@@ -43,7 +44,7 @@ test_that('package behaves the same under single- and multi-process modes with s
                                piecewise_rate = c(2, 8, 20, 25, 50))
 
     trial <- trial(
-      name = 'test', n_patients = 1000, duration = 40,
+      name = 'test', n_patients = 1000,
       enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
       dropout = rweibull, shape = 1.32, scale = 114.4,
       seed = seed,
@@ -54,7 +55,7 @@ test_that('package behaves the same under single- and multi-process modes with s
 
     interim1 <- milestone(name = 'interim1',
                           when = eventNumber(endpoint = 'or', n = 200),
-                          action = function(trial){trial$remove_arms('trt1')})
+                          action = function(trial){trial$remove_arms('trt1', additional_followup = 0)})
 
     action2 <- function(trial){
 
@@ -136,6 +137,7 @@ test_that('stop_followup and update_accrual_rate reproduce across worker modes',
 
   skip_if(Sys.getenv("R_COVR") == "true",
           "n_workers > 1 spawns R processes that covr cannot trace")
+  skip_if_not_installed('mirai')
 
   bar <- function(n, n_workers, seed = NULL){
     pfs <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2)/10)
@@ -144,7 +146,7 @@ test_that('stop_followup and update_accrual_rate reproduce across worker modes',
     trt <- arm(name = 'trt'); trt$add_endpoints(pfs)
 
     trial <- trial(
-      name = 'test', n_patients = 300, duration = 30,
+      name = 'test', n_patients = 300,
       enroller = StaggeredRecruiter,
       accrual_rate = data.frame(end_time = Inf, piecewise_rate = 30),
       dropout = rweibull, shape = 1.32, scale = 114.4,
@@ -155,7 +157,7 @@ test_that('stop_followup and update_accrual_rate reproduce across worker modes',
     adapt <- milestone(name = 'adapt',
                        when = calendarTime(time = 8),
                        action = function(trial){
-                         stop_followup(trial, arm == 'pbo')
+                         stop_followup(trial, arm == 'pbo', additional_followup = 0)
                          update_accrual_rate(
                            trial,
                            data.frame(end_time = Inf, piecewise_rate = 15))
@@ -193,6 +195,7 @@ test_that('update_milestone reproduces across worker modes', {
 
   skip_if(Sys.getenv("R_COVR") == "true",
           "n_workers > 1 spawns R processes that covr cannot trace")
+  skip_if_not_installed('mirai')
 
   baz <- function(n, n_workers, seed = NULL){
     pfs <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2)/10)
@@ -201,7 +204,7 @@ test_that('update_milestone reproduces across worker modes', {
     trt <- arm(name = 'trt'); trt$add_endpoints(pfs)
 
     trial <- trial(
-      name = 'test', n_patients = 300, duration = 40,
+      name = 'test', n_patients = 300,
       enroller = StaggeredRecruiter,
       accrual_rate = data.frame(end_time = Inf, piecewise_rate = 30),
       dropout = rweibull, shape = 1.32, scale = 114.4,

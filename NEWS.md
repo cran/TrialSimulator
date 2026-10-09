@@ -1,3 +1,62 @@
+# TrialSimulator 1.39.0
+
+## Bug fixes
+
+- `fitLinear()` and `fitLogistic()` (except `scale = 'coefficient'`) no longer fail with "We are unable to reconstruct the data" when the right-hand side of `formula` transforms a covariate, e.g., `log(x)`. The fitted rows are now passed to `emmeans` directly, so it no longer re-evaluates the model call, where the analysis data are not visible. The same re-evaluation caused a test failure on R-devel for Windows.
+
+# TrialSimulator 1.38.2
+
+## Updates
+
+- New vignette [An Example of Simulating a Trial with Adaptive Enrichment Design](https://zhangh12.github.io/TrialSimulator/articles/enrichmentDesign.html): a two-stage design with a biomarker-defined subgroup, where conditional power at an interim drives a five-zone decision (futility, unfavorable, enrichment, promising with sample size and event number reassessment, favorable), the two stages are combined by the inverse normal method, and the full-population and subgroup hypotheses are tested by a closed test with Simes' test. Operating characteristics from 10000 replicates under the alternative and under the global null are stored in the package.
+- `event_plot()` now shows the trial as observed, i.e., cumulative counts up to the time of the last triggered milestone. Since 1.36.0 trial data hold the full generated follow-up of every patient, so without this cut the plot extended to the last generated event, far beyond the end of the trial.
+
+# TrialSimulator 1.38.0
+
+## Breaking changes
+
+- Custom data (`save_custom_data()`, `get()`, `bind()`) is now strictly replicate-local: entries saved in an action function no longer leak into the next replicate, and data saved before `run()` does not reach the replicates. After `run()`, the last replicate's custom data remains available for inspection.
+- `save_custom_data()` rejects a `NULL` value and requires `name` to be a non-empty character of length 1.
+
+## New features
+
+- `trial()` gains a read-only `global_data` argument: a named list of, e.g., design parameters or template objects of testing procedures, available in every replicate through `trial$get_global_data(name)`. R6 objects and `data.table`s are copied at registration and on every read, so registered entries can never be modified; see `vignette('actionFunctions')`.
+- `controller$run()` refuses to start on a trial that has already been run and points to `reset()`, instead of failing at the first milestone with a misleading error.
+
+# TrialSimulator 1.37.0
+
+## Breaking changes
+
+- `additional_followup` no longer has a default in `stop_followup()`, `Trials$stop_followup()`, `remove_arms()` and `Trials$remove_arms()`. Existing calls must state it: `additional_followup = 0` reproduces the previous behavior. Whether follow-up stops at the milestone or continues is a design decision that should be visible in the action function.
+
+## Updates
+
+- `remove_arms()` and `Trials$remove_arms()` gain `additional_followup` (thanks, [@gravesti](https://github.com/gravesti), [#21](https://github.com/zhangh12/TrialSimulator/issues/21)); 0 is the previous behavior. Patients of the removed arms are followed for that much longer after the milestone, or for the rest of the trial with `Inf`, e.g., to collect overall survival of a dose that stops enrolling. One value is shared by all arms removed in a call; call once per arm for different values. Events of a removed arm within its follow-up are counted by a later milestone only if the arm is listed in `arms` of its triggering condition; `arms = NULL` never counts removed arms.
+
+## Bug fixes
+
+- `trial(duration = ...)` is now an error stating that the argument was removed in 1.36.0. Previously `duration` fell into `...` and was forwarded to the enroller and dropout generators, which ignore it, so a script written for an earlier version kept running with its follow-up no longer capped and nothing said so.
+- The `arms` argument of `eventNumber()` and `enrollment()` is now validated once, at the entry shared by the C++ and R implementations of the lock-time search, so both behave the same. A name that has never been an arm of the trial is an error; previously the default C++ path dropped it silently, so a misspelled arm only delayed the milestone. The set of known arms is every arm ever added in the current replicate, so an arm added and then removed within the trial is accepted; the R path previously checked against the current arms and the arms present when `run()` started, and rejected such an arm.
+- An arm listed in `arms` that has been removed by `remove_arms()` before the milestone is evaluated now raises a warning unless the trial is silent (`silent = TRUE` in `trial()` or `run()`). Its patients are still counted as specified. Use `arms = NULL` to count on the arms in the trial only.
+
+## Documentation
+
+- `?remove_arms` now states what removing an arm does (no further randomization, out of the set of arms of the trial, data censored at removal but kept in locked data) and documents the three patterns for counting at later milestones after a data-driven removal: `arms = NULL` for the arms still in the trial, listing every arm of the design to include removed ones, and `update_milestone()` in the same action function for a subset that depends on which arm was removed. Examples show each pattern.
+- The adaptive design vignette explains why the final analysis lists all three arms in `enrollment()`: after dose selection, `arms = NULL` would count on the remaining arms only and the total sample size could never be reached.
+- The `trial()` examples of `?controller` and `?summarizeMilestoneTime` no longer pass `duration`.
+
+# TrialSimulator 1.36.0
+
+## Breaking changes
+
+- `duration` is removed from `trial()`. A trial no longer has a pre-specified duration: it ends when its last milestone is triggered, and the timing of a milestone is determined by its triggering condition. Users of event-driven designs no longer need to guess a "sufficiently large" cap whose unit depends on the design. Existing code must drop the argument. For a trial whose milestones were all reachable within the old `duration`, results are unchanged for a given seed; a trial whose calendar-time milestone lay beyond the old `duration` now gets the full follow-up it was designed for instead of follow-up silently truncated at `duration`.
+- `set_duration()` and `Trials$set_duration()` are removed. The design it served, extending a trial at an unblinded interim while patients enrolled by the interim keep their originally planned follow-up, is expressed within the action function of the interim as `trial$stop_followup(additional_followup = planned_end - trial$get_current_time())` for the freeze, and `trial$update_milestone('final', when = ...)` for the new timing of the final analysis. The freeze point `planned_end` is the calendar time in the original triggering condition of the final analysis, which the user knows by design. Unlike `set_duration()`, this recipe does not re-randomize and regenerate patients not yet enrolled at the interim, so the random number stream is no longer advanced by the adaptation; the two are equivalent in distribution.
+- Internal: `Trials$censor_trial_data()` no longer has a default for `censor_at`, the calendar time of administrative censoring; pass `censor_at = Inf` to apply dropout censoring only, without administrative censoring.
+
+## Updates
+
+- Trial data are no longer administratively censored at a trial-level horizon when patients are generated. Administrative censoring happens only at data locks (`lock_data()`) and through adaptations (`stop_followup()`, `remove_arms()`). `event_plot()` extends its x axis to the time of the last triggered milestone.
+
 # TrialSimulator 1.35.8
 
 ## Performance

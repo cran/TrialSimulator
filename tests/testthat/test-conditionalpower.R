@@ -294,9 +294,9 @@ make_arm <- function(name, median) {
   a
 }
 
-make_trial <- function(seed = 31416, n_patients = 400, duration = 40) {
+make_trial <- function(seed = 31416, n_patients = 400) {
   accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-  trial(name = "t", n_patients = n_patients, duration = duration, seed = seed,
+  trial(name = "t", n_patients = n_patients, seed = seed,
         enroller = StaggeredRecruiter, accrual_rate = accrual,
         dropout = rweibull, shape = 1, scale = 1e6,
         silent = TRUE)
@@ -333,7 +333,7 @@ run_three_arm_trial <- function(seed = 27183, remove_at_8 = NULL) {
     milestones <- c(
       list(milestone(name = "select", when = calendarTime(time = 8),
                      action = function(trial){
-                       remove_arms(trial, arm_to_drop)
+                       remove_arms(trial, arm_to_drop, additional_followup = 0)
                      })),
       milestones
     )
@@ -558,7 +558,7 @@ test_that("numeric-effect conditionalPower works for arms removed after the mile
   lstn$add_milestones(
     milestone(name = "interim", when = calendarTime(time = 15)),
     milestone(name = "select", when = calendarTime(time = 20),
-              action = function(trial){ remove_arms(trial, 'trt1') }),
+              action = function(trial){ remove_arms(trial, 'trt1', additional_followup = 0) }),
     milestone(name = "final", when = calendarTime(time = 40))
   )
   controller(tr, lstn)$run(n = 1, silent = TRUE, plot_event = FALSE)
@@ -760,8 +760,8 @@ test_that("conditionalPower rejects d >= D with an informative message", {
     error = function(e) conditionMessage(e)
   )
   expect_match(err, 'arm <trt>')
-  expect_match(err, paste0('d = ', fit$info))
-  expect_match(err, 'D = 5')
+  expect_match(err, paste0('d = <', fit$info, '>'))
+  expect_match(err, 'D = <5>')
 })
 
 

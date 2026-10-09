@@ -464,17 +464,17 @@ function:</p>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(</span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;Trial-31415&#39;</span>, <span class="at">description =</span> <span class="st">&#39;Example Clinical Trial&#39;</span>, </span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">n_patients =</span> <span class="dv">420</span>, <span class="at">duration =</span> <span class="dv">30</span>, </span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">n_patients =</span> <span class="dv">420</span>, </span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">enroller =</span> StaggeredRecruiter, <span class="at">accrual_rate =</span> accrual_rate, </span>
 <span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">dropout =</span> rweibull, <span class="at">scale =</span> <span class="fl">30.636</span>, <span class="at">shape =</span> <span class="fl">1.939</span></span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>)</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; Seed is not specified. TrialSimulator sets it to 1680176743</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; Seed is not specified. TrialSimulator sets it to &lt;1680176743&gt;.</span></span>
 <span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
 <span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="do">## add arms to the trial</span></span>
 <span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>trial<span class="sc">$</span><span class="fu">add_arms</span>(<span class="at">sample_ratio =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), trt, pbo)</span>
 <span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; Arm(s) &lt;treatment, placebo&gt; are added to the trial.</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; Randomization is done for 1 potential patients.</span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; Data of 420 potential patients are generated for the trial with 2 arm(s) &lt;treatment, placebo&gt;.</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; Randomization is done for &lt;1&gt; potential patients.</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; Data of &lt;420&gt; potential patients are generated for the trial with &lt;2&gt; arm(s) &lt;treatment, placebo&gt;.</span></span>
 <span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>trial</span>
 <span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕         Trial Name:  Trial-31415  </span></span>
 <span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕        Description:  Example Clinical Trial  </span></span>
@@ -482,9 +482,8 @@ function:</p>
 <span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕    Registered Arms:  treatment, placebo  </span></span>
 <span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕       Sample Ratio:  1, 1  </span></span>
 <span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Number of Patients:  420  </span></span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕   Planned Duration:  30  </span></span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕            Regimen:  not set  </span></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕        Random Seed:  1680176743</span></span></code></pre></div>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕            Regimen:  not set  </span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕        Random Seed:  1680176743</span></span></code></pre></div>
 <p>Here <code>accrual_rate</code> is an argument of
 <code>TrialSimulator::StaggeredRecruiter</code> controlling how patients
 are recruited into the trial. Similarly, <code>scale</code> and
@@ -540,21 +539,21 @@ controller to monitor and execute the trial.</p>
 <span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>controller <span class="ot">&lt;-</span> <span class="fu">controller</span>(trial, listener)</span>
 <span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>controller<span class="sc">$</span><span class="fu">run</span>()</span>
 <span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; Condition of milestone &lt;interim&gt; is being checked.</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Data is locked at time = 8.05 for milestone &lt;interim&gt;.</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Data is locked at time = &lt;8.05&gt; for milestone &lt;interim&gt;.</span></span>
 <span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; Locked data can be accessed in Trial$get_locked_data(&#39;interim&#39;). </span></span>
 <span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Number of events at lock time:</span></span>
 <span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;   cfb orr patient         arms</span></span>
 <span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; 1  20  60     101 c(&quot;place....</span></span>
 <span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Condition of milestone &lt;random&gt; is being checked.</span></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Data is locked at time = 14.1 for milestone &lt;random&gt;.</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Data is locked at time = &lt;14.1&gt; for milestone &lt;random&gt;.</span></span>
 <span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; Locked data can be accessed in Trial$get_locked_data(&#39;random&#39;). </span></span>
 <span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; Number of events at lock time:</span></span>
 <span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;   cfb orr patient         arms</span></span>
 <span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; 1  98 180     222 c(&quot;place....</span></span>
 <span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; Condition of milestone &lt;final&gt; is being checked.</span></span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; Data is locked at time = 30 for milestone &lt;final&gt;.</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; Data is locked at time = &lt;30&gt; for milestone &lt;final&gt;.</span></span>
 <span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; Locked data can be accessed in Trial$get_locked_data(&#39;final&#39;). </span></span>
 <span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; Number of events at lock time:</span></span>
 <span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt;   cfb orr patient         arms</span></span>

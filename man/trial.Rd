@@ -7,12 +7,12 @@
 trial(
   name,
   n_patients,
-  duration,
   description = name,
   seed = NULL,
   enroller = StaggeredRecruiter,
   dropout = NULL,
   stratification_factors = NULL,
+  global_data = list(),
   silent = FALSE,
   ...
 )
@@ -22,9 +22,6 @@ trial(
 
 \item{n_patients}{integer. Maximum (and initial) number of patients
 could be enrolled when planning the trial. It can be altered adaptively
-during a trial.}
-
-\item{duration}{Numeric. Trial duration. It can be altered adaptively
 during a trial.}
 
 \item{description}{character. Optional for description of the trial. By
@@ -59,6 +56,14 @@ can have same or different distributions given baseline characteristics.
 \code{NULL} by default, i.e., unstratified permuted block randomization is
 executed.}
 
+\item{global_data}{a list with named components, e.g., design parameters
+or a template object of a testing procedure, to be shared by all
+replicates of a simulation. It is read-only and can be accessed in
+action functions by calling \code{trial$get_global_data(name)}. For
+temporary results passed between action functions within a single
+replicate, use \code{trial$save_custom_data()} instead. See
+\code{vignette('actionFunctions', package = 'TrialSimulator')}.}
+
 \item{silent}{logical. \code{TRUE} to mute messages. However, warning
 message is still displayed. Usually set it to \code{TRUE} in formal
 simulation. Default: \code{FALSE}.}
@@ -73,12 +78,21 @@ Define a trial. This is a user-friendly wrapper for
 the class constructor \code{Trial$new()}. Users who are not familiar with
 the concept of classes may consider using this wrapper directly.
 
-Trial's name, planned size/duration, enrollment plan,
+Trial's name, planned size, enrollment plan,
 dropout mechanism and seeding are specified in this function. Note that
 many of these parameters can be altered adaptively during a trial.
 
+A trial has no pre-specified duration. It ends when its last milestone
+(usually the final analysis) is triggered, and the timing of a milestone
+is determined by its triggering condition, e.g., a calendar time, a
+number of events, or a number of enrolled patients. In particular, the
+duration of a trial with event-driven milestones is random and varies
+across simulated replicates. It can be read from the milestone time
+columns of \code{$get_output()}.
+
 Note that it is users' responsibility to assure that the units of dropout
-time, trial duration, and readout of non-tte endpoints are consistent.
+time, calendar time in milestones' triggering conditions, and readout of
+non-tte endpoints are consistent.
 }
 \examples{
 risk1 <- data.frame(
@@ -119,7 +133,7 @@ active$add_endpoints(pfs2, orr2)
 ## Enrollment accrues at a constant 10 patients per time unit.
 trial <- trial(
   name = 'Trial-3415', n_patients = 100,
-  seed = 31415926, duration = 100,
+  seed = 31415926,
   enroller = StaggeredRecruiter,
   accrual_rate = data.frame(end_time = Inf, piecewise_rate = 10))
 

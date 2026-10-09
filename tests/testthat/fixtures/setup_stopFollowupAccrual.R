@@ -20,7 +20,7 @@ trt <- arm(name = 'trt')
 trt$add_endpoints(pfs, resp)
 
 trial <- trial(
-  name = 'stopFollowupAccrual', n_patients = 200, duration = 30,
+  name = 'stopFollowupAccrual', n_patients = 200,
   seed = 20260723,
   enroller = StaggeredRecruiter,
   accrual_rate = data.frame(end_time = Inf, piecewise_rate = 20),
@@ -32,7 +32,7 @@ trial$add_arms(sample_ratio = c(1, 1), pbo, trt)
 adapt_action <- function(trial){
   ## stop following the placebo cohort at the milestone, then pause
   ## recruitment for 2 months before resuming at a higher rate
-  stop_followup(trial, arm == 'pbo')
+  stop_followup(trial, arm == 'pbo', additional_followup = 0)
   update_accrual_rate(trial,
                       data.frame(end_time = c(2, Inf),
                                  piecewise_rate = c(0, 30)))

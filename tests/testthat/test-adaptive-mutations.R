@@ -1,6 +1,6 @@
 # User-facing wrappers for adaptive trial mutations
 #
-# Covers: add_arms, remove_arms, resize, set_duration, update_generator,
+# Covers: add_arms, remove_arms, resize, stop_followup, update_generator,
 # update_sample_ratio, stop_followup, update_accrual_rate — each invoked
 # inside an action function to verify they forward to the corresponding
 # Trials$... method.
@@ -13,9 +13,9 @@ make_arm <- function(name, rate) {
   a
 }
 
-make_trial <- function(seed = 1, n_patients = 400, duration = 30) {
+make_trial <- function(seed = 1, n_patients = 400) {
   accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-  trial(name = "t", n_patients = n_patients, duration = duration, seed = seed,
+  trial(name = "t", n_patients = n_patients, seed = seed,
         enroller = StaggeredRecruiter, accrual_rate = accrual,
         dropout = rweibull, shape = 1, scale = 1e6,
         silent = TRUE)
@@ -48,7 +48,7 @@ test_that("remove_arms wrapper drops an arm after a milestone", {
 
   drop <- milestone(name = "drop",
                     when = calendarTime(time = 10),
-                    action = function(trial) { remove_arms(trial, "trt1") })
+                    action = function(trial) { remove_arms(trial, "trt1", additional_followup = 0) })
   final <- milestone(name = "final", when = calendarTime(time = 30))
 
   lstn <- listener(silent = TRUE)
@@ -64,6 +64,119 @@ test_that("remove_arms wrapper drops an arm after a milestone", {
   expect_true(nrow(after_trt1) > 0)
   expect_true(all(after_trt1$enroll_time + after_trt1$pfs <= 10 + 1e-6 |
                     after_trt1$pfs_event == 0))
+})
+
+
+## trt1 dropped at calendar time 10 with the given additional_followup;
+## the final lock is at calendar time 30. Returns the final locked data.
+drop_with_followup <- function(additional_followup, ...) {
+  pbo <- make_arm("pbo", 10)
+  trt1 <- make_arm("trt1", 12)
+  trt2 <- make_arm("trt2", 14)
+  tr <- make_trial()
+  add_arms(tr, sample_ratio = c(1, 1, 1), pbo, trt1, trt2)
+  drop <- milestone(name = "drop",
+                    when = calendarTime(time = 10),
+                    action = function(trial) {
+                      remove_arms(trial, "trt1",
+                                  additional_followup = additional_followup, ...)
+                    })
+  final <- milestone(name = "final", when = calendarTime(time = 30))
+  lstn <- listener(silent = TRUE)
+  lstn$add_milestones(drop, final)
+  controller(tr, lstn)$run(n = 1, silent = TRUE, plot_event = FALSE)
+  tr$get_locked_data("final")
+}
+
+## calendar time of the last event observed in an arm of locked data
+last_event_time <- function(d, arm) {
+  x <- d[d$arm == arm & d$pfs_event == 1, ]
+  max(x$enroll_time + x$pfs)
+}
+
+test_that("remove_arms(additional_followup) extends follow-up of the removed arm", {
+
+  d0 <- drop_with_followup(0)
+  d6 <- drop_with_followup(6)
+  dInf <- drop_with_followup(Inf)
+
+  ## same seed, same patients: only the censoring of trt1 differs
+  expect_equal(d0$patient_id, d6$patient_id)
+  expect_equal(d0$patient_id, dInf$patient_id)
+  ## (attributes of locked data carry the per-arm event counts, which do
+  ## differ through trt1; compare the rows only)
+  expect_equal(d0[d0$arm != "trt1", ], d6[d6$arm != "trt1", ],
+               ignore_attr = TRUE)
+  expect_equal(d0[d0$arm != "trt1", ], dInf[dInf$arm != "trt1", ],
+               ignore_attr = TRUE)
+
+  ## the event count recorded at the lock includes the extra events of trt1
+  n_events_at_lock <- function(d) attr(attr(d, "lock_time"), "n_events")$pfs
+  expect_true(n_events_at_lock(d0) < n_events_at_lock(d6))
+  expect_true(n_events_at_lock(d6) < n_events_at_lock(dInf))
+
+  ## events of trt1 are observed up to removal, removal + 6, and the final
+  ## lock respectively
+  expect_lte(last_event_time(d0, "trt1"), 10 + 1e-8)
+  expect_lte(last_event_time(d6, "trt1"), 16 + 1e-8)
+  expect_gt(last_event_time(d6, "trt1"), 10)
+  expect_lte(last_event_time(dInf, "trt1"), 30 + 1e-8)
+  expect_gt(last_event_time(dInf, "trt1"), 16)
+
+  n0 <- sum(d0$pfs_event[d0$arm == "trt1"])
+  n6 <- sum(d6$pfs_event[d6$arm == "trt1"])
+  nInf <- sum(dInf$pfs_event[dInf$arm == "trt1"])
+  expect_true(n0 < n6 && n6 < nInf)
+
+  ## trt1 still stops enrolling at removal in every case
+  for (d in list(d0, d6, dInf)) {
+    expect_lte(max(d$enroll_time[d$arm == "trt1"]), 10)
+  }
+})
+
+test_that("remove_arms() with different follow-up per arm: one call per arm", {
+
+  pbo <- make_arm("pbo", 10)
+  trt1 <- make_arm("trt1", 12)
+  trt2 <- make_arm("trt2", 14)
+  tr <- make_trial()
+  add_arms(tr, sample_ratio = c(1, 1, 1), pbo, trt1, trt2)
+  drop <- milestone(name = "drop",
+                    when = calendarTime(time = 10),
+                    action = function(trial) {
+                      remove_arms(trial, "trt1", additional_followup = 5)
+                      remove_arms(trial, "trt2", additional_followup = Inf)
+                    })
+  final <- milestone(name = "final", when = calendarTime(time = 30))
+  lstn <- listener(silent = TRUE)
+  lstn$add_milestones(drop, final)
+  controller(tr, lstn)$run(n = 1, silent = TRUE, plot_event = FALSE)
+  d <- tr$get_locked_data("final")
+
+  expect_lte(last_event_time(d, "trt1"), 15 + 1e-8)
+  expect_gt(last_event_time(d, "trt2"), 15)
+  expect_lte(last_event_time(d, "trt2"), 30 + 1e-8)
+  expect_equal(tr$get_arms_name(), "pbo")
+})
+
+test_that("remove_arms() validates additional_followup", {
+
+  ## no default: the call must state it
+  pbo <- make_arm("pbo", 10)
+  trt1 <- make_arm("trt1", 12)
+  tr <- make_trial()
+  add_arms(tr, sample_ratio = c(1, 1), pbo, trt1)
+  drop <- milestone(name = "drop", when = calendarTime(time = 10),
+                    action = function(trial) { remove_arms(trial, "trt1") })
+  lstn <- listener(silent = TRUE)
+  lstn$add_milestones(drop)
+  expect_error(controller(tr, lstn)$run(n = 1, silent = TRUE, plot_event = FALSE),
+               "additional_followup in remove_arms\\(\\) must be specified")
+
+  expect_error(drop_with_followup(-1), "cannot be negative")
+  expect_error(drop_with_followup(NA_real_), "must be a single numeric value")
+  expect_error(drop_with_followup(c(1, 2)), "must be a single numeric value")
+  expect_error(drop_with_followup("6"), "must be a single numeric value")
 })
 
 
@@ -83,31 +196,53 @@ test_that("resize wrapper increases maximum sample size mid-trial", {
   controller(tr, lstn)$run(n = 1, silent = TRUE, plot_event = FALSE)
 
   d <- tr$get_locked_data("final")
-  # With a generous duration and piecewise_rate=30/month, we should comfortably
+  # With piecewise_rate=30/month, we should comfortably
   # exceed the original 200-patient cap once resized.
   expect_gt(nrow(d), 200)
 })
 
 
-test_that("set_duration wrapper extends trial duration", {
+test_that("extending a trial at an interim freezes the enrolled cohort at the planned end", {
 
+  # The final analysis is planned at calendar time 15. At an (unblinded)
+  # interim at time 10 the trial is extended to time 30: patients enrolled by
+  # the interim keep their originally planned follow-up (stopped at 15),
+  # patients enrolled afterwards are followed to the new end. This is the
+  # recipe that replaced set_duration(): stop_followup() for the freeze,
+  # update_milestone() for the new final analysis time.
   pbo <- make_arm("pbo", 10)
   trt <- make_arm("trt", 12)
-  tr <- make_trial(duration = 15)
+  tr <- make_trial()
   add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
 
+  planned_end <- 15
   extend <- milestone(name = "extend",
                       when = calendarTime(time = 10),
-                      action = function(trial) { set_duration(trial, 30) })
-  final <- milestone(name = "final", when = calendarTime(time = 30))
+                      action = function(trial) {
+                        stop_followup(
+                          trial,
+                          additional_followup = planned_end - trial$get_current_time())
+                        update_milestone(trial, "final",
+                                         when = calendarTime(time = 30))
+                      })
+  final <- milestone(name = "final", when = calendarTime(time = planned_end))
   lstn <- listener(silent = TRUE)
   lstn$add_milestones(extend, final)
   controller(tr, lstn)$run(n = 1, silent = TRUE, plot_event = FALSE)
 
-  # If set_duration had failed, the trial would have locked at time 15 and no
-  # final milestone at time 30 would be reachable.
-  t_final <- tr$get_milestone_time("final")
-  expect_gte(t_final, 15)
+  expect_equal(unname(tr$get_milestone_time("final")), 30)
+
+  d <- tr$get_locked_data("final")
+  early <- d[d$enroll_time <= 10, ]
+  late  <- d[d$enroll_time > 10, ]
+  expect_gt(nrow(early), 0)
+  expect_gt(nrow(late), 0)
+  # frozen cohort: no follow-up beyond the planned end
+  expect_true(all(early$enroll_time + early$pfs <= planned_end + 1e-9))
+  expect_true(all(early$pfs_event[early$enroll_time + early$pfs > planned_end - 1e-9] == 0))
+  # later cohort: followed to the new end, with follow-up beyond the old one
+  expect_true(all(late$enroll_time + late$pfs <= 30 + 1e-9))
+  expect_true(any(late$enroll_time + late$pfs > planned_end))
 })
 
 
@@ -326,7 +461,7 @@ test_that("stop_followup wrapper censors selected patients at the milestone", {
 
   stop <- milestone(name = "stop",
                     when = calendarTime(time = 10),
-                    action = function(trial) { stop_followup(trial, arm == "pbo") })
+                    action = function(trial) { stop_followup(trial, arm == "pbo", additional_followup = 0) })
   final <- milestone(name = "final", when = calendarTime(time = 30))
   lstn <- listener(silent = TRUE)
   lstn$add_milestones(stop, final)
@@ -396,7 +531,7 @@ test_that("stop_followup with empty dots stops all enrolled patients", {
 
   stop <- milestone(name = "stop",
                     when = calendarTime(time = 10),
-                    action = function(trial) { stop_followup(trial) })
+                    action = function(trial) { stop_followup(trial, additional_followup = 0) })
   final <- milestone(name = "final", when = calendarTime(time = 30))
   lstn <- listener(silent = TRUE)
   lstn$add_milestones(stop, final)
@@ -444,7 +579,7 @@ test_that("update_accrual_rate slows enrollment after the milestone", {
                tolerance = 1e-9)
   expect_equal(sum(d$enroll_time > 10 & d$enroll_time <= 20), 50)
 
-  # regeneration keeps the duration-censoring invariant for re-planned rows
+  # re-planned rows are censored at the lock time like every other row
   expect_true(all(d$enroll_time + d$pfs <= 30 + 1e-9))
 })
 
@@ -483,7 +618,7 @@ test_that("update_accrual_rate speeding up accrual keeps censoring correct", {
 
   pbo <- make_arm("pbo", 10)
   trt <- make_arm("trt", 12)
-  tr <- make_trial(n_patients = 600, duration = 25)
+  tr <- make_trial(n_patients = 600)
   add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
 
   fast <- milestone(name = "fast",
@@ -501,7 +636,7 @@ test_that("update_accrual_rate speeding up accrual keeps censoring correct", {
   d <- tr$get_locked_data("final")
 
   # patients re-planned to earlier times must be regenerated, not shifted:
-  # every row still satisfies the duration-censoring invariant
+  # every row still satisfies the lock-time censoring invariant
   expect_true(all(d$enroll_time + d$pfs <= 25 + 1e-9))
   # the faster rate really pulls enrollment earlier: 300 patients remain at
   # the milestone, so the last enrolls exactly at 10 + 300/60 = 15
@@ -620,6 +755,8 @@ test_that("stop_followup validates additional_followup and filter conditions", {
   tr$.__enclos_env__$private$set_current_time(5)
   tr$.__enclos_env__$private$save_milestone_time(5, "checkpoint")
 
+  expect_error(tr$stop_followup(), "must be specified")
+  expect_error(tr$stop_followup(arm == "pbo"), "must be specified")
   expect_error(tr$stop_followup(additional_followup = -1),
                "cannot be negative")
   expect_error(tr$stop_followup(additional_followup = c(1, 2)),
@@ -627,7 +764,7 @@ test_that("stop_followup validates additional_followup and filter conditions", {
   expect_error(tr$stop_followup(additional_followup = "now"),
                "single numeric value")
 
-  expect_error(tr$stop_followup(no_such_column > 1),
+  expect_error(tr$stop_followup(no_such_column > 1, additional_followup = 0),
                "compatible with dplyr::filter")
 })
 
@@ -651,7 +788,7 @@ test_that("stop_followup sets pending non-TTE readouts to NA", {
 
   stop <- milestone(name = "stop",
                     when = calendarTime(time = 10),
-                    action = function(trial) { stop_followup(trial, arm == "pbo") })
+                    action = function(trial) { stop_followup(trial, arm == "pbo", additional_followup = 0) })
   final <- milestone(name = "final", when = calendarTime(time = 30))
   lstn <- listener(silent = TRUE)
   lstn$add_milestones(stop, final)
@@ -687,7 +824,7 @@ test_that("stop_followup and update_accrual_rate combine in one action", {
   adapt <- milestone(name = "adapt",
                      when = calendarTime(time = 10),
                      action = function(trial) {
-                       stop_followup(trial, arm == "pbo")
+                       stop_followup(trial, arm == "pbo", additional_followup = 0)
                        update_accrual_rate(
                          trial,
                          data.frame(end_time = Inf, piecewise_rate = 10))
@@ -722,7 +859,7 @@ test_that("crossover registered before update_accrual_rate reaches re-planned pa
   ctrl <- arm(name = 'control'); ctrl$add_endpoints(os_e)
   trt  <- arm(name = 'trt');     trt$add_endpoints(os_e)
 
-  tr <- trial(name = 'x', n_patients = 300, seed = 42, duration = 60,
+  tr <- trial(name = 'x', n_patients = 300, seed = 42,
               enroller = StaggeredRecruiter,
               accrual_rate = data.frame(end_time = Inf, piecewise_rate = 10),
               silent = TRUE)
@@ -777,7 +914,6 @@ test_that("adaptation methods reject calls outside action functions", {
 
   # no milestone has been triggered yet, so every guarded adaptation
   # method must refuse to run at setup time
-  expect_error(tr$set_duration(50), "within an action function")
   expect_error(tr$resize(500), "within an action function")
   expect_error(tr$remove_arms("trt"), "within an action function")
   expect_error(tr$update_sample_ratio(c("pbo", "trt"), c(1, 2)),

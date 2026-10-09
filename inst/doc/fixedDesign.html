@@ -748,16 +748,15 @@ and <code>OS</code> matches to the settings very well.</p>
 <p>With three arms, we can define a trial using the function
 <code>trial()</code>. Recruitment curve are specified through
 <code>enroller</code> with a built-in function
-<code>StaggeredRecruiter</code> of piecewise constant rate. We set
-<code>duration</code> to be an arbitrary large number (500) but
-controlling the end of trial through a pre-defined milestone later. Note
-that if <code>seed = NULL</code>, <code>TrialSimulator</code> will pick
-a seed for the purpose of reproducibility.</p>
+<code>StaggeredRecruiter</code> of piecewise constant rate. The end of
+the trial is controlled through a pre-defined milestone later. Note that
+if <code>seed = NULL</code>, <code>TrialSimulator</code> will pick a
+seed for the purpose of reproducibility.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>accrual_rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">end_time =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="cn">Inf</span>),</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                           <span class="at">piecewise_rate =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">50</span>))</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>trial <span class="ot">&lt;-</span> <span class="fu">trial</span>(</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&#39;Trial-3415&#39;</span>, <span class="at">n_patients =</span> <span class="dv">1000</span>,</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1727811904</span>, <span class="at">duration =</span> <span class="dv">500</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1727811904</span>,</span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">enroller =</span> StaggeredRecruiter, <span class="at">accrual_rate =</span> accrual_rate,</span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">dropout =</span> rexp, <span class="at">rate =</span> <span class="sc">-</span><span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.1</span>)<span class="sc">/</span><span class="dv">18</span>, <span class="do">## 10% by month 18</span></span>
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">silent =</span> <span class="cn">TRUE</span></span>
@@ -771,9 +770,8 @@ a seed for the purpose of reproducibility.</p>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕    Registered Arms:  soc, low, high  </span></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕       Sample Ratio:  1, 1, 1  </span></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕ Number of Patients:  1000  </span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕   Planned Duration:  500  </span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕            Regimen:  not set  </span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕        Random Seed:  1727811904</span></span></code></pre></div>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕            Regimen:  not set  </span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;  ⚕⚕        Random Seed:  1727811904</span></span></code></pre></div>
 </div>
 <div id="define-milestone-and-action-for-final-analysis" class="section level2">
 <h2>Define Milestone and Action for Final Analysis</h2>

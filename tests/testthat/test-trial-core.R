@@ -3,7 +3,7 @@
 # Covers:
 #   - Milestone triggering conditions (eventNumber, calendarTime, enrollment, combined)
 #   - Event and endpoint counts at each locked dataset
-#   - Behavior when trial duration is extended mid-trial
+#   - Behavior when a trial is extended mid-trial (stop_followup + update_milestone)
 #   - Behavior when an arm is removed adaptively
 #   - Inclusion criteria on arms
 #   - Custom data persistence across multiple controller$run() calls
@@ -29,7 +29,7 @@ test_that('trial milestone timing and endpoint event count work as expected', {
                              piecewise_rate = c(2, 8, 20, 25, 50))
 
   trial <- trial(
-    name = 'test', n_patients = 1000, duration = 40,
+    name = 'test', n_patients = 1000,
     enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
     dropout = rweibull, shape = 1.32, scale = 114.4,
     silent = TRUE
@@ -180,7 +180,7 @@ test_that('filters are supported when defining milestones', {
                                piecewise_rate = c(1,2,5,8,12,17,22,28,32,37,40,43,46,47,50,50,51,52))
 
     trial <- trial(
-      name = '1438', n_patients = sample_size, duration = 200,
+      name = '1438', n_patients = sample_size,
       enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
       dropout = rexp, rate = -log(1 - .15)/12,
       silent = TRUE
@@ -259,7 +259,7 @@ test_that('filters are supported when defining milestones', {
 
 })
 
-test_that('endpoint event counts work as expected when duration is adapted', {
+test_that('endpoint event counts work as expected when the trial is extended at an interim', {
 
   pfs <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2)/10)
   os <- endpoint(name = 'os', type = 'tte', generator = rexp, rate = log(2)/17)
@@ -279,7 +279,7 @@ test_that('endpoint event counts work as expected when duration is adapted', {
                              piecewise_rate = c(2, 8, 20, 25, 50))
 
   trial <- trial(
-    name = 'test', n_patients = 1000, duration = 30,
+    name = 'test', n_patients = 1000,
     enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
     dropout = rweibull, shape = 1.32, scale = 114.4,
     seed = 808715505,
@@ -288,8 +288,11 @@ test_that('endpoint event counts work as expected when duration is adapted', {
 
   trial$add_arms(sample_ratio = c(1, 2), pbo, trt)
 
+  ## the final analysis was planned at calendar time 30. Extending the trial
+  ## at the interim freezes patients enrolled so far at the planned end;
+  ## patients enrolled afterwards are followed to the new end (40).
   action_at_interim <- function(trial){
-    trial$set_duration(duration = 40)
+    trial$stop_followup(additional_followup = 30 - trial$get_current_time())
   }
 
   interim <- milestone(name = 'interim',
@@ -376,7 +379,7 @@ test_that('endpoint event counts work as expected when an arm is removed', {
                              piecewise_rate = c(2, 8, 20, 25, 50))
 
   trial <- trial(
-    name = 'test', n_patients = 1000, duration = 40,
+    name = 'test', n_patients = 1000,
     enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
     dropout = rweibull, shape = 1.32, scale = 114.4,
     silent = TRUE
@@ -386,7 +389,7 @@ test_that('endpoint event counts work as expected when an arm is removed', {
 
   interim1 <- milestone(name = 'interim1',
                         when = eventNumber(endpoint = 'or', n = 200),
-                        action = function(trial){trial$remove_arms('trt1')})
+                        action = function(trial){trial$remove_arms('trt1', additional_followup = 0)})
 
   interim2 <- milestone(name = 'interim2',
                         when = eventNumber(endpoint = 'pfs', n = 240) &
@@ -474,7 +477,7 @@ test_that('inclusion criteria of arm work as expected', {
 
 })
 
-test_that('custom data can be re-used in multiple trials', {
+test_that('global data can be re-used in multiple trials', {
 
   ep <- endpoint(name = 'ep', type = 'tte', generator = rexp, rate = .1)
   pbo <- arm(name = 'pbo')
@@ -484,17 +487,18 @@ test_that('custom data can be re-used in multiple trials', {
                              piecewise_rate = c(2, 8, 20, 25, 50))
 
   trial <- trial(
-    name = 'test', n_patients = 1000, duration = 40,
+    name = 'test', n_patients = 1000,
     enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
-    silent = TRUE
+    silent = TRUE,
+    global_data = list(config = list(x = 1, y = 'a'))
   )
 
   trial$add_arms(sample_ratio = 1, pbo)
-  trial$save_custom_data(value = list(x = 1, y = 'a'), name = 'config')
 
   final <- milestone(name = 'final',
                      action = function(trial) {
-                       trial$get_custom_data('config')},
+                       stopifnot(identical(trial$get_global_data('config'),
+                                           list(x = 1, y = 'a')))},
                      when = calendarTime(time = 40))
 
   listener <- listener(silent = TRUE)
@@ -515,7 +519,7 @@ test_that('trial data can be replicated', {
                              piecewise_rate = c(2, 8, 20, 25, 50))
 
   trial <- trial(
-    name = 'test', n_patients = 1000, duration = 40,
+    name = 'test', n_patients = 1000,
     enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
     silent = TRUE
   )
@@ -550,7 +554,7 @@ test_that('trial data can be replicated', {
   ops <- NULL
   for(seed in seeds){
     trial <- trial(
-      name = 'test', n_patients = 1000, duration = 40,
+      name = 'test', n_patients = 1000,
       seed = seed,
       enroller = StaggeredRecruiter, accrual_rate = accrual_rate,
       silent = TRUE
@@ -588,7 +592,7 @@ test_that('no private field appears mid-run that make_snapshot() does not cover'
   pfs <- endpoint(name = 'pfs', type = 'tte', generator = rexp, rate = log(2)/12)
   trt <- arm(name = 'trt'); trt$add_endpoints(pfs)
 
-  tr <- trial(name = 't', n_patients = 200, duration = 30, seed = 7,
+  tr <- trial(name = 't', n_patients = 200, seed = 7,
               enroller = StaggeredRecruiter,
               accrual_rate = data.frame(end_time = Inf, piecewise_rate = 30),
               dropout = rweibull, shape = 1, scale = 1e6, silent = TRUE)
@@ -598,7 +602,7 @@ test_that('no private field appears mid-run that make_snapshot() does not cover'
                      when = calendarTime(time = 5),
                      action = function(trial){
                        resize(trial, 250)
-                       stop_followup(trial, arm == 'pbo')
+                       stop_followup(trial, arm == 'pbo', additional_followup = 0)
                        update_accrual_rate(
                          trial,
                          data.frame(end_time = Inf, piecewise_rate = 40))

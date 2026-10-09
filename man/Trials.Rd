@@ -19,11 +19,9 @@ and should not be called directly (see the last section).
 
 \strong{Adaptation methods.} The following methods adapt an ongoing trial
 and should be called within action functions of milestones. Each of them
-has a user-friendly wrapper of the same name, e.g., \code{set_duration(trial, ...)}
-for \code{trial$set_duration(...)}.
+has a user-friendly wrapper of the same name, e.g., \code{resize(trial, ...)}
+for \code{trial$resize(...)}.
 \itemize{
-\item \code{$set_duration()} set duration of a trial. This function can be
-used to extend duration under adaptive designs.
 \item \code{$resize()} set maximum sample size of a trial. This function can
 be used to increase sample size under adaptive designs (e.g., sample size
 reassessment).
@@ -81,10 +79,15 @@ is reset to NULL in next simulated trial. Saved results
 can be retrieved by calling \code{get()} anytime.
 \item \code{$save_custom_data()} save intermediate results of any format.
 The life cycle of the saved result is within a single replicate of simulation
-and is reset to NULL in next simulated trial. Saved results can be retrieved
+and is cleared before the next simulated trial. Saved results can be retrieved
 by calling \code{get()} anytime.
 \item \code{$get()} retrieve intermediate results saved by calling functions
 \code{save_custom_data()} or \code{bind()}.
+\item \code{$get_global_data()} retrieve read-only data registered through
+the \code{global_data} argument of \code{trial()}, e.g., design
+parameters or a template object of a testing procedure, which is
+available in every replicate of a simulation. R6 objects are returned as
+independent deep clones so the registered template is never changed.
 \item \code{$get_output()} retrieve intermediate results saved by calling
 function \code{save()}.
 }
@@ -100,7 +103,7 @@ given milestone.
 the time of calling, i.e., arms that have been added and not yet removed
 by \code{$remove_arms()}. Note that this can differ from the arms present
 in locked data, where data of removed arms remain available (censored at
-the time of removal).
+the time of removal, or later if \code{additional_followup} was granted).
 }
 
 Statistical testing:
@@ -131,7 +134,8 @@ and must not be called within action functions.
 \code{$get_data_lock_time_by_event_number()},
 \code{$get_data_lock_time_by_enrollment()}, \code{$has_arm()},
 \code{$event_plot()}, \code{$mute()}, \code{$tidy_output()}, \code{$reset()},
-\code{$make_arms_snapshot()} and \code{$pop_milestone_updates()}) are
+\code{$make_arms_snapshot()}, \code{$has_been_run()} and
+\code{$pop_milestone_updates()}) are
 public only because they are invoked on
 a trial object by other components of the package (milestones, listeners,
 controllers and triggering conditions), which R6 cannot grant through
@@ -189,7 +193,7 @@ trt$add_endpoints(endpoint(name = 'pfs', type = 'tte',
                            generator = rexp, rate = log(2) / 14))
 
 accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-tr <- trial(name = 'ex', n_patients = 400, duration = 40,
+tr <- trial(name = 'ex', n_patients = 400,
             seed = 31416, enroller = StaggeredRecruiter,
             accrual_rate = accrual, silent = TRUE)
 add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
@@ -227,7 +231,7 @@ trt$add_endpoints(endpoint(name = 'pfs', type = 'tte',
                            generator = rexp, rate = log(2) / 14))
 
 accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-tr <- trial(name = 'ex', n_patients = 400, duration = 40,
+tr <- trial(name = 'ex', n_patients = 400,
             seed = 31416, enroller = StaggeredRecruiter,
             accrual_rate = accrual, silent = TRUE)
 add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
@@ -258,7 +262,6 @@ tr$eventNumberReestimationFromConditionalPower(
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-Trials-new}{\code{Trials$new()}}
-\item \href{#method-Trials-set_duration}{\code{Trials$set_duration()}}
 \item \href{#method-Trials-resize}{\code{Trials$resize()}}
 \item \href{#method-Trials-remove_arms}{\code{Trials$remove_arms()}}
 \item \href{#method-Trials-update_sample_ratio}{\code{Trials$update_sample_ratio()}}
@@ -275,6 +278,7 @@ tr$eventNumberReestimationFromConditionalPower(
 \item \href{#method-Trials-save_custom_data}{\code{Trials$save_custom_data()}}
 \item \href{#method-Trials-get_custom_data}{\code{Trials$get_custom_data()}}
 \item \href{#method-Trials-get}{\code{Trials$get()}}
+\item \href{#method-Trials-get_global_data}{\code{Trials$get_global_data()}}
 \item \href{#method-Trials-get_current_time}{\code{Trials$get_current_time()}}
 \item \href{#method-Trials-get_milestone_time}{\code{Trials$get_milestone_time()}}
 \item \href{#method-Trials-get_sample_ratio}{\code{Trials$get_sample_ratio()}}
@@ -294,6 +298,7 @@ tr$eventNumberReestimationFromConditionalPower(
 \item \href{#method-Trials-tidy_output}{\code{Trials$tidy_output()}}
 \item \href{#method-Trials-reset}{\code{Trials$reset()}}
 \item \href{#method-Trials-make_arms_snapshot}{\code{Trials$make_arms_snapshot()}}
+\item \href{#method-Trials-has_been_run}{\code{Trials$has_been_run()}}
 \item \href{#method-Trials-pop_milestone_updates}{\code{Trials$pop_milestone_updates()}}
 \item \href{#method-Trials-print}{\code{Trials$print()}}
 \item \href{#method-Trials-clone}{\code{Trials$clone()}}
@@ -308,12 +313,12 @@ initialize a trial
 \if{html}{\out{<div class="r">}}\preformatted{Trials$new(
   name,
   n_patients,
-  duration,
   description = name,
   seed = NULL,
   enroller = StaggeredRecruiter,
   dropout = NULL,
   stratification_factors = NULL,
+  global_data = list(),
   silent = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -326,9 +331,6 @@ initialize a trial
 
 \item{\code{n_patients}}{integer. Maximum (and initial) number of patients
 could be enrolled when planning the trial. It can be altered adaptively
-during a trial.}
-
-\item{\code{duration}}{Numeric. Trial duration. It can be altered adaptively
 during a trial.}
 
 \item{\code{description}}{character. Optional for description of the trial. By
@@ -362,31 +364,18 @@ can have same or different distributions given baseline characteristics.
 \code{NULL} by default, i.e., unstratified permuted block randomization is
 executed.}
 
+\item{\code{global_data}}{a list with named components, e.g., design
+parameters or a template object of a testing procedure, to be shared
+by all replicates of a simulation. It is read-only and can be
+accessed in action functions by calling
+\code{Trials$get_global_data()}. For temporary results passed
+between action functions within a single replicate, use
+\code{Trials$save_custom_data()} instead.}
+
 \item{\code{silent}}{logical. \code{TRUE} to mute messages. However, warning
 message is still displayed.}
 
 \item{\code{...}}{(optional) arguments of \code{enroller} and \code{dropout}.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Trials-set_duration"></a>}}
-\if{latex}{\out{\hypertarget{method-Trials-set_duration}{}}}
-\subsection{Method \code{set_duration()}}{
-set trial duration in an adaptive designed trial. All patients enrolled
-before resetting the duration are truncated (non-tte endpoints) or
-censored (tte endpoints) at the original duration. Remaining patients
-are re-randomized. New duration must be longer than the old one.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Trials$set_duration(duration)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{duration}}{new duration of a trial. It must be greater than the
-current duration.}
 }
 \if{html}{\out{</div>}}
 }
@@ -426,16 +415,30 @@ or interim analysis (early stop for efficacy).
 Note that this function should only be called within action functions.
 It is users' responsibility to ensure it and \code{TrialSimulator} has
 no way to track this.
-In addition, data of the removed arms are censored or truncated by
-the time of arm removal.
+In addition, data of the removed arms are censored or truncated at
+the time of arm removal, or \code{additional_followup} later, but
+stay in the trial data and thus in the locked data of later
+milestones. A removed arm is no longer in the set of arms of the
+trial: \code{arms = NULL} in \code{eventNumber()} and
+\code{enrollment()} excludes it, listing it in \code{arms} includes
+it, and a subset that depends on which arm was removed requires
+\code{$update_milestone()} in the same action function.
+See \code{?remove_arms} for the three patterns and examples.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Trials$remove_arms(arms_name)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Trials$remove_arms(arms_name, additional_followup)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{arms_name}}{character vector. Name of arms to be removed.}
+
+\item{\code{additional_followup}}{numeric. Extra follow-up time granted to
+the patients of the removed arms after the current milestone, shared
+by all arms in \code{arms_name}. No default: 0 stops their follow-up
+at the milestone itself. \code{Inf} keeps following them for
+the rest of the trial. To grant different times to different arms,
+call this function once per arm.}
 }
 \if{html}{\out{</div>}}
 }
@@ -564,7 +567,7 @@ re-applied to patients enrolled later), and applied immediately, in place,
 to all currently-eligible patients.
 
 Eligibility (the pool passed to \code{what()}) = patients with at least
-one endpoint still "open" (unobserved, dropout-/duration-aware) at
+one endpoint still "open" (unobserved, dropout-aware) at
 \code{T}; fully-observed patients are excluded. \code{when()} must return
 a switch time with \code{enroll_time + switch_time >= T} (a crossover
 cannot predate its opening), otherwise an error is raised. \code{how()}
@@ -632,7 +635,7 @@ It is users' responsibility to ensure it and \code{TrialSimulator} has
 no way to track this. Calling it before any milestone has been
 triggered is an error.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Trials$stop_followup(..., additional_followup = 0)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Trials$stop_followup(..., additional_followup)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -644,8 +647,8 @@ provided, follow-up is stopped for all patients enrolled by the time
 this function is called.}
 
 \item{\code{additional_followup}}{numeric. Extra follow-up time granted to the
-selected patients after the current milestone. If 0 (default),
-follow-up stops at the milestone itself.}
+selected patients after the current milestone. No default: 0 stops
+follow-up at the milestone itself.}
 }
 \if{html}{\out{</div>}}
 }
@@ -880,9 +883,18 @@ multiple rows.}
 \if{html}{\out{<a id="method-Trials-save_custom_data"></a>}}
 \if{latex}{\out{\hypertarget{method-Trials-save_custom_data}{}}}
 \subsection{Method \code{save_custom_data()}}{
-save arbitrary (number of) objects into a trial so that users can use
-those to control the workflow. Most common use case is to store
-simulation parameters to be used in action functions.
+save temporary data into a trial to pass intermediate results between
+action functions of milestones within a single simulated trial, e.g.,
+a testing procedure object updated at every interim analysis. The
+saved data live only within the current replicate: the storage is
+cleared before every replicate, so nothing saved here can leak into
+the next replicate or be used to summarize a simulation (use
+\code{Trials$save()} for outputs, and the \code{global_data} argument
+of \code{trial()} for read-only data that must be available in all
+replicates). After \code{run()} returns, the storage still holds the
+data of the last replicate, which can be inspected like the rest of
+the trial's final state; the next \code{run()} clears it when it
+starts.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Trials$save_custom_data(value, name, overwrite = FALSE)}\if{html}{\out{</div>}}
 }
@@ -890,7 +902,7 @@ simulation parameters to be used in action functions.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{value}}{value to be saved. Any type.}
+\item{\code{value}}{value to be saved. Any type except \code{NULL}.}
 
 \item{\code{name}}{character. Name of the value to be accessed later.}
 
@@ -931,6 +943,30 @@ alias of function \code{get_custom_data} to make it short and cool.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{name}}{character. Name of custom data to be accessed.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-get_global_data"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-get_global_data}{}}}
+\subsection{Method \code{get_global_data()}}{
+return global data registered through the \code{global_data} argument
+of \code{trial()} with its name. Global data is read-only and
+available in every replicate of a simulation: an R6 object is
+returned as an independent deep clone and a \code{data.table} as a
+copy (also when nested inside plain lists), so updating the returned
+object never changes the registered template. To carry an updated
+object across milestones within a replicate, save the returned object
+with \code{Trials$save_custom_data()}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$get_global_data(name)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{character. Name of global data to be accessed.}
 }
 \if{html}{\out{</div>}}
 }
@@ -1322,7 +1358,7 @@ trt$add_endpoints(endpoint(name = 'pfs', type = 'tte',
                            generator = rexp, rate = log(2) / 14))
 
 accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-tr <- trial(name = 'ex', n_patients = 400, duration = 40,
+tr <- trial(name = 'ex', n_patients = 400,
             seed = 31416, enroller = StaggeredRecruiter,
             accrual_rate = accrual, silent = TRUE)
 add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
@@ -1510,7 +1546,7 @@ trt$add_endpoints(endpoint(name = 'pfs', type = 'tte',
                            generator = rexp, rate = log(2) / 14))
 
 accrual <- data.frame(end_time = Inf, piecewise_rate = 30)
-tr <- trial(name = 'ex', n_patients = 400, duration = 40,
+tr <- trial(name = 'ex', n_patients = 400,
             seed = 31416, enroller = StaggeredRecruiter,
             accrual_rate = accrual, silent = TRUE)
 add_arms(tr, sample_ratio = c(1, 1), pbo, trt)
@@ -1646,7 +1682,10 @@ the found data lock time).
 of endpoints.}
 
 \item{\code{arms}}{a vector of arms' name on which number of events will be
-counted.}
+counted. If \code{NULL}, arms in the trial when this function is
+called. Otherwise, every name must be an arm ever added to the trial
+(an error otherwise), and arms removed before this call are counted
+as specified, with a warning unless the trial is silent.}
 
 \item{\code{target_n_events}}{target number of events for each of the
 \code{endpoints}.}
@@ -1686,8 +1725,11 @@ but only focus on patient_id.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{arms}}{a vector of arms' name on which number of events will be
-counted.}
+\item{\code{arms}}{a vector of arms' name on which number of patients will be
+counted. If \code{NULL}, arms in the trial when this function is
+called. Otherwise, every name must be an arm ever added to the trial
+(an error otherwise), and arms removed before this call are counted
+as specified, with a warning unless the trial is silent.}
 
 \item{\code{target_n_patients}}{target number of enrolled patients.}
 
@@ -1699,7 +1741,7 @@ it means that milestone is triggered when a specific number of enrolled
 patients have received treatment for at least \code{min_treatment_duration}
 duration. It is users' responsibility to assure that the unit of
 \code{min_treatment_duration} are consistent with
-readout of non-tte endpoints, dropout time, and trial duration.}
+readout of non-tte endpoints, dropout time, and calendar time of milestones.}
 
 \item{\code{...}}{subset conditions compatible with \code{dplyr::filter}. Number
 Time of milestone is based on event counts on the subset of trial data.}
@@ -1802,6 +1844,22 @@ recruit patients again.
 make a snapshot of arms
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Trials$make_arms_snapshot()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Trials-has_been_run"></a>}}
+\if{latex}{\out{\hypertarget{method-Trials-has_been_run}{}}}
+\subsection{Method \code{has_been_run()}}{
+\strong{INTERNAL MACHINERY: DO NOT CALL THIS METHOD DIRECTLY.}
+
+report whether the trial has left its as-designed state, i.e., at
+least one replicate has been (partially) executed on it. The
+controller refuses to start \code{run()} on such a trial: wrapping an
+already-run trial in a new controller would otherwise bypass the
+run-twice guard and simulate from a dirty state.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Trials$has_been_run()}\if{html}{\out{</div>}}
 }
 
 }

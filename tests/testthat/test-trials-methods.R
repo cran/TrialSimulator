@@ -16,7 +16,7 @@ test_that("Trials accessors and print reflect the constructed trial", {
   trt$add_endpoints(endpoint(name = "pfs", type = "tte",
                              generator = rexp, rate = log(2) / 12))
 
-  tr <- trial(name = "demo", n_patients = 200, duration = 30, seed = 42L,
+  tr <- trial(name = "demo", n_patients = 200, seed = 42L,
               enroller = StaggeredRecruiter,
               accrual_rate = data.frame(end_time = Inf, piecewise_rate = 20),
               silent = TRUE)
@@ -46,7 +46,7 @@ test_that("Trials event_plot runs without error after a run", {
   trt$add_endpoints(endpoint(name = "pfs", type = "tte",
                              generator = rexp, rate = log(2) / 10))
 
-  tr <- trial(name = "t", n_patients = 200, duration = 30, seed = 1L,
+  tr <- trial(name = "t", n_patients = 200, seed = 1L,
               enroller = StaggeredRecruiter,
               accrual_rate = data.frame(end_time = Inf, piecewise_rate = 20),
               silent = TRUE)
@@ -116,7 +116,7 @@ test_that("Trials save/get_custom_data and get_output round-trip", {
   pbo$add_endpoints(endpoint(name = "pfs", type = "tte",
                              generator = rexp, rate = 0.1))
 
-  tr <- trial(name = "t", n_patients = 100, duration = 20, seed = 3L,
+  tr <- trial(name = "t", n_patients = 100, seed = 3L,
               enroller = StaggeredRecruiter,
               accrual_rate = data.frame(end_time = Inf, piecewise_rate = 20),
               silent = TRUE)
@@ -125,6 +125,8 @@ test_that("Trials save/get_custom_data and get_output round-trip", {
   act <- function(trial) {
     trial$save(value = 42L, name = "answer")
     trial$save_custom_data(value = list(x = 1), name = "cfg")
+    ## round-trip within the replicate, where custom data lives
+    trial$save(value = trial$get_custom_data("cfg")$x, name = "cfg_x")
   }
 
   lstn <- listener(silent = TRUE)
@@ -138,6 +140,8 @@ test_that("Trials save/get_custom_data and get_output round-trip", {
   op <- ctrl$get_output()
   expect_true("answer" %in% names(op))
   expect_equal(op$answer[1], 42)
+  expect_equal(op$cfg_x[1], 1)
 
+  ## after run(), the last replicate's custom data remains for inspection
   expect_equal(tr$get_custom_data("cfg"), list(x = 1))
 })
